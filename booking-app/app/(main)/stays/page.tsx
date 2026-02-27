@@ -1,3 +1,5 @@
-export default function Stays() {
-  return <div>Stays</div>;
+import RecentSearches from "@/sections/stays/Yourrecentsearches";
+
+export default function Page() {
+  return <RecentSearches />;
 }
