@@ -209,7 +209,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
 }
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 
-export default function MainHeader() {
+export default function Header() {
     const [activeNav, setActiveNav] = useState<string>("Stays");
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);

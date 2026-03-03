@@ -1,5 +1,5 @@
 import React from "react";
-import HeaderSelector from "./Header/HeaderSelector";
+import Header from "./Header/page";
 import Footer from "./Footer/page";
 
 export default function RootLayout({
@@ -10,7 +10,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-                <HeaderSelector />
+                <Header />
                 {children}
                 <Footer />
             </body>
