@@ -20,14 +20,14 @@ const recentSearches: SearchItem[] = [
 
 export default function RecentSearches() {
     return (
-        <section className="max-w-6xl mx-auto mt-25">
+        <section className="max-w-7xl  mt-25 ml-[380px]">
             <h2 className="text-[26px] font-bold text-gray-900 mb-3">Your recent searches</h2>
 
-            <div className="flex flex-wrap gap-3 justify-start">
+            <div className="flex flex-wrap gap-3">
                 {recentSearches.map((item) => (
                     <div
                         key={item.id}
-                        className="flex items-center gap-0 bg-white shadow-lg rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden w-86"
+                        className="flex items-center bg-white shadow-lg rounded-lg border border-gray-200 cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden w-86"
                     >
                         <img
                             src={item.image}

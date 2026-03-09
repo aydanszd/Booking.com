@@ -3,14 +3,18 @@
 import { usePathname } from "next/navigation";
 import MainHeader from "./page";
 import SecondLayoutOption from "./secondLayoutOption";
+import CarRentalHeader from "./CarRender";
+import AttractionsHeader from "./attractions"
 
 export default function HeaderSelector() {
   const pathname = usePathname() || "";
   const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
-  const isStays = pathname === "/stays" || pathname.startsWith("/stays/");
+  const isCarRental = pathname === "/carrender" || pathname.startsWith("/carrender/");
+  const isattractions = pathname === "/attractions" || pathname.startsWith("/attractions/");
 
   if (isFlights) return <SecondLayoutOption />;
-  if (isStays) return <MainHeader />;
+  if (isCarRental) return <CarRentalHeader />;
+  if (isattractions) return <AttractionsHeader />;
 
   return <MainHeader />;
 }

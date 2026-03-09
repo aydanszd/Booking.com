@@ -17,8 +17,8 @@ function OfferCard({
     onExplore,
 }: OfferCardProps) {
     return (
-        <div className="border  border-gray-200 rounded-xl p-5 flex items-center justify-between gap-4 bg-white hover:shadow-md transition-shadow duration-300">
-            <div className="flex-1 max-w-6xl">
+        <div className="border border-gray-200 rounded-xl p-5 flex items-start justify-between gap-4 bg-white hover:shadow-md transition-shadow duration-300">
+            <div className="flex flex-col flex-1">
                 <p className="text-xs text-gray-500 mb-1">{tag}</p>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-600 mb-4 leading-relaxed">
@@ -26,7 +26,7 @@ function OfferCard({
                 </p>
                 <button
                     onClick={onExplore}
-                    className="bg-[#006ce4] hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200"
+                    className="bg-[#006ce4] hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors duration-200 w-fit"
                 >
                     {ctaLabel}
                 </button>
@@ -64,11 +64,10 @@ const OFFERS: OfferCardProps[] = [
     },
 ];
 
-
 export default function FirsatlarSection() {
     return (
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-7.5">
-            <div className="mb-6">
+<section className="py-10 px-6 max-w-6xl items-start ml-[370px] font-sans mt-[-30px]">            
+    <div className="mb-6 ">
                 <h2 className="text-2xl font-bold text-gray-900">Offers</h2>
                 <p className="text-sm text-gray-500 mt-1">
                     Size özel promosyonlar, indirimler ve fırsatlar
