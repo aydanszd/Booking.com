@@ -9,11 +9,13 @@ import AttractionsHeader from "./attractions"
 export default function HeaderSelector() {
   const pathname = usePathname() || "";
   const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
+  const isFlightsDetail = pathname === "/flightsdetail" || pathname.startsWith("/flightsdetail/");
   const isCarRental = pathname === "/carrender" || pathname.startsWith("/carrender/");
   const isattractions = pathname === "/attractions" || pathname.startsWith("/attractions/");
 
   if (isFlights) return <SecondLayoutOption />;
   if (isCarRental) return <CarRentalHeader />;
+  if (isFlightsDetail) return <SecondLayoutOption />;
   if (isattractions) return <AttractionsHeader />;
 
   return <MainHeader />;
