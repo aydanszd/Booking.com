@@ -5,7 +5,7 @@ import {
     Users, Settings2, Gauge, MapPin, CheckCircle2, Star,
     ChevronLeft, ChevronRight, Shield, Fuel, Wind,
     Phone, Mail, Info, ArrowRight, Clock, Calendar,
-    CreditCard, AlertCircle, ThumbsUp, Car,
+    CreditCard, AlertCircle, ThumbsUp, Car, X, ChevronDown,
 } from 'lucide-react'
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
@@ -148,9 +148,9 @@ function ImageGallery({ images }: { images: string[] }) {
 
     return (
         <div className="relative">
-            {/* Main image — click to open lightbox */}
+            {/* Main image */}
             <div
-                className="relative h-[420px] rounded-2xl overflow-hidden bg-gray-100 group cursor-zoom-in"
+                className="relative h-[260px] sm:h-[340px] md:h-[420px] rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 group cursor-zoom-in"
                 onClick={() => openAt(activeThumb)}
             >
                 <img
@@ -159,18 +159,19 @@ function ImageGallery({ images }: { images: string[] }) {
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
-                <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm select-none">
-                    {activeThumb + 1} / {images.length} · Büyütmek için tıkla
+                <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm select-none">
+                    {activeThumb + 1} / {images.length}
+                    <span className="hidden sm:inline"> · Büyütmek için tıkla</span>
                 </div>
             </div>
 
             {/* Thumbnail strip */}
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-1.5 sm:gap-2 mt-2">
                 {images.map((img, i) => (
                     <button
                         key={i}
                         onClick={() => setActiveThumb(i)}
-                        className={`flex-1 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                        className={`flex-1 h-12 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${
                             activeThumb === i
                                 ? 'border-blue-600 opacity-100'
                                 : 'border-transparent opacity-55 hover:opacity-90'
@@ -216,9 +217,9 @@ function ImageGallery({ images }: { images: string[] }) {
 
 function SpecBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
     return (
-        <div className="flex flex-col items-center gap-1.5 bg-gray-50 rounded-xl px-3 py-3 min-w-[80px]">
+        <div className="flex flex-col items-center gap-1 sm:gap-1.5 bg-gray-50 rounded-xl px-2 sm:px-3 py-2 sm:py-3 min-w-[68px] sm:min-w-[80px]">
             <div className="text-blue-600">{icon}</div>
-            <span className="text-xs text-gray-600 text-center leading-tight font-medium">{label}</span>
+            <span className="text-[10px] sm:text-xs text-gray-600 text-center leading-tight font-medium">{label}</span>
         </div>
     )
 }
@@ -239,74 +240,207 @@ function StarRating({ score }: { score: number }) {
     )
 }
 
+// ─── Mobile Sticky Bottom Bar ─────────────────────────────────────────────────
+
+function MobileStickyBar({ price, onBook }: { price: number; onBook: () => void }) {
+    return (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+            <div className="flex-1">
+                <p className="text-xs text-gray-400 leading-none">3 günlük toplam</p>
+                <p className="text-xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                    US${price}
+                </p>
+            </div>
+            <button
+                onClick={onBook}
+                className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm"
+            >
+                Rezervasyon yap
+            </button>
+        </div>
+    )
+}
+
+// ─── Mobile Booking Sheet ─────────────────────────────────────────────────────
+
+function MobileBookingSheet({ open, onClose, car }: { open: boolean; onClose: () => void; car: typeof CAR }) {
+    return (
+        <>
+            {/* Backdrop */}
+            <div
+                className={`lg:hidden fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+            />
+            {/* Sheet */}
+            <div
+                className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl transition-transform duration-300 ${open ? 'translate-y-0' : 'translate-y-full'}`}
+            >
+                {/* Handle */}
+                <div className="flex justify-center pt-3 pb-1">
+                    <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                </div>
+
+                <div className="overflow-y-auto max-h-[85vh]">
+                    {/* Header */}
+                    <div className="bg-[#003b94] px-5 py-4 flex items-start justify-between">
+                        <div>
+                            <p className="text-white/60 text-xs font-medium mb-0.5">3 günlük toplam</p>
+                            <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                                US${car.price3Day}
+                            </p>
+                            <p className="text-white/40 text-xs mt-1">Vergiler dahil · Kış ücreti dahil</p>
+                        </div>
+                        <button onClick={onClose} className="text-white/60 hover:text-white mt-1">
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div className="px-5 py-4 space-y-3">
+                        {/* Dates */}
+                        <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    Alış tarihi
+                                </div>
+                                <span className="text-xs font-semibold text-gray-800">12 Mar, 10:00</span>
+                            </div>
+                            <div className="border-t border-gray-200" />
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    İade tarihi
+                                </div>
+                                <span className="text-xs font-semibold text-gray-800">15 Mar, 10:00</span>
+                            </div>
+                        </div>
+
+                        {/* Location */}
+                        <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
+                            <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <p className="text-xs text-gray-400">Alış / iade yeri</p>
+                                <p className="text-xs font-semibold text-gray-800 mt-0.5">{car.location}</p>
+                            </div>
+                        </div>
+
+                        {/* Price breakdown */}
+                        <div className="space-y-1.5 text-xs">
+                            <div className="flex justify-between text-gray-500">
+                                <span>US${car.pricePerDay} × 3 gün</span>
+                                <span>US${car.pricePerDay * 3}</span>
+                            </div>
+                            <div className="flex justify-between text-gray-500">
+                                <span>Kış mevsimi ücreti</span>
+                                <span className="text-emerald-600 font-semibold">Dahil</span>
+                            </div>
+                            <div className="flex justify-between text-gray-500">
+                                <span>Temel sigorta</span>
+                                <span className="text-emerald-600 font-semibold">Dahil</span>
+                            </div>
+                            <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
+                                <span>Toplam</span>
+                                <span>US${car.price3Day}</span>
+                            </div>
+                        </div>
+
+                        <button className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 rounded-xl transition-colors text-sm">
+                            Şimdi rezervasyon yap
+                        </button>
+                        <p className="text-center text-xs text-gray-400">Ücretsiz iptal · Şimdi öde sonra öde</p>
+
+                        {/* Trust badges */}
+                        <div className="flex justify-around pt-2 pb-4">
+                            {[
+                                { icon: <Shield className="w-4 h-4 text-emerald-500" />, text: 'Güvenli ödeme' },
+                                { icon: <ThumbsUp className="w-4 h-4 text-blue-500" />, text: 'Ücretsiz iptal' },
+                                { icon: <Info className="w-4 h-4 text-amber-500" />, text: '7/24 destek' },
+                            ].map(({ icon, text }) => (
+                                <div key={text} className="flex flex-col items-center gap-1 text-center">
+                                    {icon}
+                                    <span className="text-[10px] text-gray-500 font-medium">{text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CarDetailPage() {
     const [selectedDays] = useState(3)
+    const [sheetOpen, setSheetOpen] = useState(false)
 
     return (
-        <div className="min-h-screen bg-[#F4F6F9]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="min-h-screen bg-[#F4F6F9] pb-24 lg:pb-0" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Serif+Display&display=swap');
             `}</style>
 
-            <div className="max-w-7xl mx-auto px-6 py-6 mt-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 mt-4 sm:mt-8">
                 {/* Breadcrumb */}
-                <nav className="flex items-center gap-2 text-xs text-gray-400 pb-2">
-                    <span className="hover:text-blue-600 cursor-pointer ">Ana sayfa</span>
-                    <ChevronRight className="w-3 h-3" />
+                <nav className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-400 pb-2">
+                    <span className="hover:text-blue-600 cursor-pointer">Ana sayfa</span>
+                    <ChevronRight className="w-3 h-3 flex-shrink-0" />
                     <span className="hover:text-blue-600 cursor-pointer">Hamburg</span>
-                    <ChevronRight className="w-3 h-3" />
-                    <span className="text-gray-700 font-medium">{CAR.name}</span>
+                    <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                    <span className="text-gray-700 font-medium truncate">{CAR.name}</span>
                 </nav>
 
-                <div className="flex gap-6 items-start">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
 
                     {/* ── Left Column ── */}
-                    <div className="flex-1 min-w-0 space-y-5">
+                    <div className="w-full lg:flex-1 lg:min-w-0 space-y-4 sm:space-y-5">
 
                         {/* Header */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-full">{CAR.category}</span>
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <div className="flex items-start justify-between gap-3 sm:gap-4 mb-4">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-full whitespace-nowrap">{CAR.category}</span>
                                         <span className="text-xs text-gray-400">{CAR.year}</span>
                                     </div>
-                                    <h1 className="text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
                                         {CAR.name}
                                     </h1>
-                                    <p className="text-sm text-gray-400 mt-0.5">{CAR.subtitle}</p>
+                                    <p className="text-sm text-gray-400 mt-0.5 truncate">{CAR.subtitle}</p>
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                     <p className="text-xs text-gray-400">Günlük fiyat</p>
-                                    <p className="text-3xl font-bold text-gray-900 leading-none mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
                                         US${CAR.pricePerDay}
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-0.5">{selectedDays} gün toplam: <span className="font-semibold text-gray-700">US${CAR.price3Day}</span></p>
+                                    <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
+                                        {selectedDays} gün toplam:{' '}
+                                        <span className="font-semibold text-gray-700">US${CAR.price3Day}</span>
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Specs row */}
-                            <div className="flex gap-2 flex-wrap">
-                                <SpecBadge icon={<Users className="w-5 h-5" />} label={`${CAR.seats} koltuk`} />
-                                <SpecBadge icon={<Settings2 className="w-5 h-5" />} label={CAR.transmission} />
-                                <SpecBadge icon={<Gauge className="w-5 h-5" />} label="Sınırsız km" />
-                                <SpecBadge icon={<Wind className="w-5 h-5" />} label="Klimalı" />
-                                <SpecBadge icon={<Car className="w-5 h-5" />} label={`${CAR.doors} kapı`} />
-                                <SpecBadge icon={<Fuel className="w-5 h-5" />} label="Benzin" />
+                            {/* Specs row — horizontal scroll on small screens */}
+                            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                                <SpecBadge icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />} label={`${CAR.seats} koltuk`} />
+                                <SpecBadge icon={<Settings2 className="w-4 h-4 sm:w-5 sm:h-5" />} label={CAR.transmission} />
+                                <SpecBadge icon={<Gauge className="w-4 h-4 sm:w-5 sm:h-5" />} label="Sınırsız km" />
+                                <SpecBadge icon={<Wind className="w-4 h-4 sm:w-5 sm:h-5" />} label="Klimalı" />
+                                <SpecBadge icon={<Car className="w-4 h-4 sm:w-5 sm:h-5" />} label={`${CAR.doors} kapı`} />
+                                <SpecBadge icon={<Fuel className="w-4 h-4 sm:w-5 sm:h-5" />} label="Benzin" />
                             </div>
                         </div>
 
                         {/* Gallery */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
                             <ImageGallery images={CAR.images} />
                         </div>
 
                         {/* Includes / Excludes */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <h2 className="text-base font-bold text-gray-900 mb-4">Fiyata dahil olanlar</h2>
-                            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Fiyata dahil olanlar</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                                 <div className="space-y-2">
                                     {CAR.includes.map((item, i) => (
                                         <div key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
@@ -315,7 +449,7 @@ export default function CarDetailPage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-2 mt-2 sm:mt-0">
                                     {CAR.excludes.map((item, i) => (
                                         <div key={i} className="flex items-start gap-2.5 text-sm text-gray-500">
                                             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -326,7 +460,7 @@ export default function CarDetailPage() {
                             </div>
 
                             {CAR.winterFee && (
-                                <div className="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-4 py-2.5 rounded-xl">
+                                <div className="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                                     Fiyata kış mevsimi ücreti dahildir
                                 </div>
@@ -334,20 +468,20 @@ export default function CarDetailPage() {
                         </div>
 
                         {/* Policies */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <h2 className="text-base font-bold text-gray-900 mb-4">Kiralama koşulları</h2>
-                            <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Kiralama koşulları</h2>
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                 {[
                                     { icon: <CreditCard className="w-4 h-4" />, label: 'Depozit', value: `US$${CAR.deposit}` },
                                     { icon: <Users className="w-4 h-4" />, label: 'Minimum yaş', value: `${CAR.minAge} yaş` },
                                     { icon: <Fuel className="w-4 h-4" />, label: 'Yakıt politikası', value: CAR.fuelPolicy },
                                     { icon: <Shield className="w-4 h-4" />, label: 'Sigorta', value: 'Temel sigorta dahil' },
                                 ].map(({ icon, label, value }) => (
-                                    <div key={label} className="flex items-start gap-3 bg-gray-50 rounded-xl p-3">
-                                        <div className="text-blue-600 mt-0.5">{icon}</div>
-                                        <div>
-                                            <p className="text-xs text-gray-400 font-medium">{label}</p>
-                                            <p className="text-sm font-semibold text-gray-800 mt-0.5">{value}</p>
+                                    <div key={label} className="flex items-start gap-2 sm:gap-3 bg-gray-50 rounded-xl p-2.5 sm:p-3">
+                                        <div className="text-blue-600 mt-0.5 flex-shrink-0">{icon}</div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{label}</p>
+                                            <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5 leading-tight">{value}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -355,28 +489,28 @@ export default function CarDetailPage() {
                         </div>
 
                         {/* Location Map */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <h2 className="text-base font-bold text-gray-900 mb-1">Alış konumu</h2>
-                            <div className="flex items-center gap-1.5 mb-3">
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Alış konumu</h2>
+                            <div className="flex items-center gap-1.5 mb-1.5 sm:mb-3">
                                 <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                                 <span className="text-sm font-semibold text-blue-600">{CAR.location}</span>
                             </div>
                             <p className="text-xs text-gray-400 mb-3">{CAR.locationAddress}</p>
-                            <div className="h-[240px] rounded-xl overflow-hidden border border-gray-200">
+                            <div className="h-[200px] sm:h-[240px] rounded-xl overflow-hidden border border-gray-200">
                                 <LeafletMap lat={CAR.lat} lng={CAR.lng} />
                             </div>
                         </div>
 
                         {/* Reviews */}
-                        <div className="bg-white rounded-2xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-base font-bold text-gray-900">Değerlendirmeler</h2>
-                                <div className="flex items-center gap-2">
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
+                                <h2 className="text-sm sm:text-base font-bold text-gray-900">Değerlendirmeler</h2>
+                                <div className="flex items-center gap-1.5 sm:gap-2">
                                     <div className="bg-amber-100 text-amber-700 text-sm font-black px-2.5 py-1 rounded-lg">
                                         {CAR.providerScore}
                                     </div>
                                     <span className="text-sm font-semibold text-gray-700">{CAR.providerLabel}</span>
-                                    <span className="text-xs text-gray-400">{CAR.providerReviews} yorum</span>
+                                    <span className="text-xs text-gray-400 hidden sm:inline">{CAR.providerReviews} yorum</span>
                                 </div>
                             </div>
 
@@ -384,13 +518,13 @@ export default function CarDetailPage() {
                                 {REVIEWS.map(review => (
                                     <div key={review.id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
                                         <div className="flex items-start gap-3">
-                                            <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
                                                 {review.avatar}
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm font-semibold text-gray-800">{review.author}</span>
-                                                    <span className="text-xs text-gray-400">{review.date}</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-sm font-semibold text-gray-800 truncate">{review.author}</span>
+                                                    <span className="text-xs text-gray-400 flex-shrink-0">{review.date}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <StarRating score={review.rating} />
@@ -409,8 +543,8 @@ export default function CarDetailPage() {
                         </div>
                     </div>
 
-                    {/* ── Right Column (sticky CTA) ── */}
-                    <div className="w-[300px] flex-shrink-0 sticky top-4 space-y-3">
+                    {/* ── Right Column (sticky CTA — desktop only) ── */}
+                    <div className="hidden lg:block w-[300px] flex-shrink-0 sticky top-4 space-y-3">
 
                         {/* Booking card */}
                         <div className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden">
@@ -522,6 +656,12 @@ export default function CarDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile sticky bottom bar */}
+            <MobileStickyBar price={CAR.price3Day} onBook={() => setSheetOpen(true)} />
+
+            {/* Mobile booking sheet */}
+            <MobileBookingSheet open={sheetOpen} onClose={() => setSheetOpen(false)} car={CAR} />
         </div>
     )
 }
