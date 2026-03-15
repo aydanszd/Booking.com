@@ -12,13 +12,15 @@ export default function HeaderSelector() {
   const isFlightsDetail = pathname === "/flightsdetail" || pathname.startsWith("/flightsdetail/");
   const isCarRental = pathname === "/carrender" || pathname.startsWith("/carrender/");
   const isattractions = pathname === "/attractions" || pathname.startsWith("/attractions/");
-  const isCarDetails = pathname === "/carfilter" || pathname.startsWith("/carfilter/");
+  const isCarFilter = pathname === "/carfilter" || pathname.startsWith("/carfilter/");
+  const isCartDetails = pathname === "/cardetails" || pathname.startsWith("/cardetails/");
 
   if (isFlights) return <SecondLayoutOption />;
   if (isCarRental) return <CarRentalHeader />;
   if (isFlightsDetail) return <SecondLayoutOption />;
   if (isattractions) return <AttractionsHeader />;
-  if (isCarDetails) return <CarRentalHeader />;
+  if (isCarFilter) return <CarRentalHeader />;
+  if (isCartDetails) return <CarRentalHeader />;
 
   return <MainHeader />;
 }

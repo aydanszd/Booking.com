@@ -275,7 +275,7 @@ export default function CarRentalHeader() {
     return (
         <div className="font-sans">
             <div className="bg-[#003b94] px-6 pt-3">
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                     {/* Top bar */}
                     <div className="flex items-center justify-between mb-5">
                         <img
