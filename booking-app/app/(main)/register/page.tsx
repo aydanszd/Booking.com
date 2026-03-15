@@ -5,8 +5,6 @@ import {
     User, Mail, Phone, CreditCard, Lock, Eye, EyeOff, Check
 } from 'lucide-react'
 
-// ─── Password strength ────────────────────────────────────────────────────────
-
 function getStrength(pw: string): number {
     let s = 0
     if (pw.length >= 8) s++
@@ -18,8 +16,6 @@ function getStrength(pw: string): number {
 
 const STRENGTH_COLORS = ['#e24b4a', '#ef9f27', '#003580', '#1d9e75']
 const STRENGTH_LABELS = ['Çok zayıf', 'Zayıf', 'İyi', 'Güçlü']
-
-// ─── Field wrapper ─────────────────────────────────────────────────────────────
 
 function Field({
     label, icon, error, hint, children,
@@ -46,8 +42,6 @@ function Field({
         </div>
     )
 }
-
-// ─── Input ─────────────────────────────────────────────────────────────────────
 
 function Input({
     hasIcon = true,
@@ -77,8 +71,6 @@ function Input({
         </div>
     )
 }
-
-// ─── Stepper ───────────────────────────────────────────────────────────────────
 
 const STEPS = [
     { label: 'Kişisel' },
@@ -132,8 +124,6 @@ function Stepper({ current }: { current: number }) {
     )
 }
 
-// ─── Register Form ─────────────────────────────────────────────────────────────
-
 export default function RegisterForm() {
     const [step, setStep] = useState(0)
     const [showPw, setShowPw] = useState(false)
@@ -154,7 +144,6 @@ export default function RegisterForm() {
     const strength = getStrength(pw)
     const iconClass = 'w-[15px] h-[15px]'
 
-    // ── Validation per step ──────────────────────────────────────────────────
 
     function validateStep(s: number): Record<string, string> {
         const errs: Record<string, string> = {}
@@ -170,8 +159,8 @@ export default function RegisterForm() {
             if (!refs.phone.current?.value.trim())      errs.phone  = 'Telefon numarası gerekli.'
         }
         if (s === 2) {
-            if (pw.length < 8)                          errs.pw     = 'Şifre en az 8 karakter olmalı.'
-            if (refs.cpw.current?.value !== pw)         errs.cpw    = 'Şifreler eşleşmiyor.'
+            if (pw.length < 8) errs.pw= 'Şifre en az 8 karakter olmalı.'
+            if (refs.cpw.current?.value !== pw)errs.cpw    = 'Şifreler eşleşmiyor.'
         }
         return errs
     }
@@ -191,8 +180,6 @@ export default function RegisterForm() {
         setSubmitted(true)
     }
 
-    // ── Summary data ─────────────────────────────────────────────────────────
-
     const summary = [
         { label: 'Ad Soyad',     value: `${refs.fname.current?.value || ''} ${refs.lname.current?.value || ''}`.trim() },
         { label: 'TC Numarası',  value: refs.idcode.current?.value || '' },
@@ -200,8 +187,6 @@ export default function RegisterForm() {
         { label: 'Telefon',      value: refs.phone.current?.value || '' },
         { label: 'Şifre',        value: '••••••••' },
     ]
-
-    // ── Shared button row ─────────────────────────────────────────────────────
 
     function NavButtons({ onNext, nextLabel = 'Devam et →', isLast = false }: {
         onNext: () => void
@@ -235,8 +220,6 @@ export default function RegisterForm() {
         )
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
-
     return (
         <div
             className="min-h-screen bg-[#F4F6F9] flex items-center justify-center px-4 py-10"
@@ -257,8 +240,6 @@ export default function RegisterForm() {
                 </div>
 
                 <Stepper current={step} />
-
-                {/* ── Step 0: Personal ── */}
                 {step === 0 && (
                     <>
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">Kişisel bilgiler</h2>
@@ -285,17 +266,13 @@ export default function RegisterForm() {
                                     maxLength={11} inputMode="numeric" hasError={!!errors.idcode} />
                             </Field>
                         </div>
-
                         <NavButtons onNext={next} />
                     </>
                 )}
-
-                {/* ── Step 1: Contact ── */}
                 {step === 1 && (
                     <>
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">İletişim bilgileri</h2>
                         <p className="text-[13px] text-gray-500 mb-5">Size ulaşabileceğimiz bilgileri girin.</p>
-
                         <div className="space-y-3">
                             <Field label="E-posta" icon={<Mail className={iconClass} />} error={errors.email}>
                                 <Input ref={refs.email} type="email" placeholder="ahmet@ornek.com"
@@ -306,17 +283,13 @@ export default function RegisterForm() {
                                     autoComplete="tel" hasError={!!errors.phone} />
                             </Field>
                         </div>
-
                         <NavButtons onNext={next} />
                     </>
                 )}
-
-                {/* ── Step 2: Security ── */}
                 {step === 2 && (
                     <>
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">Güvenlik</h2>
                         <p className="text-[13px] text-gray-500 mb-5">Hesabınız için güçlü bir şifre belirleyin.</p>
-
                         <div className="space-y-3">
                             <Field label="Şifre" icon={<Lock className={iconClass} />} error={errors.pw}>
                                 <Input
@@ -346,7 +319,6 @@ export default function RegisterForm() {
                                     </div>
                                 )}
                             </Field>
-
                             <Field label="Şifre tekrar" icon={<Lock className={iconClass} />} error={errors.cpw}>
                                 <Input
                                     ref={refs.cpw}
@@ -362,17 +334,13 @@ export default function RegisterForm() {
                                 />
                             </Field>
                         </div>
-
                         <NavButtons onNext={next} />
                     </>
                 )}
-
-                {/* ── Step 3: Review ── */}
                 {step === 3 && (
                     <>
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">Bilgilerinizi onaylayın</h2>
                         <p className="text-[13px] text-gray-500 mb-5">Her şey doğru mu? Kaydı tamamlayın.</p>
-
                         <div className="border border-gray-100 rounded-xl overflow-hidden">
                             {summary.map(({ label, value }, i) => (
                                 <div key={i}
@@ -382,9 +350,7 @@ export default function RegisterForm() {
                                 </div>
                             ))}
                         </div>
-
                         <NavButtons onNext={handleSubmit} nextLabel="Kayıt ol" isLast />
-
                         <p className="text-center text-[11px] text-gray-400 mt-3 leading-relaxed">
                             Kaydolarak{' '}
                             <a href="#" className="underline">Kullanım Şartları</a>'nı ve{' '}
@@ -392,7 +358,6 @@ export default function RegisterForm() {
                         </p>
                     </>
                 )}
-
                 {step < 3 && (
                     <p className="text-center text-[13px] text-gray-500 mt-3">
                         Zaten hesabınız var mı?{' '}
