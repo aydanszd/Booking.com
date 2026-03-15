@@ -14,7 +14,9 @@ export default function HeaderSelector() {
   const isattractions = pathname === "/attractions" || pathname.startsWith("/attractions/");
   const isCarFilter = pathname === "/carfilter" || pathname.startsWith("/carfilter/");
   const isCartDetails = pathname === "/cardetails" || pathname.startsWith("/cardetails/");
+  const isRegister = pathname === "/register" || pathname.startsWith("/register/");
 
+  if (isRegister) return null;  
   if (isFlights) return <SecondLayoutOption />;
   if (isCarRental) return <CarRentalHeader />;
   if (isFlightsDetail) return <SecondLayoutOption />;

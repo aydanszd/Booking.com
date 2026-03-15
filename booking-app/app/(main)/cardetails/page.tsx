@@ -656,11 +656,7 @@ export default function CarDetailPage() {
                     </div>
                 </div>
             </div>
-
-            {/* Mobile sticky bottom bar */}
             <MobileStickyBar price={CAR.price3Day} onBook={() => setSheetOpen(true)} />
-
-            {/* Mobile booking sheet */}
             <MobileBookingSheet open={sheetOpen} onClose={() => setSheetOpen(false)} car={CAR} />
         </div>
     )
