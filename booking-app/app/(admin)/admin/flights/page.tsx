@@ -1,7 +1,6 @@
-export default function SettingsPage() {
+export default function FlightsPage() {
     return (
-        <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-300 text-sm font-medium">Flights</p>
+        <div className="flex-1">
         </div>
     );
 }

@@ -52,8 +52,6 @@ function SidebarInner({ collapsed, onNavClick }) {
 
     return (
         <div className="flex flex-col h-full">
-
-            {/* Logo */}
             <div className={`flex items-center h-16 border-b border-gray-100 ${collapsed ? "justify-center px-3" : "gap-2 px-5"}`}>
                 {!collapsed ? (
                     <div className="flex items-center select-none">
@@ -68,7 +66,6 @@ function SidebarInner({ collapsed, onNavClick }) {
                 )}
             </div>
 
-            {/* Nav */}
             <nav className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
                 {navGroups.map((group) => (
                     <div key={group.label}>
@@ -96,13 +93,9 @@ function SidebarInner({ collapsed, onNavClick }) {
                                         ].join(" ")}
                                     >
                                         <Icon size={17} className="flex-shrink-0" />
-
                                         {!collapsed && (
-                                            <span className="flex-1 text-[13px] font-medium truncate">
-                                                {item.label}
-                                            </span>
+                                            <span className="flex-1 text-[13px] font-medium truncate">{item.label}</span>
                                         )}
-
                                         {!collapsed && item.badge && (
                                             <span className={[
                                                 "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none",
@@ -113,7 +106,6 @@ function SidebarInner({ collapsed, onNavClick }) {
                                                 {item.badge}
                                             </span>
                                         )}
-
                                         {collapsed && item.badge && (
                                             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-orange-400 rounded-full" />
                                         )}
@@ -125,13 +117,10 @@ function SidebarInner({ collapsed, onNavClick }) {
                 ))}
             </nav>
 
-            {/* User */}
             <div className="border-t border-gray-100 p-3">
                 {!collapsed ? (
                     <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
-                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">
-                            AK
-                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">AK</div>
                         <div className="flex-1 min-w-0">
                             <div className="text-gray-800 text-[13px] font-semibold truncate">Anar K.</div>
                             <div className="text-gray-400 text-[11px]">Administrator</div>
@@ -140,9 +129,7 @@ function SidebarInner({ collapsed, onNavClick }) {
                     </div>
                 ) : (
                     <div className="flex justify-center">
-                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold">
-                            AK
-                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold">AK</div>
                     </div>
                 )}
             </div>
@@ -159,7 +146,6 @@ export default function DashboardLayout({ children }) {
 
     return (
         <div className="flex w-screen h-screen overflow-hidden bg-gray-50">
-
             {/* Desktop Sidebar */}
             <aside className={[
                 "hidden lg:flex flex-col h-full bg-white border-r border-gray-100 shadow-sm flex-shrink-0 transition-all duration-300 ease-in-out relative",
@@ -174,12 +160,12 @@ export default function DashboardLayout({ children }) {
                 <SidebarInner collapsed={collapsed} onNavClick={() => {}} />
             </aside>
 
-            {/* Mobile overlay */}
+            {/* Mobile Overlay */}
             {mobileOpen && (
                 <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
             )}
 
-            {/* Mobile drawer */}
+            {/* Mobile Sidebar */}
             <aside className={[
                 "fixed top-0 left-0 h-full w-[216px] z-50 bg-white border-r border-gray-100 shadow-xl lg:hidden transition-transform duration-300 ease-in-out",
                 mobileOpen ? "translate-x-0" : "-translate-x-full",
@@ -187,10 +173,8 @@ export default function DashboardLayout({ children }) {
                 <SidebarInner collapsed={false} onNavClick={() => setMobileOpen(false)} />
             </aside>
 
-            {/* Main */}
-            <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden">
-
-                {/* Header */}
+            {/* Main Content */}
+            <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                 <header className="h-16 bg-white border-b border-gray-100 flex items-center px-5 gap-3 flex-shrink-0 w-full">
                     <button
                         className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
@@ -198,13 +182,11 @@ export default function DashboardLayout({ children }) {
                     >
                         <Menu size={18} />
                     </button>
-
                     <div className="hidden sm:flex items-center gap-2 flex-1">
                         <span className="text-xs font-extrabold text-[#006ce4]">Booking.com</span>
                         <span className="text-xs text-gray-300">/</span>
                         <span className="text-xs text-gray-500 font-medium">{page.title}</span>
                     </div>
-
                     <div className="ml-auto flex items-center gap-2">
                         <div className="hidden sm:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-400 hover:border-[#006ce4]/30 transition-colors cursor-text">
                             <Search size={13} />
@@ -214,14 +196,11 @@ export default function DashboardLayout({ children }) {
                             <Bell size={16} />
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#006ce4] rounded-full text-[9px] text-white font-bold flex items-center justify-center">4</span>
                         </button>
-                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold cursor-pointer">
-                            AK
-                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold cursor-pointer">AK</div>
                     </div>
                 </header>
 
-                {/* Page content */}
-                <main className="flex-1 overflow-auto p-6 flex flex-col w-full">
+                <main className="flex-1 overflow-auto p-6">
                     <div className="mb-6">
                         <h1 className="text-xl font-bold text-gray-800">{page.title}</h1>
                         <p className="text-sm text-gray-400 mt-0.5">{page.subtitle}</p>
