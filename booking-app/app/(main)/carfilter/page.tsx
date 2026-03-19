@@ -541,7 +541,7 @@ export default function CarRentalPage() {
                                     {cat}
                                 </button>
                             ))}
-                            <button className="w-9 h-9 flex-shrink-0 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:border-blue-300 text-gray-500 transition-colors">
+                            <button className="w-9 h-9 shrink-0 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:border-blue-300 text-gray-500 transition-colors">
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>

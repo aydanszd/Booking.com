@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useRef } from 'react'
 import {
     User, Mail, Phone, CreditCard, Lock, Eye, EyeOff, Check

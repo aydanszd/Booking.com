@@ -49,7 +49,7 @@ export default function BookingNavbar() {
                 </div>
 
                 {/* Bottom row: nav tabs */}
-                <div className="flex gap-1 -mt-4.5 overflow-x-auto scrollbar-hide pb-3 mt-[2px]">
+                <div className="flex gap-1 -mt-4.5 overflow-x-auto scrollbar-hide pb-3">
                     {NAV_ITEMS.map(({ icon: Icon, label }) => (
                         <button
                             key={label}

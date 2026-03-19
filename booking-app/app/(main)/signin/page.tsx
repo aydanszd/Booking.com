@@ -18,7 +18,7 @@ function Field({
             <label className="text-xs font-medium text-gray-500 tracking-wide">{label}</label>
             <div className="relative flex items-center flex-col">
                 {icon && (
-                    <span className="absolute left-3 top-[10px] text-gray-400 pointer-events-none z-10">
+                    <span className="absolute left-3 top-2.5 text-gray-400 pointer-events-none z-10">
                         {icon}
                     </span>
                 )}

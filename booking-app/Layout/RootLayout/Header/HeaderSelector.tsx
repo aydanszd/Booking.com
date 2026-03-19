@@ -16,7 +16,9 @@ export default function HeaderSelector() {
   const isCartDetails = pathname === "/cardetails" || pathname.startsWith("/cardetails/");
   const isRegister = pathname === "/register" || pathname.startsWith("/register/");
   const isSignIn = pathname === "/signin" || pathname.startsWith("/signin/");
+  const isAdmin = pathname.startsWith("/admin");
 
+  if (isAdmin) return null;
   if (isRegister) return null;  
   if (isSignIn) return null;
   if (isFlights) return <SecondLayoutOption />;

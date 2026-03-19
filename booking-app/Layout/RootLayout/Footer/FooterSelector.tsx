@@ -9,6 +9,9 @@ export default function FooterSelector() {
     const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
     const isSignin = pathname === "/signin" || pathname.startsWith("/signin/");
     const isRegister = pathname === "/register" || pathname.startsWith("/register/");
+    const isAdmin = pathname.startsWith("/admin");
+
+    if (isAdmin) return null;
     if (isSignin) return null;
     if (isRegister) return null;
     if (isFlights) return <FlightsFooter />;
