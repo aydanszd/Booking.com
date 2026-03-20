@@ -1,94 +1,325 @@
 "use client";
-import { useState } from "react";
-import { Search, Filter, MoreHorizontal, Car } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+    Search, Filter, Car, Plus, Pencil, Trash2,
+    ChevronLeft, ChevronRight, MapPin, Star, Loader2,
+} from "lucide-react";
+import { CarType, ModalType } from "@/types/car";
+import { carApi } from "@/api/carapi";
+import CarFormModal from "@/components/Carformmodal";
+import CarDeleteModal from "@/components/Cardeletemodal";
 
-const cars = [
-    { id: 1, make: "BMW", model: "5 Series", year: 2024, plate: "10-AB-222", price: "$95/day", category: "Sedan", status: "Available", mileage: "12,400 km" },
-    { id: 2, make: "Mercedes-Benz", model: "GLE 450", year: 2024, plate: "10-BC-341", price: "$130/day", category: "SUV", status: "Rented", mileage: "8,200 km" },
-    { id: 3, make: "Tesla", model: "Model Y", year: 2024, plate: "10-CD-512", price: "$110/day", category: "Electric", status: "Available", mileage: "5,900 km" },
-    { id: 4, make: "Range Rover", model: "Sport", year: 2023, plate: "10-DE-634", price: "$150/day", category: "SUV", status: "Available", mileage: "22,800 km" },
-    { id: 5, make: "Audi", model: "A6", year: 2024, plate: "10-EF-780", price: "$85/day", category: "Sedan", status: "Maintenance", mileage: "31,000 km" },
-    { id: 6, make: "Porsche", model: "Cayenne", year: 2023, plate: "10-FG-921", price: "$180/day", category: "SUV", status: "Rented", mileage: "18,500 km" },
-    { id: 7, make: "Toyota", model: "Camry", year: 2024, plate: "10-GH-102", price: "$55/day", category: "Sedan", status: "Available", mileage: "9,700 km" },
-];
-
-const statusColor: Record<string, string> = {
-    Available: "bg-emerald-50 text-emerald-600",
-    Rented: "bg-blue-50 text-blue-600",
-    Maintenance: "bg-orange-50 text-orange-500",
-};
+const IMG = (path: string) => `http://localhost:5000${path}`;
+const LIMIT = 10;
 
 const catColor: Record<string, string> = {
-    Sedan: "bg-gray-100 text-gray-600",
-    SUV: "bg-violet-50 text-violet-600",
-    Electric: "bg-teal-50 text-teal-600",
+    economy: "bg-gray-100 text-gray-600",
+    compact: "bg-sky-50 text-sky-600",
+    suv: "bg-violet-50 text-violet-600",
+    luxury: "bg-amber-50 text-amber-600",
+    van: "bg-pink-50 text-pink-600",
+    electric: "bg-teal-50 text-teal-600",
 };
 
+const CATEGORIES = ["", "economy", "compact", "suv", "luxury", "van", "electric"] as const;
+
 export default function CarsPage() {
+    const [cars, setCars] = useState<CarType[]>([]);
+    const [total, setTotal] = useState(0);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
-    const filtered = cars.filter(c =>
-        `${c.make} ${c.model}`.toLowerCase().includes(search.toLowerCase()) ||
-        c.plate.toLowerCase().includes(search.toLowerCase())
+    const [filterCat, setFilterCat] = useState("");
+    const [showFilter, setShowFilter] = useState(false);
+
+    const [modal, setModal] = useState<ModalType>(null);
+    const [selected, setSelected] = useState<CarType | null>(null);
+
+    const fetchCars = async () => {
+        setLoading(true);
+        try {
+            const data = await carApi.getAll({ page, limit: LIMIT, category: filterCat });
+            setCars(data.cars);
+            setTotal(data.total);
+        } catch {
+            // handle silently or toast
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchCars(); }, [page, filterCat]);
+
+    const filtered = cars.filter((c) =>
+        `${c.brand} ${c.model} ${c.title}`.toLowerCase().includes(search.toLowerCase())
     );
 
+    const openAdd = () => { setSelected(null); setModal("add"); };
+    const openEdit = (car: CarType) => { setSelected(car); setModal("edit"); };
+    const openDelete = (car: CarType) => { setSelected(car); setModal("delete"); };
+    const closeModal = () => { setModal(null); setSelected(null); };
+
+    const onSuccess = async () => { await fetchCars(); closeModal(); };
+
+    const totalPages = Math.ceil(total / LIMIT);
+
     return (
-        <div className="space-y-5">
+        <div className="space-y-5 font-sans">
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><Car size={18} className="text-blue-600" /></div>
-                    <div><p className="text-xs text-gray-400">Total Fleet</p><p className="text-xl font-bold text-gray-800">{cars.length}</p></div>
-                </div>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><Car size={18} className="text-emerald-600" /></div>
-                    <div><p className="text-xs text-gray-400">Available</p><p className="text-xl font-bold text-gray-800">{cars.filter(c => c.status === "Available").length}</p></div>
-                </div>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><Car size={18} className="text-blue-400" /></div>
-                    <div><p className="text-xs text-gray-400">Currently Rented</p><p className="text-xl font-bold text-gray-800">{cars.filter(c => c.status === "Rented").length}</p></div>
-                </div>
+                {[
+                    { label: "Cəmi Fleet", val: total, color: "blue" },
+                    { label: "Mövcud", val: cars.filter((c) => c.isAvailable).length, color: "emerald" },
+                    { label: "İcarəde", val: cars.filter((c) => !c.isAvailable).length, color: "violet" },
+                ].map(({ label, val, color }) => (
+                    <div key={label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl bg-${color}-50 flex items-center justify-center`}>
+                            <Car size={18} className={`text-${color}-500`} />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-400">{label}</p>
+                            <p className="text-xl font-bold text-gray-800">{val}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
+            {/* Table Card */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 gap-3">
+                {/* Toolbar */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 gap-3 flex-wrap">
                     <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 flex-1 max-w-xs">
                         <Search size={13} className="text-gray-400" />
-                        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search cars..." className="bg-transparent text-sm text-gray-700 outline-none placeholder-gray-400 w-full" />
+                        <input
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Axtar..."
+                            className="bg-transparent text-sm text-gray-700 outline-none placeholder-gray-400 w-full"
+                        />
                     </div>
-                    <button className="flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-xl px-3 py-2 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors"><Filter size={13} /> Filter</button>
-                    <button className="flex items-center gap-2 text-xs text-white bg-[#006ce4] rounded-xl px-4 py-2 hover:bg-[#0057b8] transition-colors font-medium">+ Add Car</button>
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowFilter((s) => !s)}
+                            className={`flex items-center gap-2 text-xs border rounded-xl px-3 py-2 transition-colors ${
+                                filterCat
+                                    ? "border-[#006ce4] text-[#006ce4]"
+                                    : "border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4]"
+                            }`}
+                        >
+                            <Filter size={13} /> Filtr {filterCat && `· ${filterCat}`}
+                        </button>
+                        {showFilter && (
+                            <div className="absolute top-10 left-0 z-20 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 min-w-[160px]">
+                                {CATEGORIES.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => { setFilterCat(cat); setShowFilter(false); setPage(1); }}
+                                        className={`w-full text-left text-xs px-3 py-2 rounded-xl transition-colors ${
+                                            filterCat === cat
+                                                ? "bg-[#006ce4] text-white"
+                                                : "hover:bg-gray-50 text-gray-600"
+                                        }`}
+                                    >
+                                        {cat || "Hamısı"}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        onClick={openAdd}
+                        className="flex items-center gap-2 text-xs text-white bg-[#006ce4] rounded-xl px-4 py-2 hover:bg-[#0057b8] transition-colors font-medium"
+                    >
+                        <Plus size={13} /> Maşın Əlavə Et
+                    </button>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-gray-50 text-left">
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Vehicle</th>
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Plate</th>
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Category</th>
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Mileage</th>
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Price</th>
-                                <th className="px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                                <th className="px-5 py-3"></th>
+
+                {/* Table */}
+                <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
+                    <table className="w-full text-sm min-w-[900px]">
+                        <thead className="sticky top-0 z-10">
+                            <tr className="bg-gray-50">
+                                {["Avtomobil", "Məkan", "Kateqoriya", "Ötürücü / Oturacaq", "Xüsusiyyətlər", "Qiymət/Gün", "Reytinq", "Status", "Əməliyyat"].map((h) => (
+                                    <th key={h} className="px-4 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-left whitespace-nowrap">
+                                        {h}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {filtered.map((c) => (
-                                <tr key={c.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-5 py-3.5">
-                                        <p className="font-semibold text-gray-800 text-[13px]">{c.make} {c.model}</p>
-                                        <p className="text-xs text-gray-400">{c.year}</p>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={9} className="py-16">
+                                        <div className="flex justify-center">
+                                            <Loader2 size={26} className="animate-spin text-[#006ce4]" />
+                                        </div>
                                     </td>
-                                    <td className="px-5 py-3.5 font-mono text-xs text-gray-600">{c.plate}</td>
-                                    <td className="px-5 py-3.5"><span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${catColor[c.category] ?? "bg-gray-100 text-gray-600"}`}>{c.category}</span></td>
-                                    <td className="px-5 py-3.5 text-gray-500 text-xs">{c.mileage}</td>
-                                    <td className="px-5 py-3.5 text-gray-800 font-semibold text-[13px]">{c.price}</td>
-                                    <td className="px-5 py-3.5"><span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusColor[c.status]}`}>{c.status}</span></td>
-                                    <td className="px-5 py-3.5"><button className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600"><MoreHorizontal size={15} /></button></td>
                                 </tr>
-                            ))}
+                            ) : filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={9} className="text-center py-12 text-gray-400 text-sm">
+                                        Nəticə tapılmadı
+                                    </td>
+                                </tr>
+                            ) : (
+                                filtered.map((c) => (
+                                    <tr key={c._id} className="hover:bg-gray-50 transition-colors">
+                                        {/* Car */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                {c.images?.[0] ? (
+                                                    <img src={IMG(c.images[0])} className="w-9 h-9 rounded-lg object-cover shrink-0" alt={c.title} />
+                                                ) : (
+                                                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                                        <Car size={14} className="text-gray-400" />
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <p className="font-semibold text-gray-800 text-[13px] whitespace-nowrap">{c.brand} {c.model}</p>
+                                                    <p className="text-[11px] text-gray-400">{c.title}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        {/* Location */}
+                                        <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+                                            <div className="flex items-center gap-1">
+                                                <MapPin size={11} />
+                                                {c.location?.city || "—"}
+                                                {c.location?.country ? `, ${c.location.country}` : ""}
+                                            </div>
+                                        </td>
+
+                                        {/* Category */}
+                                        <td className="px-4 py-3">
+                                            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${catColor[c.category] ?? "bg-gray-100 text-gray-600"}`}>
+                                                {c.category}
+                                            </span>
+                                        </td>
+
+                                        {/* Transmission / Seats */}
+                                        <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap capitalize">
+                                            {c.transmission} · {c.seats} yerdə
+                                        </td>
+
+                                        {/* Features */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-wrap gap-1 max-w-[160px]">
+                                                {c.features?.slice(0, 3).map((f) => (
+                                                    <span key={f} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{f}</span>
+                                                ))}
+                                                {(c.features?.length || 0) > 3 && (
+                                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                                        +{(c.features?.length || 0) - 3}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+
+                                        {/* Price */}
+                                        <td className="px-4 py-3 font-semibold text-gray-800 text-[13px] whitespace-nowrap">
+                                            ${c.pricePerDay}/gün
+                                        </td>
+
+                                        {/* Rating */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-1">
+                                                <Star size={12} className="text-amber-400 fill-amber-400" />
+                                                <span className="text-[13px] font-semibold text-gray-700">{c.rating ?? "—"}</span>
+                                            </div>
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="px-4 py-3">
+                                            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${c.isAvailable ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-500"}`}>
+                                                {c.isAvailable ? "Mövcud" : "İcarəde"}
+                                            </span>
+                                        </td>
+
+                                        {/* Actions */}
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => openEdit(c)}
+                                                    className="w-7 h-7 rounded-lg hover:bg-blue-50 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"
+                                                    title="Redaktə et"
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => openDelete(c)}
+                                                    className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Sil"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
+                        <p className="text-xs text-gray-400">
+                            {total} nəticədən {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, total)}
+                        </p>
+                        <div className="flex items-center gap-1">
+                            <button
+                                disabled={page <= 1}
+                                onClick={() => setPage((p) => p - 1)}
+                                className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-40 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors"
+                            >
+                                <ChevronLeft size={13} />
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPage(p)}
+                                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${
+                                        p === page
+                                            ? "bg-[#006ce4] text-white"
+                                            : "border border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4]"
+                                    }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                            <button
+                                disabled={page >= totalPages}
+                                onClick={() => setPage((p) => p + 1)}
+                                className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-40 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors"
+                            >
+                                <ChevronRight size={13} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Modals */}
+            {(modal === "add" || modal === "edit") && (
+                <CarFormModal
+                    mode={modal}
+                    car={selected}
+                    onClose={closeModal}
+                    onSuccess={onSuccess}
+                />
+            )}
+
+            {modal === "delete" && selected && (
+                <CarDeleteModal
+                    car={selected}
+                    onClose={closeModal}
+                    onSuccess={onSuccess}
+                />
+            )}
         </div>
     );
 }

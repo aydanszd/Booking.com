@@ -1,6 +1,6 @@
 import { Building2, MapPin, Star, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Building, TYPE_COLORS } from '@/types/building';
-import { IMG } from '@/lib/api';
+import { IMG } from '@/api/building';
 
 interface Props {
     buildings: Building[];
@@ -19,7 +19,7 @@ export default function BuildingTable({ buildings, loading, onEdit, onDelete }: 
     }
 
     return (
-        <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
+        <div className="overflow-x-auto max-h-140 overflow-y-auto">
             <table className="w-full text-sm min-w-[800px]">
                 <thead className="sticky top-0 z-10">
                     <tr className="bg-gray-50">
@@ -42,7 +42,7 @@ export default function BuildingTable({ buildings, loading, onEdit, onDelete }: 
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
                                     {b.images?.[0] ? (
-                                        <img src={IMG(b.images[0])} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt={b.title} />
+                                        <img src={IMG(b.images[0])} className="w-9 h-9 rounded-lg object-cover shrink-0" alt={b.title} />
                                     ) : (
                                         <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                                             <Building2 size={14} className="text-gray-400" />

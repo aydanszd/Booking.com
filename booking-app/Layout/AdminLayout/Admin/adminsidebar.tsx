@@ -92,13 +92,13 @@ function SidebarInner({ collapsed, onNavClick }) {
                                                 : "text-gray-500 hover:bg-[#006ce4] hover:text-white",
                                         ].join(" ")}
                                     >
-                                        <Icon size={17} className="flex-shrink-0" />
+                                        <Icon size={17} className="shrink-0" />
                                         {!collapsed && (
                                             <span className="flex-1 text-[13px] font-medium truncate">{item.label}</span>
                                         )}
                                         {!collapsed && item.badge && (
                                             <span className={[
-                                                "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none",
+                                                "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4.5 text-center leading-none",
                                                 isActive
                                                     ? "bg-white/25 text-white"
                                                     : "bg-[#006ce4]/10 text-[#006ce4] group-hover:bg-white/25 group-hover:text-white",
@@ -120,7 +120,7 @@ function SidebarInner({ collapsed, onNavClick }) {
             <div className="border-t border-gray-100 p-3">
                 {!collapsed ? (
                     <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer group">
-                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0">AK</div>
+                        <div className="w-8 h-8 rounded-xl bg-[#006ce4] flex items-center justify-center text-white text-[11px] font-bold shrink-0">AK</div>
                         <div className="flex-1 min-w-0">
                             <div className="text-gray-800 text-[13px] font-semibold truncate">Anar K.</div>
                             <div className="text-gray-400 text-[11px]">Administrator</div>
@@ -167,7 +167,7 @@ export default function DashboardLayout({ children }) {
 
             {/* Mobile Sidebar */}
             <aside className={[
-                "fixed top-0 left-0 h-full w-[216px] z-50 bg-white border-r border-gray-100 shadow-xl lg:hidden transition-transform duration-300 ease-in-out",
+                "fixed top-0 left-0 h-full w-54 z-50 bg-white border-r border-gray-100 shadow-xl lg:hidden transition-transform duration-300 ease-in-out",
                 mobileOpen ? "translate-x-0" : "-translate-x-full",
             ].join(" ")}>
                 <SidebarInner collapsed={false} onNavClick={() => setMobileOpen(false)} />
