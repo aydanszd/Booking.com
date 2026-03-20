@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { X, Loader2, ImagePlus } from 'lucide-react';
 import { Building, buildingSchema, BuildingSchema, INITIAL_SCHEMA } from '@/types/building';
-import api, { IMG } from '@/lib/api';
+import api, { IMG } from '@/api/building';
 import { toast } from 'sonner';
 
 interface Props {
