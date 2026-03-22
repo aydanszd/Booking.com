@@ -43,7 +43,7 @@ function getDaysInMonth(year: number, month: number): number {
 }
 
 function getFirstDayOfWeek(year: number, month: number): number {
-    return (new Date(year, month, 1).getDay() + 6) % 7; // Monday = 0
+    return (new Date(year, month, 1).getDay() + 6) % 7;
 }
 
 function isSameDay(a: Date | null, b: Date | null): boolean {
@@ -64,6 +64,7 @@ function formatDate(date: Date | null): string | null {
     const WEEK_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return `${WEEK_DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)}`;
 }
+
 interface CalendarMonthProps {
     year: number;
     month: number;
@@ -104,7 +105,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
     const rangeEnd = checkOut || hoveredDate;
 
     return (
-        <div className="w-65">
+        <div className="w-full">
             <div ref={headerRef} className="flex items-center justify-center gap-1 mb-3 relative">
                 <div className="relative">
                     <button
@@ -116,7 +117,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                     </button>
 
                     {showMonthPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
                             {MONTHS.map((m, i) => {
                                 const isPast = year === currentYear && i < TODAY.getMonth();
                                 return (
@@ -145,7 +146,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                     </button>
 
                     {showYearPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22.5 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22 mt-1 max-h-55 overflow-y-auto">
                             {years.map((y: number) => (
                                 <div
                                     key={y}
@@ -207,6 +208,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
         </div>
     );
 }
+
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 
 export default function Header() {
@@ -214,6 +216,7 @@ export default function Header() {
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
     const [showGuests, setShowGuests] = useState<boolean>(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
     const [calendarTab, setCalendarTab] = useState<string>("calendar");
     const [location, setLocation] = useState<string>("Baku");
     const [checkIn, setCheckIn] = useState<Date | null>(null);
@@ -226,9 +229,20 @@ export default function Header() {
     const [leftMonth, setLeftMonth] = useState<number>(TODAY.getMonth());
     const [rightYear, setRightYear] = useState<number>(initRight.getFullYear());
     const [rightMonth, setRightMonth] = useState<number>(initRight.getMonth());
+    // track screen width for single/dual calendar
+    const [isMobile, setIsMobile] = useState<boolean>(false);
+
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 768);
+        check();
+        window.addEventListener("resize", check);
+        return () => window.removeEventListener("resize", check);
+    }, []);
+
     const locationRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
     const guestRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (locationRef.current && !locationRef.current.contains(e.target as Node)) setShowLocation(false);
@@ -238,6 +252,7 @@ export default function Header() {
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
     }, []);
+
     const prevMonth = (): void => {
         const d = new Date(leftYear, leftMonth - 1, 1);
         setLeftYear(d.getFullYear());
@@ -256,6 +271,7 @@ export default function Header() {
     };
 
     const isAtStart = leftYear === TODAY.getFullYear() && leftMonth === TODAY.getMonth();
+
     const handleDayClick = (date: Date): void => {
         if (!checkIn || (checkIn && checkOut)) {
             setCheckIn(date);
@@ -269,8 +285,10 @@ export default function Header() {
             setCheckOut(date);
         }
     };
+
     const adjust = (key: string, delta: number): void =>
         setGuests(prev => ({ ...prev, [key]: Math.max(key === "children" ? 0 : 1, prev[key as keyof typeof prev] + delta) }));
+
     const dateLabel =
         checkIn && checkOut ? `${formatDate(checkIn)} — ${formatDate(checkOut)}` :
             checkIn ? `${formatDate(checkIn)} — ?` :
@@ -278,16 +296,20 @@ export default function Header() {
 
     return (
         <div className="font-sans">
-            <div className="bg-[#003b94] px-6 pt-3">
+            {/* ───── TOP BAR ───── */}
+            <div className="bg-[#003b94] px-4 sm:px-6 pt-3">
                 <div className="max-w-6xl mx-auto">
+
+                    {/* Logo + Desktop Nav Actions */}
                     <div className="flex items-center justify-between mb-5">
                         <img
                             src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
                             alt="Booking.com"
-                            className="h-16 object-contain cursor-pointer"
+                            className="h-10 sm:h-16 object-contain cursor-pointer"
                         />
 
-                        <div className="flex items-center gap-3 text-white text-sm font-medium">
+                        {/* Desktop right actions */}
+                        <div className="hidden md:flex items-center gap-3 text-white text-sm font-medium">
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors">
                                 <img src="https://flagcdn.com/w40/gb.png" alt="English" className="w-6 h-6 rounded-full object-cover" />
@@ -296,57 +318,92 @@ export default function Header() {
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
                             <button className="hover:bg-white/10 px-3 py-1 rounded transition-colors text-[16px]">List your property</button>
-                            <button className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors">Register</button>
+                            <button className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.5 cursor-pointer transition-colors">Register</button>
                             <button className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors">Sign in</button>
                         </div>
+
+                        {/* Mobile hamburger */}
+                        <button
+                            className="md:hidden text-white p-2"
+                            onClick={() => setMobileMenuOpen(v => !v)}
+                            aria-label="Toggle menu"
+                        >
+                            <div className="space-y-1">
+                                <span className={`block w-6 h-0.5 bg-white transition-transform ${mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`} />
+                                <span className={`block w-6 h-0.5 bg-white transition-opacity ${mobileMenuOpen ? "opacity-0" : ""}`} />
+                                <span className={`block w-6 h-0.5 bg-white transition-transform ${mobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`} />
+                            </div>
+                        </button>
                     </div>
-                    <div className="flex gap-1 -mt-4.5">
+
+                    {/* Mobile dropdown menu */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden bg-white rounded-xl shadow-xl p-4 mb-4 flex flex-col gap-2">
+                            <button className="text-sm text-gray-700 py-2 border-b border-gray-100 text-left">USD</button>
+                            <button className="text-sm text-gray-700 py-2 border-b border-gray-100 text-left flex items-center gap-2">
+                                <img src="https://flagcdn.com/w40/gb.png" alt="English" className="w-5 h-5 rounded-full object-cover" />
+                                English
+                            </button>
+                            <button className="text-sm text-gray-700 py-2 border-b border-gray-100 text-left">List your property</button>
+                            <button className="text-[#006ae3] text-sm font-semibold py-2 border-b border-gray-100 text-left">Register</button>
+                            <button className="text-[#006ae3] text-sm font-semibold py-2 text-left">Sign in</button>
+                        </div>
+                    )}
+
+                    {/* Category nav - scrollable on mobile */}
+                    <div className="flex gap-1 -mt-4.5 overflow-x-auto pb-1 scrollbar-hide">
                         {NAV_ITEMS.map(({ icon: Icon, label }: typeof NAV_ITEMS[0]) => (
                             <button
                                 key={label}
                                 onClick={() => setActiveNav(label)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
+                                className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${activeNav === label
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
-                                <Icon size={16} />
+                                <Icon size={15} />
                                 {label}
                             </button>
                         ))}
                     </div>
                 </div>
             </div>
-            <div className="bg-[#003b94] px-6 pb-10">
-                <div className="max-w-6xl mx-auto translate-y-25">
 
-                    <h1 className="text-white text-5xl font-bold mb-2">Find your next stay</h1>
-                    <p className="text-white/90 text-2xl mb-7">Search low prices on hotels, homes and much more...</p>
-                    <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
-                        <div ref={locationRef} className="relative flex-1 min-w-50">
+            {/* ───── SEARCH SECTION ───── */}
+            <div className="bg-[#003b94] px-4 sm:px-6 pb-4 sm:pb-10">
+                <div className="max-w-6xl mx-auto sm:translate-y-25 pb-8 sm:pb-0">
+                    <h1 className="text-white text-2xl sm:text-5xl font-bold mb-2 pt-4 sm:pt-0">Find your next stay</h1>
+
+                    <p className="text-white/90 text-base sm:text-2xl mb-5 sm:mb-7">Search low prices on hotels, homes and much more...</p>
+
+                    {/* Search bar */}
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
+
+                        {/* Location */}
+                        <div ref={locationRef} className="relative flex-1 min-w-0 sm:min-w-50">
                             <div
                                 onClick={() => { setShowLocation(v => !v); setShowDate(false); setShowGuests(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
                             >
-                                <BedDouble size={26} className="text-gray-500 shrink-0" />
+                                <BedDouble size={22} className="text-gray-500 shrink-0" />
                                 <input
                                     value={location}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
                                     placeholder="Where are you going?"
-                                    className="flex-1 text-sm text-gray-800 bg-transparent outline-none"
+                                    className="flex-1 text-sm text-gray-800 bg-transparent outline-none min-w-0"
                                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                 />
                                 {location && (
                                     <X
                                         size={15}
-                                        className="text-gray-400 cursor-pointer hover:text-gray-600"
+                                        className="text-gray-400 cursor-pointer hover:text-gray-600 shrink-0"
                                         onClick={(e: React.MouseEvent) => { e.stopPropagation(); setLocation(""); }}
                                     />
                                 )}
                             </div>
 
                             {showLocation && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl min-w-60 overflow-hidden">
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl min-w-full sm:min-w-60 overflow-hidden">
                                     {SUGGESTIONS
                                         .filter((s: string) => s.toLowerCase().includes(location.toLowerCase()))
                                         .map((s: string) => (
@@ -363,17 +420,19 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <div ref={dateRef} className="relative flex-1 min-w-50">
+
+                        {/* Date */}
+                        <div ref={dateRef} className="relative flex-1 min-w-0 sm:min-w-50">
                             <div
                                 onClick={() => { setShowDate(v => !v); setShowLocation(false); setShowGuests(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
                             >
-                                <Calendar size={26} className="text-gray-500 shrink-0" />
-                                <span className="text-sm text-gray-800 whitespace-nowrap">{dateLabel}</span>
+                                <Calendar size={22} className="text-gray-500 shrink-0" />
+                                <span className="text-sm text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">{dateLabel}</span>
                             </div>
 
                             {showDate && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl min-w-150">
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl w-[calc(100vw-2rem)] sm:w-auto sm:min-w-[600px] max-w-[98vw]">
 
                                     {/* Tabs */}
                                     <div className="flex border-b border-gray-100">
@@ -393,46 +452,51 @@ export default function Header() {
 
                                     {calendarTab === "calendar" && (
                                         <>
-                                            <div className="flex items-center gap-4 px-5 pt-5 pb-3">
+                                            <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 pt-5 pb-3">
                                                 <button
                                                     onClick={prevMonth}
                                                     disabled={isAtStart}
-                                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                                                 >
                                                     <ChevronLeft size={18} className="text-gray-600" />
                                                 </button>
 
                                                 <div
-                                                    className="flex gap-8 flex-1 justify-center"
+                                                    className="flex flex-col sm:flex-row gap-6 sm:gap-8 flex-1 justify-center"
                                                     onMouseLeave={() => setHoveredDate(null)}
                                                 >
+                                                    {/* On mobile show only left calendar; on sm+ show both */}
                                                     <CalendarMonth
                                                         year={leftYear} month={leftMonth}
                                                         checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
                                                         onDayClick={handleDayClick} onDayHover={setHoveredDate}
                                                         onMonthChange={setLeftMonth} onYearChange={setLeftYear}
                                                     />
-                                                    <CalendarMonth
-                                                        year={rightYear} month={rightMonth}
-                                                        checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
-                                                        onDayClick={handleDayClick} onDayHover={setHoveredDate}
-                                                        onMonthChange={setRightMonth} onYearChange={setRightYear}
-                                                    />
+                                                    <div className="hidden sm:block">
+                                                        <CalendarMonth
+                                                            year={rightYear} month={rightMonth}
+                                                            checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
+                                                            onDayClick={handleDayClick} onDayHover={setHoveredDate}
+                                                            onMonthChange={setRightMonth} onYearChange={setRightYear}
+                                                        />
+                                                    </div>
                                                 </div>
 
                                                 <button
                                                     onClick={nextMonth}
-                                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors shrink-0"
                                                 >
                                                     <ChevronRight size={18} className="text-gray-600" />
                                                 </button>
                                             </div>
-                                            <div className="flex items-center gap-2 px-5 pt-3 pb-4 border-t border-gray-100">
+
+                                            {/* Flex options - scrollable on mobile */}
+                                            <div className="flex items-center gap-2 px-3 sm:px-5 pt-3 pb-4 border-t border-gray-100 overflow-x-auto scrollbar-hide">
                                                 {FLEX_OPTIONS.map((opt: typeof FLEX_OPTIONS[0]) => (
                                                     <button
                                                         key={opt.label}
                                                         onClick={() => setFlexDays(opt.value)}
-                                                        className={`px-4 py-1.5 rounded-full text-sm border transition-colors ${flexDays === opt.value
+                                                        className={`px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm border whitespace-nowrap transition-colors ${flexDays === opt.value
                                                             ? "border-[#003b94] text-[#003b94] bg-blue-50"
                                                             : "border-gray-300 text-gray-700 hover:border-gray-400"
                                                             }`}
@@ -443,11 +507,13 @@ export default function Header() {
                                             </div>
                                         </>
                                     )}
+
                                     {calendarTab === "flexible" && (
                                         <div className="px-5 py-8 text-center text-gray-500 text-sm">
                                             Flexible dates coming soon
                                         </div>
                                     )}
+
                                     <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-100">
                                         <button
                                             onClick={() => { setCheckIn(null); setCheckOut(null); }}
@@ -465,20 +531,22 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <div ref={guestRef} className="relative flex-1 min-w-50">
+
+                        {/* Guests */}
+                        <div ref={guestRef} className="relative flex-1 min-w-0 sm:min-w-50">
                             <div
                                 onClick={() => { setShowGuests(v => !v); setShowLocation(false); setShowDate(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
                             >
-                                <Users size={26} className="text-gray-500 shrink-0" />
-                                <span className="flex-1 text-sm text-gray-800 whitespace-nowrap">
+                                <Users size={22} className="text-gray-500 shrink-0" />
+                                <span className="flex-1 text-sm text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
                                     {guests.adults} adults · {guests.children} children · {guests.rooms} room
                                 </span>
-                                <ChevronDown size={16} className="text-gray-400" />
+                                <ChevronDown size={16} className="text-gray-400 shrink-0" />
                             </div>
 
                             {showGuests && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl p-5 min-w-70">
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl p-5 w-full sm:min-w-70">
                                     {[
                                         { key: "adults" as const, label: "Adults", sub: "Age 18+" },
                                         { key: "children" as const, label: "Children", sub: "Age 0–17" },
@@ -515,11 +583,14 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <button className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
+
+                        {/* Search button */}
+                        <button className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center justify-center gap-2 h-13 transition-colors w-full sm:w-auto shrink-0">
                             <Search size={18} />
                             Search
                         </button>
                     </div>
+
                     <label className="flex items-center gap-2 mt-3.5 text-black text-sm cursor-pointer select-none">
                         <input
                             type="checkbox"

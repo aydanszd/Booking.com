@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface PropertyType {
     image: string;
@@ -48,59 +48,79 @@ const PROPERTY_TYPES: PropertyType[] = [
     },
 ];
 
-const CARD_WIDTH = 272; 
-const VISIBLE = 4;
+const GAP = 16;
+const DESKTOP_CARD_WIDTH = 272;
+const DESKTOP_VISIBLE = 4;
 
 export default function BrowseByPropertyType({ city = "Milan" }: { city?: string }) {
     const [index, setIndex] = useState(0);
-    const maxIndex = PROPERTY_TYPES.length - VISIBLE;
+    const [cardWidth, setCardWidth] = useState(DESKTOP_CARD_WIDTH);
+    const [isMobile, setIsMobile] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const update = () => {
+            const mobile = window.innerWidth < 640;
+            setIsMobile(mobile);
+            if (mobile && containerRef.current) {
+                setCardWidth(containerRef.current.offsetWidth);
+            } else {
+                setCardWidth(DESKTOP_CARD_WIDTH);
+            }
+        };
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, []);
+
+    const maxIndex = isMobile
+        ? PROPERTY_TYPES.length - 1
+        : PROPERTY_TYPES.length - DESKTOP_VISIBLE;
 
     const prev = () => setIndex((i) => Math.max(i - 1, 0));
     const next = () => setIndex((i) => Math.min(i + 1, maxIndex));
 
     return (
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-10 ">
-            {/* Header */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <section className="py-10 px-4 sm:px-6 max-w-6xl mx-auto font-sans -mt-10">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
                 Browse by property type in {city}
             </h2>
 
-            {/* Slider wrapper */}
             <div className="relative">
-                {/* Left arrow */}
                 <button
                     onClick={prev}
                     disabled={index === 0}
-                    className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+                    className="absolute -left-3 sm:-left-5 top-[45%] -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
                     aria-label="Previous"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
 
-                <div className="overflow-hidden ">
+                <div className="overflow-hidden" ref={containerRef}>
                     <div
-                        className="flex gap-4 transition-transform duration-300 ease-in-out"
-                        style={{ transform: `translateX(-${index * CARD_WIDTH}px)` }}
+                        className="flex transition-transform duration-300 ease-in-out"
+                        style={{
+                            gap: `${GAP}px`,
+                            transform: `translateX(-${index * (cardWidth + GAP)}px)`,
+                        }}
                     >
                         {PROPERTY_TYPES.map((prop, i) => (
                             <div
                                 key={i}
-                                className="shrink-0 w-64 cursor-pointer group"
+                                className="shrink-0 cursor-pointer group"
+                                style={{ width: `${cardWidth}px` }}
                                 onClick={() => console.log("Navigate to:", prop.type)}
                             >
-                                {/* Image */}
-                                <div className="w-full h-54 rounded-xl overflow-hidden mb-3">
+                                <div className="w-full h-48 sm:h-54 rounded-xl overflow-hidden mb-3">
                                     <img
                                         src={prop.image}
                                         alt={prop.type}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                 </div>
-
-                                {/* Info */}
-                                <p className="font-semibold text-gray-900 text-[16px]">{prop.type}</p>
+                                <p className="font-semibold text-gray-900 text-[15px] sm:text-[16px]">{prop.type}</p>
                                 <p className="text-sm text-gray-500 mt-0.5">{prop.dates}</p>
                                 <p className="text-sm text-gray-500">{prop.available} available</p>
                             </div>
@@ -108,14 +128,13 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
                     </div>
                 </div>
 
-                {/* Right arrow */}
                 <button
                     onClick={next}
                     disabled={index >= maxIndex}
-                    className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+                    className="absolute -right-3 sm:-right-5 top-[45%] -translate-y-1/2 z-10 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
                     aria-label="Next"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5 text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>

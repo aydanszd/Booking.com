@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+
 interface PropertyCardProps {
     image: string;
     name: string;
@@ -20,7 +21,7 @@ function PropertyCard({
     const [saved, setSaved] = useState(false);
 
     return (
-        <div className="relative max-w-6xl w-72 rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
+        <div className="relative w-full sm:w-72 rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
             <div className="relative h-55 w-full overflow-hidden">
                 <img
                     src={image}
@@ -57,12 +58,13 @@ function PropertyCard({
                 <p className="text-sm text-gray-500 mb-3">{location}</p>
                 <div className="flex items-center gap-2">
                     <span
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold ${score >= 7
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold ${
+                            score >= 7
                                 ? "bg-blue-700"
                                 : score >= 5
-                                    ? "bg-orange-400"
-                                    : "bg-gray-400"
-                            }`}
+                                ? "bg-orange-400"
+                                : "bg-gray-400"
+                        }`}
                     >
                         {score}
                     </span>
@@ -110,11 +112,15 @@ const SAMPLE_PROPERTIES: PropertyCardProps[] = [
 
 export default function StillInterestedSection() {
     return (
+<<<<<<< Updated upstream
         <section className="py-10 px-6 max-w-6xl mx-auto -translate-x-5 text-[26px] font-sans">
+=======
+        <section className="py-10 px-6 max-w-7xl md:ml-90 font-sans">
+>>>>>>> Stashed changes
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Still interested?
             </h2>
-            <div className="flex gap-5 flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-5 flex-wrap">
                 {SAMPLE_PROPERTIES.map((prop, i) => (
                     <PropertyCard key={i} {...prop} />
                 ))}
