@@ -35,7 +35,7 @@ const footerColumns = [
 
 export default function Footer() {
     return (
-        <div className="bg-gray-100 border-t border-gray-200">
+        <div className="bg-gray-100 border-t border-gray-200 mt-10">
             <div className="max-w-6xl mx-auto px-4 py-8">
                 <div className="grid grid-cols-5 gap-6">
                     {footerColumns.map((col) => (

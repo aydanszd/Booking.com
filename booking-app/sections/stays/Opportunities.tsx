@@ -67,15 +67,9 @@ const OFFERS: OfferCardProps[] = [
 
 export default function FirsatlarSection() {
     return (
-<<<<<<< Updated upstream
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-7.5">
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Offers</h2>
-=======
-        <section className="py-10 px-4 sm:px-6 max-w-7xl font-sans mt-[-30px] sm:ml-[370px]">
+        <section className="py-10 px-4 sm:px-6 max-w-6xl font-sans mt-[-30px] sm:ml-[370px]">
             <div className="mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Offers</h2>
->>>>>>> Stashed changes
                 <p className="text-sm text-gray-500 mt-1">
                     Size özel promosyonlar, indirimler ve fırsatlar
                 </p>

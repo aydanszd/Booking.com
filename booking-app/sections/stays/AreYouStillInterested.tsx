@@ -112,11 +112,7 @@ const SAMPLE_PROPERTIES: PropertyCardProps[] = [
 
 export default function StillInterestedSection() {
     return (
-<<<<<<< Updated upstream
-        <section className="py-10 px-6 max-w-6xl mx-auto -translate-x-5 text-[26px] font-sans">
-=======
         <section className="py-10 px-6 max-w-7xl md:ml-90 font-sans">
->>>>>>> Stashed changes
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Still interested?
             </h2>
