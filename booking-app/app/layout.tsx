@@ -4,6 +4,7 @@ import "./globals.css";
 import HeaderSelector from "@/layout/RootLayout/Header/HeaderSelector";
 import FooterSelector from "@/layout/RootLayout/Footer/FooterSelector";
 import { headers } from "next/headers";
+import GoogleLogger from "@/components/GoogleLogger";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
+        <GoogleLogger />
         {!isAdmin && <HeaderSelector />}
         {children}
         {!isAdmin && <FooterSelector />}

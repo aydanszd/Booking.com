@@ -1,0 +1,7 @@
+TypeError: next is not a function
+    at model.<anonymous> (C:\Users\AYDAN\Desktop\Booking.com\server\models\User.js:16:5)
+    at async Kareem.execPre (C:\Users\AYDAN\Desktop\Booking.com\server\node_modules\kareem\index.js:70:24)
+    at async model.$__save (C:\Users\AYDAN\Desktop\Booking.com\server\node_modules\mongoose\lib\model.js:394:5)
+    at async model.save (C:\Users\AYDAN\Desktop\Booking.com\server\node_modules\mongoose\lib\model.js:664:5)
+    at async Function.create (C:\Users\AYDAN\Desktop\Booking.com\server\node_modules\mongoose\lib\model.js:2751:5)
+    at async googleCallback (C:\Users\AYDAN\Desktop\Booking.com\server\controllers\Googleauthcontroller.js:13:20)
