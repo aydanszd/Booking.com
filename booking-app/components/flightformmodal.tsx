@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useFormik } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { X, Plus, Plane, Pencil } from "lucide-react";
+import { X, Plus, Plane, Pencil, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { flightSchema, defaultFlightValues, FlightFormValues } from "@/schemas/flightshema";
 import { FlightType } from "@/types/flight";
@@ -25,7 +25,6 @@ const CABIN_LABELS: Record<string, string> = {
 
 const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#006ce4] transition-colors";
 
-// ── Komponent XARİCİNDƏ təyin edilib — hər render-də yenidən yaranmır ──
 interface FieldProps {
     label: string;
     error?: string;
@@ -43,40 +42,142 @@ function Field({ label, error, colSpan2, children }: FieldProps) {
     );
 }
 
+// ── Logo Upload Field ──
+interface LogoUploadFieldProps {
+    value: string;
+    onChange: (url: string) => void;
+}
+
+function LogoUploadField({ value, onChange }: LogoUploadFieldProps) {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleFile = (file: File) => {
+        if (!file.type.startsWith("image/")) {
+            toast.error("Yalnız şəkil faylı seçin");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => onChange(e.target?.result as string);
+        reader.readAsDataURL(file);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    };
+
+    return (
+        <div>
+            <label className="text-xs text-gray-500 font-medium mb-1 block">Aviaşirkət Loqosu</label>
+            {value ? (
+                <div className="relative flex items-center gap-3 border border-gray-200 rounded-xl p-3">
+                    <div className="w-14 h-14 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img
+                            src={value}
+                            alt="Logo"
+                            className="w-full h-full object-contain"
+                        />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-700">Loqo yüklənib</p>
+                        <button
+                            type="button"
+                            onClick={() => inputRef.current?.click()}
+                            className="text-[11px] text-[#006ce4] hover:underline mt-0.5"
+                        >
+                            Dəyişdir
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => onChange("")}
+                        className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                        <X size={14} />
+                    </button>
+                    <input
+                        ref={inputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                    />
+                </div>
+            ) : (
+                <div
+                    onClick={() => inputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    className={`
+                        border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors
+                        ${isDragging
+                            ? "border-[#006ce4] bg-blue-50"
+                            : "border-gray-200 hover:border-[#006ce4] hover:bg-gray-50"
+                        }
+                    `}
+                >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDragging ? "bg-blue-100" : "bg-gray-100"}`}>
+                        <ImageIcon size={16} className={isDragging ? "text-[#006ce4]" : "text-gray-400"} />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-xs font-medium text-gray-600">
+                            Şəkil seçin <span className="text-[#006ce4]">və ya sürükləyin</span>
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">PNG, JPG, SVG, WebP · Maks 2MB</p>
+                    </div>
+                    <input
+                        ref={inputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                    />
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function FlightFormModal({ mode, flight, onClose, onSuccess }: FlightFormModalProps) {
     const [stopInput, setStopInput] = useState({ airport: "", duration: "" });
     const [siteInput, setSiteInput] = useState({ name: "", url: "", price: "" });
+    const [logoUrl, setLogoUrl] = useState(flight?.logoUrl || "");
 
     const formik = useFormik<FlightFormValues>({
         initialValues: flight
             ? {
-                  airline: flight.airline,
-                  alliance: flight.alliance ?? "",
-                  flightNumber: flight.flightNumber ?? "",
-                  aircraft: flight.aircraft ?? "",
-                  cabin: flight.cabin,
-                  origin: { ...flight.origin },
-                  destination: { ...flight.destination },
-                  departureTime: flight.departureTime?.slice(0, 16) ?? "",
-                  arrivalTime: flight.arrivalTime?.slice(0, 16) ?? "",
-                  duration: flight.duration,
-                  stops: flight.stops ?? [],
-                  price: flight.price,
-                  baggagePerPax: flight.baggagePerPax ?? "",
-                  flightQuality: flight.flightQuality,
-                  bookingSites: flight.bookingSites ?? [],
-                  totalSeats: flight.totalSeats,
-                  bookedSeats: flight.bookedSeats,
-              }
+                airline: flight.airline,
+                alliance: flight.alliance ?? "",
+                flightNumber: flight.flightNumber ?? "",
+                aircraft: flight.aircraft ?? "",
+                cabin: flight.cabin,
+                origin: { ...flight.origin },
+                destination: { ...flight.destination },
+                departureTime: flight.departureTime?.slice(0, 16) ?? "",
+                arrivalTime: flight.arrivalTime?.slice(0, 16) ?? "",
+                duration: flight.duration,
+                stops: flight.stops ?? [],
+                price: flight.price,
+                baggagePerPax: flight.baggagePerPax ?? "",
+                flightQuality: flight.flightQuality,
+                bookingSites: flight.bookingSites ?? [],
+                totalSeats: flight.totalSeats,
+                bookedSeats: flight.bookedSeats,
+            }
             : defaultFlightValues,
         validationSchema: toFormikValidationSchema(flightSchema),
         onSubmit: async (values) => {
             try {
+                const payload = { ...values, logoUrl };
                 if (mode === "edit" && flight?._id) {
-                    await flightApi.update(flight._id, values);
+                    await flightApi.update(flight._id, payload);
                     toast.success("Uğurlu");
                 } else {
-                    await flightApi.create(values);
+                    await flightApi.create(payload);
                     toast.success("Uğurlu");
                 }
                 onSuccess();
@@ -94,7 +195,6 @@ export default function FlightFormModal({ mode, flight, onClose, onSuccess }: Fl
         return t && typeof e === "string" ? e : undefined;
     };
 
-    // Rəqəm inputu üçün: dəyər 0-dırsa boş göstər
     const numericProps = (name: string, val: number) => ({
         type: "number" as const,
         value: val === 0 ? "" : val,
@@ -177,6 +277,10 @@ export default function FlightFormModal({ mode, flight, onClose, onSuccess }: Fl
                                         {CABINS.map((c) => <option key={c} value={c}>{CABIN_LABELS[c]}</option>)}
                                     </select>
                                 </Field>
+                                {/* ── Logo Upload ── */}
+                                <div className="col-span-2">
+                                    <LogoUploadField value={logoUrl} onChange={setLogoUrl} />
+                                </div>
                             </div>
                         </section>
 
