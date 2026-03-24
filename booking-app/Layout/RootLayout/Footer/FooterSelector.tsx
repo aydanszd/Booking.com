@@ -9,11 +9,11 @@ export default function FooterSelector() {
     const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
     const isSignin = pathname === "/signin" || pathname.startsWith("/signin/");
     const isRegister = pathname === "/register" || pathname.startsWith("/register/");
+    const isForgot = pathname === "/forgot-password" || pathname.startsWith("/forgot-password/");
+    const isReset = pathname.startsWith("/reset-password/");
     const isAdmin = pathname.startsWith("/admin");
 
-    if (isAdmin) return null;
-    if (isSignin) return null;
-    if (isRegister) return null;
+    if (isAdmin || isSignin || isRegister || isForgot || isReset) return null;
     if (isFlights) return <FlightsFooter />;
     return <DefaultFooter />;
 }

@@ -1,171 +1,65 @@
 "use client";
-import { useState } from "react";
-import { Plus, ChevronRight } from "lucide-react";
-const categories = [
-    { label: "Çalışanlar", score: 9.4 },
-    { label: "Olanaklar", score: 8.9 },
-    { label: "Temizlik", score: 9.0 },
-    { label: "Rahatlık", score: 9.1 },
-    { label: "Fiyat/fayda dengesi", score: 9.2 },
-    { label: "Konum", score: 9.2 },
-    { label: "Ücretsiz WiFi", score: 8.2 },
-];
-const topics = ["Oda", "Konum", "Kahvaltı", "Manzara", "Temiz"];
-const reviews = [
-    {
-        name: "Kübra",
-        country: "ABD",
-        flag: "🇺🇸",
-        text: '"Vulgar ve İlkay beye çok teşekkür ediyorum. İlk andan itibaren çok yardımcı oldular. Odalar geniş, temiz, sıcak ve konforluydu. İçeri Şehere yürüyerek ulaşım sağladık çok keyif aldık. Ayrıca deniz mall da çok yakındı. Kahvaltı yeterliydi. Teras..."',
-    },
-    {
-        name: "Tekelioğlu",
-        country: "Türkiye",
-        flag: "🇹🇷",
-        text: '"Şehir merkezine uzaklığı, nazik personel, temizliği"',
-    },
-    {
-        name: "Mustafa",
-        country: "Türkiye",
-        flag: "🇹🇷",
-        text: '"Temiz, Güleryüz luler, yataklar daha iyi olabilirdi, aile olarak kaldık, tavsiye ederim"',
-    },
-];
+import { Star, MessageSquareQuote, CheckCircle2, ChevronDown, Loader2 } from "lucide-react";
 
-function ScoreBar({ score }: { score: number }) {
-    const pct = (score / 10) * 100;
+export default function Reviews({ building }: { building: any }) {
     return (
-        <div className="h-1.5 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
-            <div
-                className="h-full bg-[#1a3c6e] rounded-full transition-all duration-700"
-                style={{ width: `${pct}%` }}
-            />
-        </div>
-    );
-}
-
-function Avatar({ name }: { name: string }) {
-    const colors = [
-        "bg-[#1a7a4a]", "bg-[#1a3c6e]", "bg-[#7a1a1a]",
-        "bg-[#7a5a1a]", "bg-[#1a5a7a]",
-    ];
-    const idx = name.charCodeAt(0) % colors.length;
-    return (
-        <div className={`w-9 h-9 rounded-full ${colors[idx]} text-white font-bold text-sm flex items-center justify-center flex-shrink-0`}>
-            {name[0].toUpperCase()}
-        </div>
-    );
-}
-
-export default function KonukDegerlendirmeleri() {
-    const [activeTopics, setActiveTopics] = useState<string[]>([]);
-
-    const toggleTopic = (t: string) => {
-        setActiveTopics((prev) =>
-            prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-        );
-    };
-
-    return (
-        <div className=" min-h-screen py-8">
-            <div className="max-w-6xl mx-auto px-4">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Konuk değerlendirmeleri</h2>
-                    <button className="bg-[#006ce4] hover:bg-[#0055b3] text-white font-semibold px-5 py-2 rounded-lg text-sm transition-colors whitespace-nowrap">
-                        Yer durumuna bak
-                    </button>
-                </div>
-
-                {/* Overall score */}
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="bg-[#1a3c6e] text-white text-xl font-bold w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
-                        9,1
+        <div className="bg-white rounded-3xl p-10 shadow-sm border border-gray-100 mb-20 relative overflow-hidden">
+            <h2 className="text-2xl font-black text-gray-900 mb-12 uppercase tracking-tighter">Guest Reviews</h2>
+            
+            <div className="flex flex-col lg:flex-row gap-16 mb-16">
+                <div className="flex-1">
+                    <div className="flex items-center gap-6 mb-10">
+                        <div className="bg-blue-600 text-white text-5xl font-black p-10 rounded-3xl shadow-2xl shadow-blue-200">
+                            {building.rating}
+                        </div>
+                        <div>
+                            <p className="text-3xl font-black text-gray-900 italic">Excellent</p>
+                            <p className="text-sm font-bold text-gray-400 mt-2 uppercase tracking-widest flex items-center gap-2">
+                                <MessageSquareQuote size={18} className="text-blue-600" /> Based on 1,597 verified reviews
+                            </p>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-lg font-bold text-gray-900">Fevkalade</span>
-                        <span className="text-gray-400">·</span>
-                        <span className="text-gray-500 text-sm">1.597 değerlendirme</span>
-                        <a href="#" className="text-[#006ce4] text-sm hover:underline">
-                            Tüm değerlendirmeleri oku
-                        </a>
-                    </div>
-                </div>
 
-                {/* Category scores */}
-                <div className="mb-8">
-                    <p className="text-sm font-bold text-gray-900 mb-4">Kategoriler:</p>
-                    <div className="grid grid-cols-3 gap-x-10 gap-y-4">
-                        {categories.map((cat) => (
-                            <div key={cat.label}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {[
+                            { label: "Cleanliness", score: 9.8, color: "bg-green-500" },
+                            { label: "Location", score: 9.5, color: "bg-blue-500" },
+                            { label: "Service", score: 9.4, color: "bg-amber-500" },
+                            { label: "Wifi", score: 9.2, color: "bg-indigo-500" },
+                        ].map((item) => (
+                            <div key={item.label} className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-700">{cat.label}</span>
-                                    <span className="text-sm font-bold text-gray-900">{cat.score.toFixed(1).replace(".", ",")}</span>
+                                    <span className="text-xs font-black text-gray-400 uppercase tracking-widest">{item.label}</span>
+                                    <span className="text-sm font-black text-gray-900">{item.score}</span>
                                 </div>
-                                <ScoreBar score={cat.score} />
+                                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                                    <div className={`h-full ${item.color} shadow-lg shadow-current`} style={{ width: `${item.score * 10}%` }} />
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Topic filters */}
-                <div className="mb-8">
-                    <p className="text-sm font-bold text-gray-900 mb-3">Değerlendirme konularını seçin:</p>
-                    <div className="flex flex-wrap gap-2">
-                        {topics.map((t) => {
-                            const active = activeTopics.includes(t);
-                            return (
-                                <button
-                                    key={t}
-                                    onClick={() => toggleTopic(t)}
-                                    className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all ${active
-                                            ? "bg-[#1a3c6e] border-[#1a3c6e] text-white"
-                                            : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"
-                                        }`}
-                                >
-                                    <Plus size={14} className={active ? "rotate-45 transition-transform" : "transition-transform"} />
-                                    {t}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Reviews */}
-                <div className="mb-6">
-                    <p className="text-sm font-bold text-gray-900 mb-4">Konukların en çok neleri sevdiğine göz atın:</p>
-                    <div className="relative">
-                        <div className="grid grid-cols-3 gap-4">
-                            {reviews.map((r) => (
-                                <div key={r.name} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-                                    <div className="flex items-center gap-2.5">
-                                        <Avatar name={r.name} />
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-900">{r.name}</p>
-                                            <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                <span>{r.flag}</span> {r.country}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-700 leading-relaxed flex-1">{r.text}</p>
-                                    <a href="#" className="text-[#006ce4] text-sm hover:underline font-medium">
-                                        Daha fazla bilgi
-                                    </a>
-                                </div>
-                            ))}
+                <div className="lg:w-96 flex flex-col gap-6">
+                    <p className="text-lg font-black text-gray-800 mb-2">Check what guests say:</p>
+                    <div className="bg-amber-50 rounded-3xl p-8 border border-amber-100 relative shadow-sm group hover:shadow-lg transition-all cursor-pointer">
+                        <MessageSquareQuote size={40} className="text-amber-200 absolute -top-4 -left-4 opacity-50 group-hover:scale-125 transition-transform" />
+                        <p className="text-sm font-semibold text-amber-900 leading-relaxed italic relative z-10 mb-6">
+                            "Absolutely loved it. The staff went above and beyond for our anniversary. The breakfast was fresh and had many halal options."
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-black">AM</div>
+                            <div>
+                                <p className="text-xs font-black text-amber-900 uppercase">Ahmed Muhammad</p>
+                                <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">United Arab Emirates</p>
+                            </div>
                         </div>
-
-                        {/* Next arrow */}
-                        <button className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white border border-gray-200 shadow-md rounded-full p-2 hover:shadow-lg transition-shadow">
-                            <ChevronRight size={18} className="text-gray-600" />
-                        </button>
                     </div>
+                    
+                    <button className="flex items-center justify-center gap-2 text-sm font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-all py-4 border-2 border-dashed border-gray-100 rounded-2xl hover:border-blue-200">
+                        Read all reviews <ChevronDown size={14} />
+                    </button>
                 </div>
-
-                {/* CTA */}
-                <button className="border border-[#006ce4] text-[#006ce4] hover:bg-[#f0f7ff] font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors">
-                    Tüm değerlendirmeleri oku
-                </button>
             </div>
         </div>
     );

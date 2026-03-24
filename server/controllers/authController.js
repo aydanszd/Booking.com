@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { generateToken } = require('../config/jwt');
+const crypto = require('crypto'); // Add crypto
 
 // POST /api/auth/register
 exports.register = async (req, res) => {
@@ -53,5 +54,91 @@ exports.updateMe = async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(400).json({ message: err.message });
+    }
+};
+
+const sendEmail = require('../utils/sendEmail');
+
+// POST /api/auth/forgot-password
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "Bu email ilə istifadəçi tapılmadı" });
+        }
+
+        // Token yarat
+        const resetToken = crypto.randomBytes(20).toString('hex');
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 dəqiqə
+
+        await user.save();
+
+        const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+        
+        // Email mesajını hazırla
+        const message = `Şifrənizi sıfırlamaq üçün bu linkə daxil olun: ${resetUrl}\n\nBu link 10 dəqiqə ərzində etibarlıdır.`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Şifrə Sıfırlama Tokeni',
+                message,
+                html: `
+                    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px; max-width: 600px;">
+                        <h2 style="color: #003580;">Booking.com Şifrə Sıfırlama</h2>
+                        <p>Şifrənizi sıfırlamaq üçün aşağıdakı düyməyə basın:</p>
+                        <a href="${resetUrl}" style="background-color: #003580; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Şifrəni Sıfırla</a>
+                        <p style="margin-top: 15px; color: #555;">Bu link <strong>10 dəqiqə</strong> ərzində etibarlıdır.</p>
+                        <p style="font-size: 12px; color: #777; margin-top: 20px;">Əgər bu sorğunu siz etməmisinizsə, bu mesajı görməzdən gəlin.</p>
+                        <hr />
+                        <p style="font-size: 11px;">Hörmətlə, Booking App komandası.</p>
+                    </div>
+                `
+            });
+
+            res.json({ message: "Şifrə sıfırlama linki emailinizə göndərildi", resetUrl });
+        } catch (err) {
+            console.error('Email error details:', err.message);
+            
+            // Email göndərilməsə belə, istifadəçini bloklamamaq üçün linki ekranda göstəririk
+            res.json({ 
+                success: true,
+                message: "Email göndərilə bilmədi (SMTP Ayarlarınızı .env faylında düzgün doldurduğunuzdan əmin olun!), lakin test üçün linkiniz budur:", 
+                resetUrl,
+                error: err.message
+            });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// POST /api/auth/reset-password/:token
+exports.resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Sıfırlama tokeni yanlışdır və ya vaxtı bitib" });
+        }
+
+        user.password = password;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpire = null;
+
+        await user.save();
+
+        res.json({ message: "Şifrəniz uğurla yeniləndi" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };

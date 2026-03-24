@@ -6,12 +6,15 @@ import {
     X, ChevronDown, Plus, Minus, ChevronLeft, ChevronRight, BedDouble,
 } from "lucide-react";
 
+import Link from "next/link";
+
 const NAV_ITEMS = [
-    { icon: Bed, label: "Stays" },
-    { icon: Plane, label: "Flights" },
-    { icon: Car, label: "Car rental" },
-    { icon: Ticket, label: "Attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis" },
+    { icon: Bed, label: "Stays", href: "/" },
+    { icon: BedDouble, label: "Buildings", href: "/filter" },
+    { icon: Plane, label: "Flights", href: "/flights" },
+    { icon: Car, label: "Car rental", href: "/carrender" },
+    { icon: Ticket, label: "Attractions", href: "/attractions" },
+    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
 ];
 
 const SUGGESTIONS = [
@@ -281,11 +284,13 @@ export default function Header() {
             <div className="bg-[#003b94] px-6 pt-3">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex items-center justify-between mb-5">
-                        <img
-                            src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
-                            alt="Booking.com"
-                            className="h-16 object-contain cursor-pointer"
-                        />
+                        <Link href="/">
+                            <img
+                                src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
+                                alt="Booking.com"
+                                className="h-16 object-contain cursor-pointer"
+                            />
+                        </Link>
 
                         <div className="flex items-center gap-3 text-white text-sm font-medium">
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
@@ -295,15 +300,30 @@ export default function Header() {
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
-                            <button className="hover:bg-white/10 px-3 py-1 rounded transition-colors text-[16px]">List your property</button>
-                            <button className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors">Register</button>
-                            <button className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors">Sign in</button>
+                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">List your property</Link>
+                            {typeof window !== "undefined" && localStorage.getItem("token") ? (
+                                <>
+                                    <Link href="/my-bookings" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block font-semibold text-amber-400">My Bookings</Link>
+                                    <button 
+                                        onClick={() => { localStorage.removeItem("token"); window.location.reload(); }}
+                                        className="bg-white text-red-600 border border-red-200 rounded px-3 py-2 cursor-pointer font-semibold hover:bg-red-50 transition-colors block leading-none"
+                                    >
+                                        Sign out
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">Register</Link>
+                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">Sign in</Link>
+                                </>
+                            )}
                         </div>
                     </div>
                     <div className="flex gap-1 -mt-4.5">
-                        {NAV_ITEMS.map(({ icon: Icon, label }: typeof NAV_ITEMS[0]) => (
-                            <button
+                        {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
+                            <Link
                                 key={label}
+                                href={href}
                                 onClick={() => setActiveNav(label)}
                                 className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
                                     ? "border border-white bg-white/10 text-white"
@@ -312,7 +332,7 @@ export default function Header() {
                             >
                                 <Icon size={16} />
                                 {label}
-                            </button>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -515,7 +535,29 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <button className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
+                        <button 
+                            onClick={() => {
+                                const isCarPage = window.location.pathname.includes('carrender');
+                                const target = isCarPage ? '/carresults' : '/filter';
+                                const params = new URLSearchParams();
+                                if (location) params.set('city', location);
+                                
+                                if (isCarPage) {
+                                    if (checkIn) params.set('pickUp', checkIn.toISOString().split('T')[0]);
+                                    if (checkOut) params.set('dropOff', checkOut.toISOString().split('T')[0]);
+                                } else {
+                                    if (checkIn) params.set('checkIn', checkIn.toISOString());
+                                    if (checkOut) params.set('checkOut', checkOut.toISOString());
+                                }
+                                
+                                params.set('adults', String(guests.adults));
+                                params.set('children', String(guests.children));
+                                params.set('rooms', String(guests.rooms));
+                                
+                                window.location.href = `${target}?${params.toString()}`;
+                            }}
+                            className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0"
+                        >
                             <Search size={18} />
                             Search
                         </button>

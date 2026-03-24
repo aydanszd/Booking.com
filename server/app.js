@@ -12,6 +12,7 @@ const flightRoutes = require('./routes/flightRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const googleAuthRoutes = require('./routes/googleAuthRoutes'); // ✅ YENİ
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/cars', carRoutes);
 app.use('/api/flights', flightRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/auth', googleAuthRoutes); 
 
 app.get('/', (req, res) => res.json({ message: 'API işləyir ✅' }));

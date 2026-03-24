@@ -79,10 +79,10 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                 images.forEach(img => fd.append('images', img));
 
                 if (editItem) {
-                    await api.put(`/buildings/${editItem._id}`, fd);
+                    await api.updateBuilding(editItem._id, fd);
                     toast.success('Bina yeniləndi ✅');
                 } else {
-                    await api.post('/buildings', fd);
+                    await api.createBuilding(fd);
                     toast.success('Bina əlavə edildi ✅');
                 }
                 onSuccess();

@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     googleId: { type: String, default: null },                  // Google OAuth
     role:     { type: String, enum: ['user', 'admin'], default: 'user' },
     avatar:   { type: String, default: '' },
+    resetPasswordToken:  { type: String, default: null },
+    resetPasswordExpire: { type: Date,   default: null },
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

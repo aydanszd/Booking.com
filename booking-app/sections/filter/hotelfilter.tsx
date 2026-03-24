@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+
 import {
     Heart, MapPin, ArrowUpDown, X, LayoutList, LayoutGrid,
-    ChevronRight, Leaf, Info, Loader2, Star, SlidersHorizontal, Menu,
+    ChevronRight, Leaf, Info, Loader2, Star, SlidersHorizontal, Menu, ChevronLeft,
 } from "lucide-react";
 import api, { IMG } from "@/api/building";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Building {
@@ -341,6 +344,7 @@ function Sidebar({ filters, onChange, onReset, allBuildings, open, onClose }: {
 
 // ─── List Card (responsive horizontal → vertical on mobile) ──────────────────
 function ListCard({ building }: { building: Building }) {
+    const searchParams = useSearchParams();
     const [saved, setSaved] = useState(false);
     const imageUrl = building.images?.[0]
         ? IMG(building.images[0])
@@ -364,19 +368,20 @@ function ListCard({ building }: { building: Building }) {
 
             <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
                 <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
-                    {/* Left: details */}
                     <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-[#006ce4] font-bold text-base hover:underline cursor-pointer leading-tight">
-                                {building.title}
-                            </h3>
-                            <span className="bg-amber-100 border border-amber-300 text-amber-700 text-xs px-1.5 py-0.5 rounded font-medium">
-                                {capitalize(building.type)}
-                            </span>
-                            {building.brand && (
-                                <span className="text-xs text-gray-400 font-medium">{building.brand}</span>
-                            )}
-                        </div>
+                        <Link href={`/hoteldetail/${building._id}?${searchParams.toString()}`} className="block">
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="text-[#006ce4] font-bold text-base hover:underline cursor-pointer leading-tight">
+                                    {building.title}
+                                </h3>
+                                <span className="bg-amber-100 border border-amber-300 text-amber-700 text-xs px-1.5 py-0.5 rounded font-medium">
+                                    {capitalize(building.type)}
+                                </span>
+                                {building.brand && (
+                                    <span className="text-xs text-gray-400 font-medium">{building.brand}</span>
+                                )}
+                            </div>
+                        </Link>
 
                         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                             <span className="text-[#006ce4] text-xs flex items-center gap-0.5">
@@ -456,14 +461,16 @@ function ListCard({ building }: { building: Building }) {
                                 <Info size={13} className="text-gray-400" />
                             </p>
                             <p className="text-xs text-gray-500">per night</p>
-                            <button disabled={!building.isAvailable}
+                            <Link 
+                                href={building.isAvailable ? `/hoteldetail/${building._id}?${searchParams.toString()}` : "#"}
                                 className={`mt-2 font-semibold px-4 py-2 rounded-lg text-xs transition-colors flex items-center gap-1 whitespace-nowrap ${
                                     building.isAvailable
                                         ? "bg-[#006ce4] hover:bg-[#0055b3] text-white"
                                         : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                }`}>
+                                }`}
+                            >
                                 {building.isAvailable ? <>Check availability <ChevronRight size={13} /></> : "Not available"}
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -571,13 +578,35 @@ function GridCard({ building }: { building: Building }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function SearchResults() {
+    const searchParams = useSearchParams();
+    const router       = useRouter();
+    const initialPage  = Number(searchParams.get("page")) || 1;
+
     const [allBuildings, setAllBuildings] = useState<Building[]>([]);
     const [loading, setLoading]           = useState(true);
     const [error, setError]               = useState<string | null>(null);
-    const [filters, setFilters]           = useState<Filters>(DEFAULT_FILTERS);
+    const [filters, setFilters]           = useState<Filters>(() => {
+        const cityFilter = searchParams.get("city") || "";
+        return { ...DEFAULT_FILTERS, city: cityFilter };
+    });
     const [sortBy, setSortBy]             = useState<"rating" | "price_asc" | "price_desc">("rating");
     const [viewMode, setViewMode]         = useState<"list" | "grid">("list");
     const [sidebarOpen, setSidebarOpen]   = useState(false);
+    const [page, setPage]                 = useState(initialPage);
+    const limit = 6;
+
+    // URL-də səhifə dəyişəndə state-i yenilə
+    useEffect(() => {
+        const p = Number(searchParams.get("page")) || 1;
+        if (p !== page) setPage(p);
+    }, [searchParams]);
+
+    const updatePage = (p: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", p.toString());
+        router.push(`?${params.toString()}`);
+        window.scrollTo(0, 0);
+    };
 
     // Mobile-da həmişə list mode
     useEffect(() => {
@@ -592,7 +621,8 @@ export default function SearchResults() {
             setLoading(true);
             setError(null);
             try {
-                const first = await api.get("/buildings", { params: { page: 1, limit: 100 } });
+                const apiAny = api as any;
+                const first = await apiAny.getBuildings({ page: 1, limit: 100 });
                 const d = first.data;
 
                 const extractItems = (payload: any): Building[] => {
@@ -615,8 +645,8 @@ export default function SearchResults() {
                 const totalPages = Math.ceil(total / pageSize);
                 const rest = await Promise.all(
                     Array.from({ length: totalPages - 1 }, (_, i) =>
-                        api.get("/buildings", { params: { page: i + 2, limit: pageSize } })
-                            .then(r => extractItems(r.data))
+                        (api as any).getBuildings({ page: i + 2, limit: pageSize })
+                            .then((r: any) => extractItems(r.data))
                     )
                 );
                 setAllBuildings([...firstPage, ...rest.flat()]);
@@ -648,8 +678,31 @@ export default function SearchResults() {
         });
     }, [allBuildings, filters, sortBy]);
 
-    const handleChange = (p: Partial<Filters>) => setFilters(prev => ({ ...prev, ...p }));
-    const resetFilters = () => setFilters(DEFAULT_FILTERS);
+    const handleChange = (p: Partial<Filters>) => {
+        setFilters(prev => ({ ...prev, ...p }));
+        updatePage(1); // Filter dəyişəndə 1-ci səhifəyə qayıt
+    };
+    const resetFilters = () => {
+        setFilters(DEFAULT_FILTERS);
+        updatePage(1);
+    };
+
+    const totalPages    = Math.ceil(displayed.length / limit);
+    const paginatedItems = displayed.slice((page - 1) * limit, page * limit);
+
+    // Pagination Calculation logic
+    const getPageRange = () => {
+        const delta = 2;
+        const range = [];
+        for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {
+            range.push(i);
+        }
+        if (page - delta > 2) range.unshift("...");
+        range.unshift(1);
+        if (page + delta < totalPages - 1) range.push("...");
+        if (totalPages > 1) range.push(totalPages);
+        return range;
+    };
 
     const chips: { label: string; onRemove: () => void }[] = [
         ...filters.types.map(t => ({ label: capitalize(t), onRemove: () => handleChange({ types: filters.types.filter(x => x !== t) }) })),
@@ -770,14 +823,65 @@ export default function SearchResults() {
                                 <p className="text-gray-500 font-medium">No properties match your filters</p>
                                 <button onClick={resetFilters} className="mt-3 text-[#006ce4] text-sm hover:underline">Reset filters</button>
                             </div>
-                        ) : viewMode === "list" ? (
-                            <div className="space-y-4">
-                                {displayed.map(b => <ListCard key={b._id} building={b} />)}
-                            </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
-                                {displayed.map(b => <GridCard key={b._id} building={b} />)}
-                            </div>
+                            <>
+                                {viewMode === "list" ? (
+                                    <div className="space-y-4">
+                                        {paginatedItems.map(b => <ListCard key={b._id} building={b} />)}
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+                                        {paginatedItems.map(b => <GridCard key={b._id} building={b} />)}
+                                    </div>
+                                )}
+
+                                {/* Pagination Controls */}
+                                {totalPages > 1 && (
+                                    <div className="mt-10 py-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                        <p className="text-sm text-gray-500 order-2 sm:order-1">
+                                            Showing <span className="font-semibold text-gray-900">{Math.min((page - 1) * limit + 1, displayed.length)}</span> – <span className="font-semibold text-gray-900">{Math.min(page * limit, displayed.length)}</span> of <span className="font-semibold text-gray-900">{displayed.length}</span> properties
+                                        </p>
+                                        
+                                        <div className="flex items-center gap-1.5 order-1 sm:order-2">
+                                            <button
+                                                onClick={() => updatePage(Math.max(1, page - 1))}
+                                                disabled={page === 1}
+                                                className="p-2 rounded-full border border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-white"
+                                            >
+                                                <ChevronLeft size={16} />
+                                            </button>
+                                            
+                                            <div className="flex items-center gap-1">
+                                                {getPageRange().map((p, i) => (
+                                                    p === "..." ? (
+                                                        <span key={`els-${i}`} className="px-1.5 text-gray-400">...</span>
+                                                    ) : (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => updatePage(Number(p))}
+                                                            className={`w-9 h-9 rounded-full text-sm font-semibold transition-all ${
+                                                                page === Number(p) 
+                                                                    ? "bg-[#006ce4] text-white shadow-md shadow-blue-200" 
+                                                                    : "text-gray-500 hover:bg-gray-100"
+                                                            }`}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    )
+                                                ))}
+                                            </div>
+
+                                            <button
+                                                onClick={() => updatePage(Math.min(totalPages, page + 1))}
+                                                disabled={page === totalPages}
+                                                className="p-2 rounded-full border border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-white"
+                                            >
+                                                <ChevronRight size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </main>
                 </div>

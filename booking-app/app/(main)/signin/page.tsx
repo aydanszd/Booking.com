@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { toast } from 'sonner'
+import axios from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -62,22 +66,21 @@ function Input({
 
 // ─── Sign In Form ──────────────────────────────────────────────────────────────
 export default function SignInForm() {
+    const router = useRouter()
     const [email, setEmail]             = useState('')
     const [password, setPassword]       = useState('')
     const [showPw, setShowPw]           = useState(false)
     const [errors, setErrors]           = useState<Record<string, string>>({})
-    const [submitted, setSubmitted]     = useState(false)
+    const [loading, setLoading]         = useState(false)
     const [googleLoading, setGoogleLoading] = useState(false)
     const [googleError, setGoogleError] = useState('')
 
     const iconClass = 'w-[15px] h-[15px]'
 
-    // URL-də ?error=google_failed varsa xəta göstər
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
         if (params.get('error') === 'google_failed') {
             setGoogleError('Google ilə giriş uğursuz oldu. Yenidən cəhd edin.')
-            // URL-dən parametri təmizlə
             window.history.replaceState({}, '', window.location.pathname)
         }
     }, [])
@@ -91,14 +94,30 @@ export default function SignInForm() {
         return errs
     }
 
-    function handleSubmit() {
+    async function handleSubmit() {
         const errs = validate()
         setErrors(errs)
-        if (Object.keys(errs).length === 0) setSubmitted(true)
+        if (Object.keys(errs).length > 0) return
+
+        setLoading(true)
+        try {
+            const res = await axios.post(`${API_URL}/api/auth/login`, { email, password })
+            toast.success('Giriş uğurla tamamlandı!')
+            
+            // Token-i saxlayırıq (LocalStorage və ya Cookie)
+            localStorage.setItem('token', res.data.token)
+            localStorage.setItem('user', JSON.stringify(res.data.user))
+
+            setTimeout(() => {
+                router.push('/')
+            }, 1000)
+        } catch (err: any) {
+            const msg = err.response?.data?.message || 'Giriş zamanı xəta baş verdi'
+            toast.error(msg)
+            setLoading(false)
+        }
     }
 
-    // Backend-dəki /auth/google route-una yönləndir
-    // Passport oradan Google-a apararaq callback-ə qayıdır
     function handleGoogleLogin() {
         setGoogleLoading(true)
         window.location.href = `${API_URL}/auth/google`
@@ -173,24 +192,25 @@ export default function SignInForm() {
 
                 {/* Forgot password */}
                 <div className="flex justify-end mt-2">
-                    <a href="#" className="text-[12px] text-[#003580] hover:underline font-medium">
+                    <Link href="/forgot-password" title="Sifremi unuttuma basanda maile reset password gelsin" className="text-[12px] text-[#003580] hover:underline font-medium">
                         Şifremi unuttum
-                    </a>
+                    </Link>
                 </div>
 
                 {/* Submit */}
                 <div className="mt-5">
                     <button
                         onClick={handleSubmit}
-                        disabled={submitted}
+                        disabled={loading}
                         className={[
-                            'w-full h-11 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99]',
-                            submitted
-                                ? 'bg-emerald-500 cursor-default'
+                            'w-full h-11 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99] flex items-center justify-center gap-2',
+                            loading
+                                ? 'bg-gray-400 cursor-not-allowed'
                                 : 'bg-[#003580] hover:bg-[#00235b]',
                         ].join(' ')}
                     >
-                        {submitted ? '✓ Giriş başarılı!' : 'Giriş yap'}
+                        {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {loading ? 'Giriş edilir...' : 'Giriş yap'}
                     </button>
                 </div>
 
@@ -201,7 +221,7 @@ export default function SignInForm() {
                     <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
-                {/* Google SSO — passport-google-oauth20 ilə bağlı */}
+                {/* Google SSO */}
                 <button
                     onClick={handleGoogleLogin}
                     disabled={googleLoading}
@@ -228,7 +248,7 @@ export default function SignInForm() {
                 {/* Register link */}
                 <p className="text-center text-[13px] text-gray-500 mt-5">
                     Hesabınız yok mu?{' '}
-                    <a href="#" className="text-[#003580] font-medium hover:underline">Kayıt olun</a>
+                    <Link href="/register" className="text-[#003580] font-medium hover:underline">Kayıt olun</Link>
                 </p>
             </div>
         </div>

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard, Building2, Hotel, Car, Plane,
     MessageSquare, ShoppingBag, Settings, Users,
-    Menu, Bell, Search, ChevronLeft, LogOut,
+    Menu, Bell, Search, ChevronLeft, LogOut, Calendar,
 } from "lucide-react";
 
 const navGroups = [
@@ -24,6 +24,7 @@ const navGroups = [
         items: [
             { href: "/admin/messages", label: "Messages", icon: MessageSquare, badge: 7 },
             { href: "/admin/orders",   label: "Orders",   icon: ShoppingBag },
+            { href: "/admin/bookings", label: "Bookings", icon: Calendar },
             { href: "/admin/users",    label: "Users",    icon: Users },
         ],
     },
@@ -43,11 +44,12 @@ const pageMeta = {
     "/admin/flights":    { title: "Flights",    subtitle: "Flight schedules and bookings." },
     "/admin/messages":   { title: "Messages",   subtitle: "Customer communications." },
     "/admin/orders":     { title: "Orders",     subtitle: "Track and manage all orders." },
+    "/admin/bookings":   { title: "Bookings",   subtitle: "System wide reservations." },
     "/admin/users":      { title: "Users",      subtitle: "User accounts and permissions." },
     "/admin/settings":   { title: "Settings",   subtitle: "Configure your platform." },
 };
 
-function SidebarInner({ collapsed, onNavClick }) {
+function SidebarInner({ collapsed, onNavClick }: { collapsed: boolean; onNavClick: () => void }) {
     const pathname = usePathname();
 
     return (
@@ -137,12 +139,12 @@ function SidebarInner({ collapsed, onNavClick }) {
     );
 }
 
-export default function DashboardLayout({ children }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
 
-    const page = pageMeta[pathname] ?? { title: "Page", subtitle: "" };
+    const page = (pageMeta as any)[pathname] ?? { title: "Page", subtitle: "" };
 
     return (
         <div className="flex w-screen h-screen overflow-hidden bg-gray-50">

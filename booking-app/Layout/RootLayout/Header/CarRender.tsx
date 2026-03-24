@@ -1,17 +1,18 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import {
     Bed, Plane, Car, Ticket, CarTaxiFront,
-    MapPin, Calendar, Users, Search,
-    X, ChevronDown, Plus, Minus, ChevronLeft, ChevronRight, BedDouble, Clock,
+    MapPin, Calendar, Search,
+    X, ChevronDown, ChevronLeft, ChevronRight, Clock,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-    { icon: Bed, label: "Stays" },
-    { icon: Plane, label: "Flights" },
-    { icon: Car, label: "Car rental" },
-    { icon: Ticket, label: "Attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis" },
+    { icon: Bed, label: "Stays", href: "/" },
+    { icon: Plane, label: "Flights", href: "/flights" },
+    { icon: Car, label: "Car rental", href: "/carrender" },
+    { icon: Ticket, label: "Attractions", href: "/attractions" },
+    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
 ];
 
 const SUGGESTIONS = [
@@ -48,11 +49,11 @@ function getFirstDayOfWeek(year: number, month: number): number {
 
 function isSameDay(a: Date | null, b: Date | null): boolean {
     return (
-        a && b &&
+        !!a && !!b &&
         a.getFullYear() === b.getFullYear() &&
         a.getMonth() === b.getMonth() &&
         a.getDate() === b.getDate()
-    ) as boolean;
+    );
 }
 
 function isBetween(date: Date, start: Date | null, end: Date | null): boolean {
@@ -116,7 +117,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showMonthPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
                             {MONTHS.map((m, i) => {
                                 const isPast = year === currentYear && i < TODAY.getMonth();
                                 return (
@@ -144,7 +145,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showYearPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22.5 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22.5 mt-1 max-h-55 overflow-y-auto">
                             {years.map((y: number) => (
                                 <div
                                     key={y}
@@ -203,7 +204,6 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
 }
 
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
-
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
 export default function CarRentalHeader() {
@@ -272,17 +272,24 @@ export default function CarRentalHeader() {
         }
     };
 
+    const handleSearch = () => {
+        const url = `/filter${pickupLocation ? `?city=${encodeURIComponent(pickupLocation)}` : ''}`;
+        window.location.href = url;
+    };
+
     return (
         <div className="font-sans">
             <div className="bg-[#003b94] px-6 pt-3">
                 <div className="max-w-7xl mx-auto">
                     {/* Top bar */}
                     <div className="flex items-center justify-between mb-5">
-                        <img
-                            src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
-                            alt="Booking.com"
-                            className="h-16 object-contain cursor-pointer"
-                        />
+                        <Link href="/">
+                            <img
+                                src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
+                                alt="Booking.com"
+                                className="h-16 object-contain cursor-pointer"
+                            />
+                        </Link>
                         <div className="flex items-center gap-3 text-white text-sm font-medium">
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors">
@@ -291,17 +298,18 @@ export default function CarRentalHeader() {
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
-                            <button className="hover:bg-white/10 px-3 py-1 rounded transition-colors text-[16px]">List your property</button>
-                            <button className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors">Register</button>
-                            <button className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors">Sign in</button>
+                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">List your property</Link>
+                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">Register</Link>
+                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">Sign in</Link>
                         </div>
                     </div>
 
                     {/* Nav tabs */}
                     <div className="flex gap-1 -mt-4.5">
-                        {NAV_ITEMS.map(({ icon: Icon, label }) => (
-                            <button
+                        {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
+                            <Link
                                 key={label}
+                                href={href}
                                 onClick={() => setActiveNav(label)}
                                 className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
                                     ? "border border-white bg-white/10 text-white"
@@ -310,7 +318,7 @@ export default function CarRentalHeader() {
                             >
                                 <Icon size={16} />
                                 {label}
-                            </button>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -402,57 +410,6 @@ export default function CarRentalHeader() {
                                     </span>
                                 </div>
                             </div>
-
-                            {showDate && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl min-w-150">
-                                    <div className="flex border-b border-gray-100">
-                                        {["calendar", "flexible"].map(tab => (
-                                            <button key={tab} onClick={() => setCalendarTab(tab)}
-                                                className={`flex-1 py-3 text-sm font-medium transition-colors ${calendarTab === tab ? "text-[#0071c2] border-b-2 border-[#0071c2]" : "text-gray-500 hover:text-gray-700"}`}>
-                                                {tab === "calendar" ? "Calendar" : "I'm flexible"}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    {calendarTab === "calendar" && (
-                                        <>
-                                            <div className="flex items-center gap-4 px-5 pt-5 pb-3">
-                                                <button onClick={prevMonth} disabled={isAtStart}
-                                                    className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-                                                    <ChevronLeft size={18} className="text-gray-600" />
-                                                </button>
-                                                <div className="flex gap-8 flex-1 justify-center" onMouseLeave={() => setHoveredDate(null)}>
-                                                    <CalendarMonth year={leftYear} month={leftMonth} checkIn={checkIn} checkOut={checkOut}
-                                                        hoveredDate={hoveredDate} onDayClick={handleDayClick} onDayHover={setHoveredDate}
-                                                        onMonthChange={setLeftMonth} onYearChange={setLeftYear} />
-                                                    <CalendarMonth year={rightYear} month={rightMonth} checkIn={checkIn} checkOut={checkOut}
-                                                        hoveredDate={hoveredDate} onDayClick={handleDayClick} onDayHover={setHoveredDate}
-                                                        onMonthChange={setRightMonth} onYearChange={setRightYear} />
-                                                </div>
-                                                <button onClick={nextMonth} className="p-1.5 rounded-full hover:bg-gray-100 transition-colors">
-                                                    <ChevronRight size={18} className="text-gray-600" />
-                                                </button>
-                                            </div>
-                                            <div className="flex items-center gap-2 px-5 pt-3 pb-4 border-t border-gray-100">
-                                                {FLEX_OPTIONS.map(opt => (
-                                                    <button key={opt.label} onClick={() => setFlexDays(opt.value)}
-                                                        className={`px-4 py-1.5 rounded-full text-sm border transition-colors ${flexDays === opt.value ? "border-[#003b94] text-[#003b94] bg-blue-50" : "border-gray-300 text-gray-700 hover:border-gray-400"}`}>
-                                                        {opt.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </>
-                                    )}
-                                    {calendarTab === "flexible" && (
-                                        <div className="px-5 py-8 text-center text-gray-500 text-sm">Flexible dates coming soon</div>
-                                    )}
-                                    <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-100">
-                                        <button onClick={() => { setCheckIn(null); setCheckOut(null); }}
-                                            className="text-sm text-[#0071c2] underline hover:no-underline">Clear dates</button>
-                                        <button onClick={() => setShowDate(false)}
-                                            className="bg-[#0071c2] hover:bg-[#005ea6] text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">Apply</button>
-                                    </div>
-                                </div>
-                            )}
                         </div>
 
                         {/* Pick-up time */}
@@ -506,7 +463,7 @@ export default function CarRentalHeader() {
                         </div>
 
                         {/* Search button */}
-                        <button className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
+                        <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
                             <Search size={18} />
                             Search
                         </button>

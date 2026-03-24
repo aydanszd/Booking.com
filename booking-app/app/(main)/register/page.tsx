@@ -1,8 +1,14 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, forwardRef } from 'react'
 import {
-    User, Mail, Phone, CreditCard, Lock, Eye, EyeOff, Check
+    User, Mail, Phone, CreditCard, Lock, Eye, EyeOff, Check, Loader2
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { toast } from 'sonner'
+import axios from 'axios'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 function getStrength(pw: string): number {
     let s = 0
@@ -42,20 +48,21 @@ function Field({
     )
 }
 
-function Input({
+const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & {
+    hasIcon?: boolean
+    hasError?: boolean
+    rightSlot?: React.ReactNode
+}>(({
     hasIcon = true,
     hasError = false,
     rightSlot,
     ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & {
-    hasIcon?: boolean
-    hasError?: boolean
-    rightSlot?: React.ReactNode
-}) {
+}, ref) => {
     return (
         <div className="relative w-full flex items-center">
             <input
                 {...props}
+                ref={ref}
                 className={[
                     'w-full h-10 rounded-lg border text-sm bg-white text-gray-900 outline-none transition-all',
                     'placeholder:text-gray-300 placeholder:text-[13px]',
@@ -69,7 +76,8 @@ function Input({
             {rightSlot}
         </div>
     )
-}
+})
+Input.displayName = 'Input'
 
 const STEPS = [
     { label: 'Kişisel' },
@@ -124,42 +132,48 @@ function Stepper({ current }: { current: number }) {
 }
 
 export default function RegisterForm() {
+    const router = useRouter()
     const [step, setStep] = useState(0)
     const [showPw, setShowPw] = useState(false)
     const [showCpw, setShowCpw] = useState(false)
-    const [pw, setPw] = useState('')
-    const [submitted, setSubmitted] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState<Record<string, string>>({})
 
-    const refs = {
-        fname:  useRef<HTMLInputElement>(null),
-        lname:  useRef<HTMLInputElement>(null),
-        email:  useRef<HTMLInputElement>(null),
-        phone:  useRef<HTMLInputElement>(null),
-        idcode: useRef<HTMLInputElement>(null),
-        cpw:    useRef<HTMLInputElement>(null),
+    // Form states
+    const [formData, setFormData] = useState({
+        fname: '',
+        lname: '',
+        email: '',
+        phone: '',
+        idcode: '',
+        password: '',
+        confirmPassword: ''
+    })
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const strength = getStrength(pw)
+    const strength = getStrength(formData.password)
     const iconClass = 'w-[15px] h-[15px]'
-
 
     function validateStep(s: number): Record<string, string> {
         const errs: Record<string, string> = {}
         if (s === 0) {
-            if (!refs.fname.current?.value.trim())      errs.fname  = 'Ad gerekli.'
-            if (!refs.lname.current?.value.trim())      errs.lname  = 'Soyad gerekli.'
-            if (!/^\d{11}$/.test(refs.idcode.current?.value || ''))
+            if (!formData.fname.trim())      errs.fname  = 'Ad gerekli.'
+            if (!formData.lname.trim())      errs.lname  = 'Soyad gerekli.'
+            if (!/^\d{11}$/.test(formData.idcode))
                 errs.idcode = '11 haneli TC numarası girin.'
         }
         if (s === 1) {
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(refs.email.current?.value || ''))
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
                 errs.email = 'Geçerli bir e-posta girin.'
-            if (!refs.phone.current?.value.trim())      errs.phone  = 'Telefon numarası gerekli.'
+            if (!formData.phone.trim())      errs.phone  = 'Telefon numarası gerekli.'
         }
         if (s === 2) {
-            if (pw.length < 8) errs.pw= 'Şifre en az 8 karakter olmalı.'
-            if (refs.cpw.current?.value !== pw)errs.cpw    = 'Şifreler eşleşmiyor.'
+            if (formData.password.length < 8) errs.pw= 'Şifre en az 8 karakter olmalı.'
+            if (formData.confirmPassword !== formData.password) errs.cpw = 'Şifreler eşleşmiyor.'
         }
         return errs
     }
@@ -175,15 +189,40 @@ export default function RegisterForm() {
         setStep(s => s - 1)
     }
 
-    function handleSubmit() {
-        setSubmitted(true)
+    async function handleSubmit() {
+        setLoading(true)
+        try {
+            const payload = {
+                name: `${formData.fname} ${formData.lname}`,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                idCode: formData.idcode,
+            }
+
+            console.log('Registering with payload:', payload)
+
+            const res = await axios.post(`${API_URL}/api/auth/register`, payload)
+            console.log('Register response:', res.data)
+            
+            toast.success('Uğurla qeydiyyatdan keçildi!')
+            
+            setTimeout(() => {
+                router.push('/signin')
+            }, 1500)
+        } catch (err: any) {
+            console.error('Register error:', err)
+            const msg = err.response?.data?.message || 'Qeydiyyat zamanı xəta baş verdi'
+            toast.error(msg)
+            setLoading(false)
+        }
     }
 
-    const summary = [
-        { label: 'Ad Soyad',     value: `${refs.fname.current?.value || ''} ${refs.lname.current?.value || ''}`.trim() },
-        { label: 'TC Numarası',  value: refs.idcode.current?.value || '' },
-        { label: 'E-posta',      value: refs.email.current?.value || '' },
-        { label: 'Telefon',      value: refs.phone.current?.value || '' },
+    const summaryItems = [
+        { label: 'Ad Soyad',     value: `${formData.fname} ${formData.lname}`.trim() },
+        { label: 'TC Numarası',  value: formData.idcode },
+        { label: 'E-posta',      value: formData.email },
+        { label: 'Telefon',      value: formData.phone },
         { label: 'Şifre',        value: '••••••••' },
     ]
 
@@ -204,16 +243,17 @@ export default function RegisterForm() {
                 )}
                 <button
                     onClick={onNext}
-                    disabled={isLast && submitted}
+                    disabled={loading}
                     className={[
-                        'h-11 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99]',
+                        'h-11 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99] flex items-center justify-center gap-2',
                         step > 0 ? 'flex-[2]' : 'flex-1',
-                        isLast && submitted
-                            ? 'bg-emerald-500 cursor-default'
+                        loading
+                            ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-[#003580] hover:bg-[#00235b]',
                     ].join(' ')}
                 >
-                    {isLast && submitted ? '✓ Kayıt başarılı!' : nextLabel}
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isLast && loading ? 'Hesab yaradılır...' : nextLabel}
                 </button>
             </div>
         )
@@ -247,12 +287,12 @@ export default function RegisterForm() {
                         <div className="space-y-3">
                             <div className="grid grid-cols-2 gap-3">
                                 <Field label="Ad" icon={<User className={iconClass} />} error={errors.fname}>
-                                    <Input ref={refs.fname} type="text" placeholder="Ahmet"
-                                        autoComplete="given-name" hasError={!!errors.fname} />
+                                    <Input name="fname" type="text" placeholder="Ahmet"
+                                        autoComplete="given-name" value={formData.fname} onChange={handleChange} hasError={!!errors.fname} />
                                 </Field>
                                 <Field label="Soyad" icon={<User className={iconClass} />} error={errors.lname}>
-                                    <Input ref={refs.lname} type="text" placeholder="Yılmaz"
-                                        autoComplete="family-name" hasError={!!errors.lname} />
+                                    <Input name="lname" type="text" placeholder="Yılmaz"
+                                        autoComplete="family-name" value={formData.lname} onChange={handleChange} hasError={!!errors.lname} />
                                 </Field>
                             </div>
                             <Field
@@ -261,8 +301,8 @@ export default function RegisterForm() {
                                 error={errors.idcode}
                                 hint="11 haneli TC kimlik numaranızı girin."
                             >
-                                <Input ref={refs.idcode} type="text" placeholder="12345678901"
-                                    maxLength={11} inputMode="numeric" hasError={!!errors.idcode} />
+                                <Input name="idcode" type="text" placeholder="12345678901"
+                                    maxLength={11} inputMode="numeric" value={formData.idcode} onChange={handleChange} hasError={!!errors.idcode} />
                             </Field>
                         </div>
                         <NavButtons onNext={next} />
@@ -274,12 +314,12 @@ export default function RegisterForm() {
                         <p className="text-[13px] text-gray-500 mb-5">Size ulaşabileceğimiz bilgileri girin.</p>
                         <div className="space-y-3">
                             <Field label="E-posta" icon={<Mail className={iconClass} />} error={errors.email}>
-                                <Input ref={refs.email} type="email" placeholder="ahmet@ornek.com"
-                                    autoComplete="email" hasError={!!errors.email} />
+                                <Input name="email" type="email" placeholder="ahmet@ornek.com"
+                                    autoComplete="email" value={formData.email} onChange={handleChange} hasError={!!errors.email} />
                             </Field>
                             <Field label="Telefon numarası" icon={<Phone className={iconClass} />} error={errors.phone}>
-                                <Input ref={refs.phone} type="tel" placeholder="+90 532 000 00 00"
-                                    autoComplete="tel" hasError={!!errors.phone} />
+                                <Input name="phone" type="tel" placeholder="+90 532 000 00 00"
+                                    autoComplete="tel" value={formData.phone} onChange={handleChange} hasError={!!errors.phone} />
                             </Field>
                         </div>
                         <NavButtons onNext={next} />
@@ -292,10 +332,11 @@ export default function RegisterForm() {
                         <div className="space-y-3">
                             <Field label="Şifre" icon={<Lock className={iconClass} />} error={errors.pw}>
                                 <Input
+                                    name="password"
                                     type={showPw ? 'text' : 'password'}
                                     placeholder="En az 8 karakter"
-                                    value={pw}
-                                    onChange={(e) => setPw(e.target.value)}
+                                    value={formData.password}
+                                    onChange={handleChange}
                                     hasError={!!errors.pw}
                                     rightSlot={
                                         <button type="button" onClick={() => setShowPw(!showPw)}
@@ -304,7 +345,7 @@ export default function RegisterForm() {
                                         </button>
                                     }
                                 />
-                                {pw.length > 0 && (
+                                {formData.password.length > 0 && (
                                     <div className="w-full mt-1.5 space-y-1">
                                         <div className="flex gap-1">
                                             {[0, 1, 2, 3].map((i) => (
@@ -320,9 +361,11 @@ export default function RegisterForm() {
                             </Field>
                             <Field label="Şifre tekrar" icon={<Lock className={iconClass} />} error={errors.cpw}>
                                 <Input
-                                    ref={refs.cpw}
+                                    name="confirmPassword"
                                     type={showCpw ? 'text' : 'password'}
                                     placeholder="Şifreyi tekrar girin"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
                                     hasError={!!errors.cpw}
                                     rightSlot={
                                         <button type="button" onClick={() => setShowCpw(!showCpw)}
@@ -341,7 +384,7 @@ export default function RegisterForm() {
                         <h2 className="text-xl font-semibold text-gray-900 mb-1">Bilgilerinizi onaylayın</h2>
                         <p className="text-[13px] text-gray-500 mb-5">Her şey doğru mu? Kaydı tamamlayın.</p>
                         <div className="border border-gray-100 rounded-xl overflow-hidden">
-                            {summary.map(({ label, value }, i) => (
+                            {summaryItems.map(({ label, value }, i) => (
                                 <div key={i}
                                     className="flex justify-between items-center px-4 py-3 text-sm border-b border-gray-100 last:border-none">
                                     <span className="text-gray-500">{label}</span>
@@ -360,7 +403,7 @@ export default function RegisterForm() {
                 {step < 3 && (
                     <p className="text-center text-[13px] text-gray-500 mt-3">
                         Zaten hesabınız var mı?{' '}
-                        <a href="#" className="text-[#003580] font-medium hover:underline">Giriş yapın</a>
+                        <Link href="/signin" className="text-[#003580] font-medium hover:underline">Giriş yapın</Link>
                     </p>
                 )}
             </div>

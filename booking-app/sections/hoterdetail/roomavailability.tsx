@@ -1,24 +1,13 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
-    Calendar,
-    Users,
-    Wifi,
-    Wind,
-    Tv,
-    Maximize2,
-    Eye,
-    Coffee,
-    Tag,
-    CreditCard,
-    Ban,
-    CheckCircle2,
-    AlertCircle,
-    ChevronDown,
-    ChevronUp,
-    Info,
+    Calendar, Users, Wifi, Wind, Tv, Maximize2, Eye, Coffee, Tag, CreditCard,
+    Ban, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Info, Loader2
 } from "lucide-react";
+import bookingApi from "@/api/booking";
+import { toast } from "sonner";
+
 interface Room {
     id: number;
     name: string;
@@ -28,340 +17,200 @@ interface Room {
     amenities: string[];
     extraAmenities: string[];
     price: number;
-    features: Feature[];
+    features: any[];
     urgency?: string;
     view?: string;
 }
 
-interface Feature {
-    icon: "breakfast" | "wifi" | "cancel" | "prepay" | "nocard" | "genius";
-    label: string;
-    highlight?: boolean;
-}
-const rooms: Room[] = [
+const DEFAULT_ROOMS: Room[] = [
     {
         id: 1,
-        name: "Çift Kişilik Oda",
+        name: "Standard Double Room",
         guests: 2,
-        bedOptions: ["1 çift kişilik yatak", "2 tek kişilik yatak"],
+        bedOptions: ["1 double bed"],
         size: 25,
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: [
-            "Duş", "Tuvalet", "Havlular", "Nevresim", "Priz yatağa yakın",
-            "Çalışma Masası", "TV", "Terlik", "Buzdolabı", "Telefon",
-            "Isıtma", "Saç Kurutma Makinesi", "Halı Kaplı Zemin",
-            "Elektrikli Su Isıtıcısı", "Gardırop veya dolap",
-            "Üst katlara asansörle erişilebilmektedir", "Kıyafet askılığı", "Tuvalet kağıdı",
-        ],
-        price: 86,
+        amenities: ["AC", "TV", "Free WiFi"],
+        extraAmenities: ["Shower", "Toilet", "Towels"],
+        price: 0, // Will be overridden
         features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
+            { icon: "breakfast", label: "Breakfast included", highlight: true },
+            { icon: "wifi", label: "High speed WiFi", highlight: true },
+            { icon: "cancel", label: "No cancellation fee" },
         ],
-    },
-    {
-        id: 2,
-        name: "Deluxe Çift Kişilik veya İki Yataklı Oda - Şehir Manzaralı",
-        guests: 2,
-        bedOptions: ["1 çift kişilik yatak", "2 tek kişilik yatak"],
-        size: 25,
-        view: "Şehir manzarası",
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: ["Duş", "Tuvalet", "Havlular", "Çalışma Masası", "TV", "Buzdolabı"],
-        price: 100,
-        urgency: "Bizde 1 tane kaldı",
-        features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
-        ],
-    },
-    {
-        id: 3,
-        name: "Çift Kişilik veya İki Yataklı Oda - Deniz Manzaralı",
-        guests: 2,
-        bedOptions: ["1 çift kişilik yatak", "2 tek kişilik yatak"],
-        size: 25,
-        view: "Deniz manzarası",
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: ["Duş", "Tuvalet", "Havlular", "Çalışma Masası"],
-        price: 109,
-        urgency: "Bizde 1 tane kaldı",
-        features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
-        ],
-    },
-    {
-        id: 4,
-        name: "Standart Üç Kişilik Oda",
-        guests: 3,
-        bedOptions: ["3 tek kişilik yatak"],
-        size: 30,
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: ["Duş", "Tuvalet", "Havlular", "Buzdolabı"],
-        price: 129,
-        urgency: "Bizde 2 tane kaldı",
-        features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
-        ],
-    },
-    {
-        id: 5,
-        name: "Büyük Tek Kişilik Oda",
-        guests: 1,
-        bedOptions: ["1 tek kişilik yatak"],
-        size: 25,
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: ["Duş", "Tuvalet", "Havlular"],
-        price: 62,
-        urgency: "Bizde 2 tane kaldı",
-        features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
-        ],
-    },
-    {
-        id: 6,
-        name: "Tek Kişilik Oda",
-        guests: 1,
-        bedOptions: ["1 tek kişilik yatak"],
-        size: 25,
-        amenities: ["Klima", "Düz Ekran TV", "Ücretsiz WiFi"],
-        extraAmenities: ["Duş", "Tuvalet", "Havlular"],
-        price: 71,
-        urgency: "Bizde 1 tane kaldı",
-        features: [
-            { icon: "breakfast", label: "İyi bir kahvaltı", highlight: true },
-            { icon: "wifi", label: "Dahil: yüksek hızlı internet", highlight: true },
-            { icon: "cancel", label: "%50 oranında iptal ücreti" },
-            { icon: "prepay", label: "Ön ödemeye gerek yok: tesise ödeyin" },
-            { icon: "nocard", label: "Kredi kartına gerek yok" },
-            { icon: "genius", label: "Genius indirimi olabilir" },
-        ],
-    },
+    }
 ];
-function FeatureIcon({ type }: { type: Feature["icon"] }) {
-    const cls = "w-4 h-4 flex-shrink-0";
-    if (type === "breakfast") return <Coffee className={`${cls} text-gray-500`} />;
-    if (type === "wifi") return <Wifi className={`${cls} text-[#008009]`} />;
-    if (type === "cancel") return <Ban className={`${cls} text-gray-500`} />;
-    if (type === "prepay") return <CheckCircle2 className={`${cls} text-[#008009]`} />;
-    if (type === "nocard") return <CreditCard className={`${cls} text-[#008009]`} />;
-    if (type === "genius") return <Tag className={`${cls} text-[#006ce4]`} />;
-    return null;
-}
-function GuestIcons({ count }: { count: number }) {
-    return (
-        <div className="flex items-center gap-0.5">
-            {Array.from({ length: count }).map((_, i) => (
-                <Users key={i} size={14} className="text-gray-600" />
-            ))}
-        </div>
-    );
-}
-function RoomRow({ room }: { room: Room }) {
-    const [expanded, setExpanded] = useState(false);
-    const [selectedBed, setSelectedBed] = useState(0);
-    const [qty, setQty] = useState(0);
+
+export default function RoomAvailability({ building }: { building: any }) {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const [checkIn, setCheckIn] = useState(searchParams.get("checkIn") || "");
+    const [checkOut, setCheckOut] = useState(searchParams.get("checkOut") || "");
+    const [bookingLoading, setBookingLoading] = useState(false);
+    const [qty, setQty] = useState(1);
+
+    const handleBooking = async () => {
+        if (!checkIn || !checkOut) {
+            toast.error("Zəhmət olmasa tarixləri seçin");
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("Rezervasiya üçün daxil olun");
+            router.push("/signin");
+            return;
+        }
+
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+        const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        if (nights <= 0) {
+            toast.error("Giriş tarixi çıxış tarixindən əvvəl olmalıdır");
+            return;
+        }
+
+        try {
+            setBookingLoading(true);
+            const data = {
+                type: 'building',
+                building: building._id,
+                checkIn,
+                checkOut,
+                totalPrice: building.pricePerNight * qty * nights,
+                guests: { adults: 2, children: 0 }
+            };
+            await bookingApi.createBooking(data);
+            toast.success("Rezervasiya uğurla tamamlandı!");
+            router.push("/my-bookings");
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Rezervasiya uğursuz oldu");
+        } finally {
+            setBookingLoading(false);
+        }
+    };
 
     return (
-        <tr className="border-t border-gray-200 align-top">            <td className="py-5 px-4 w-[38%]">
-                <a href="#" className="text-[#006ce4] font-semibold text-sm hover:underline">
-                    {room.name}
-                </a>
-                <div className="mt-3 mb-3">
-                    <p className="text-xs text-gray-500 mb-1.5">
-                        Yatak tercihinizi yapın (müsaitliğe bağlı)
-                    </p>
-                    <div className="space-y-1">
-                        {room.bedOptions.map((bed, i) => (
-                            <label key={i} className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name={`bed-${room.id}`}
-                                    checked={selectedBed === i}
-                                    onChange={() => setSelectedBed(i)}
-                                    className="accent-[#006ce4]"
-                                />
-                                <span className="text-sm text-gray-700">{bed}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                    <span className="flex items-center gap-1 border border-gray-300 rounded px-1.5 py-0.5 text-xs text-gray-600">
-                        <Maximize2 size={11} /> {room.size} m²
-                    </span>
-                    {room.view && (
-                        <span className="flex items-center gap-1 border border-gray-300 rounded px-1.5 py-0.5 text-xs text-gray-600">
-                            <Eye size={11} /> {room.view}
-                        </span>
-                    )}
-                    {room.amenities.map((a) => (
-                        <span key={a} className="flex items-center gap-1 border border-gray-300 rounded px-1.5 py-0.5 text-xs text-gray-600">
-                            {a === "Klima" && <Wind size={11} />}
-                            {a === "Düz Ekran TV" && <Tv size={11} />}
-                            {a === "Ücretsiz WiFi" && <Wifi size={11} />}
-                            {a}
-                        </span>
-                    ))}
-                </div>
-                {expanded && (
-                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-2">
-                        {room.extraAmenities.map((a) => (
-                            <span key={a} className="text-xs text-gray-600 flex items-center gap-1">
-                                <CheckCircle2 size={11} className="text-[#008009]" /> {a}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                <button
-                    onClick={() => setExpanded(!expanded)}
-                    className="text-[#006ce4] text-xs flex items-center gap-0.5 hover:underline"
-                >
-                    {expanded ? (
-                        <><ChevronUp size={13} /> Gizle</>
-                    ) : (
-                        <><ChevronDown size={13} /> Devamı</>
-                    )}
-                </button>
-            </td>
-            <td className="py-5 px-3 text-center w-[8%]">
-                <GuestIcons count={room.guests} />
-            </td>
-            <td className="py-5 px-3 w-[14%]">
-                <p className="text-xl font-bold text-gray-900">US${room.price}</p>
-                <p className="text-xs text-gray-500 mt-0.5">Vergi ve ücretler dahil</p>
-            </td>
-            <td className="py-5 px-3 w-[28%]">
-                <div className="space-y-1.5">
-                    {room.features.map((f, i) => (
-                        <div key={i} className="flex items-center gap-1.5">
-                            <FeatureIcon type={f.icon} />
-                            <span
-                                className={`text-xs ${f.highlight ? "text-[#008009] font-medium" : "text-gray-600"
-                                    } ${f.icon === "genius" ? "text-[#006ce4]" : ""}`}
-                            >
-                                {f.label}
-                                {f.icon === "breakfast" && (
-                                    <span className="text-[#008009] font-medium"> dahil</span>
-                                )}
-                            </span>
-                        </div>
-                    ))}
-                    {room.urgency && (
-                        <p className="text-xs text-gray-700 flex items-center gap-1 mt-1">
-                            <span className="text-gray-400">•</span> {room.urgency}
-                        </p>
-                    )}
-                </div>
-            </td>
-            <td className="py-5 px-3 w-[12%]">
-                <select
-                    value={qty}
-                    onChange={(e) => setQty(Number(e.target.value))}
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-[#006ce4]"
-                >
-                    {[0, 1, 2, 3].map((n) => (
-                        <option key={n} value={n}>{n}</option>
-                    ))}
-                </select>
-            </td>
-        </tr>
-    );
-}
-export default function RoomAvailability() {
-    return (
-        <div className=" min-h-screen py-8">
-            <div className="max-w-6xl mx-auto px-4">
-                {/* Header */}
+        <div id="availability" className="py-8 scroll-mt-24">
+            <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-5">
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Yer Durumu</h2>
-                        <p className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
-                            Fiyatlar USD birimine dönüştürüldü
-                            <Info size={13} className="text-gray-400" />
-                        </p>
-                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900">Availability</h2>
                     <div className="flex items-center gap-1.5 text-[#006ce4] text-sm font-medium cursor-pointer hover:underline">
-                        <Tag size={14} />
-                        Fiyat Eşitlemesi Yapıyoruz
+                        <Tag size={14} /> Price Match Guarantee
                     </div>
                 </div>
 
-                {/* Search Bar */}
-                <div className="flex gap-2 mb-6">
-                    <div className="flex items-center gap-2 border-2 border-[#f0a500] rounded-lg px-4 py-2.5 bg-white flex-1">
-                        <Calendar size={16} className="text-gray-500 shrink-0" />
-                        <span className="text-sm text-gray-700">13 Mar, Cum – 15 Mar, Paz</span>
+                <div className="flex flex-col sm:flex-row gap-2 mb-6">
+                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
+                        <Calendar size={18} className="text-gray-400" />
+                        <div className="flex flex-col w-full">
+                            <span className="text-[10px] text-gray-400 uppercase font-bold">Check-in Date</span>
+                            <input 
+                                type="date"
+                                value={checkIn}
+                                min={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => setCheckIn(e.target.value)}
+                                className="text-sm font-semibold outline-none bg-transparent w-full"
+                            />
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2 border-2 border-[#f0a500] rounded-lg px-4 py-2.5 bg-white flex-1">
-                        <Users size={16} className="text-gray-500 shrink-0" />
-                        <span className="text-sm text-gray-700">2 yetişkin · 0 çocuk · 1 oda</span>
+                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
+                        <Calendar size={18} className="text-gray-400" />
+                        <div className="flex flex-col w-full">
+                            <span className="text-[10px] text-gray-400 uppercase font-bold">Check-out Date</span>
+                            <input 
+                                type="date"
+                                value={checkOut}
+                                min={checkIn || new Date().toISOString().split('T')[0]}
+                                onChange={(e) => setCheckOut(e.target.value)}
+                                className="text-sm font-semibold outline-none bg-transparent w-full"
+                            />
+                        </div>
                     </div>
-                    <button className="bg-[#006ce4] hover:bg-[#0055b3] text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap">
-                        Aramayı değiştir
-                    </button>
+                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
+                        <Users size={18} className="text-gray-400" />
+                        <div className="flex flex-col">
+                            <span className="text-[10px] text-gray-400 uppercase font-bold">Guests</span>
+                            <span className="text-sm font-semibold">2 adults · 0 children · 1 room</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-[#1a3c6e] text-white text-sm">
-                                <th className="text-left px-4 py-3 font-semibold">Oda tipi</th>
-                                <th className="text-left px-3 py-3 font-semibold">Konuk sayısı</th>
-                                <th className="text-left px-3 py-3 font-semibold bg-[#1a5276]">
-                                    <div className="flex items-center gap-1">
-                                        2 gecelik fiyat
-                                        <span className="block w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-white ml-1" />
-                                    </div>
-                                </th>
-                                <th className="text-left px-3 py-3 font-semibold">Seçimleriniz</th>
-                                <th className="text-left px-3 py-3 font-semibold">Oda seç</th>
-                                <th className="px-3 py-3" />
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                    <table className="w-full text-left">
+                        <thead className="bg-[#1a3c6e] text-white text-xs uppercase tracking-wider">
+                            <tr>
+                                <th className="px-5 py-4 font-bold">Room Type</th>
+                                <th className="px-5 py-4 font-bold text-center">Number of guests</th>
+                                <th className="px-5 py-4 font-bold">Price per night</th>
+                                <th className="px-5 py-4 font-bold">Choices</th>
+                                <th className="px-5 py-4 font-bold">Select rooms</th>
+                                <th className="px-5 py-4 font-bold">Reserve</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {rooms.map((room) => (
-                                <RoomRow key={room.id} room={room} />
+                        <tbody className="divide-y divide-gray-200">
+                            {[
+                                { name: building.title + " Standard", guests: building.maxGuests || 2, price: building.pricePerNight }
+                            ].map((row, i) => (
+                                <tr key={i} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-5 py-6">
+                                        <p className="text-[#006ce4] font-bold text-base hover:underline cursor-pointer">{row.name}</p>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full flex items-center gap-1"><Maximize2 size={10}/> 25m²</span>
+                                            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full flex items-center gap-1"><Wind size={10}/> AC</span>
+                                            {building.amenities?.slice(0, 3).map((a: string) => (
+                                                <span key={a} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{a}</span>
+                                            ))}
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-6">
+                                        <div className="flex justify-center gap-0.5">
+                                            {Array.from({ length: row.guests }).map((_, i) => <Users key={i} size={14} className="text-gray-600" />)}
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-6">
+                                        <p className="text-xl font-bold text-gray-900">${row.price}</p>
+                                        <p className="text-[10px] text-gray-400">per night</p>
+                                        {checkIn && checkOut && (
+                                            <p className="text-xs font-bold text-green-600 mt-1">
+                                                Total: ${building.pricePerNight * qty * Math.max(1, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000*60*60*24)))}
+                                            </p>
+                                        )}
+                                    </td>
+                                    <td className="px-5 py-6">
+                                        <div className="space-y-1.5">
+                                            <div className="flex items-center gap-1.5 text-[#008009] text-xs font-semibold">
+                                                <CheckCircle2 size={14} /> Free Cancellation
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-gray-600 text-xs">
+                                                <CreditCard size={14} /> No prepayment needed
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-6">
+                                        <select 
+                                            value={qty} 
+                                            onChange={e => setQty(Number(e.target.value))}
+                                            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#006ce4]"
+                                        >
+                                            {[1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
+                                        </select>
+                                    </td>
+                                    <td className="px-5 py-6">
+                                        <button 
+                                            onClick={handleBooking}
+                                            disabled={bookingLoading}
+                                            className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-2"
+                                        >
+                                            {bookingLoading ? <Loader2 className="animate-spin" size={16} /> : "I'll reserve"}
+                                        </button>
+                                        <p className="text-[9px] text-gray-400 mt-1.5 text-center flex items-center justify-center gap-1">
+                                            <AlertCircle size={10} /> Confirmation is immediate
+                                        </p>
+                                    </td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>
-                </div>
-
-                {/* Reservation CTA */}
-                <div className="mt-4 flex justify-end">
-                    <div className="flex flex-col items-end gap-1">
-                        <button className="bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold px-8 py-3 rounded-xl text-sm transition-colors shadow-sm">
-                            Rezervasyon yapacağım
-                        </button>
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <AlertCircle size={12} /> Henüz sizden ücret alınmayacak
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>

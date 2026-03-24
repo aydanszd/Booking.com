@@ -5,6 +5,7 @@ import HeaderSelector from "@/layout/RootLayout/Header/HeaderSelector";
 import FooterSelector from "@/layout/RootLayout/Footer/FooterSelector";
 import { headers } from "next/headers";
 import GoogleLogger from "@/components/GoogleLogger";
+import { Toaster } from "sonner"; // Changed: added Sonner import
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default async function RootLayout({
         {!isAdmin && <HeaderSelector />}
         {children}
         {!isAdmin && <FooterSelector />}
+        <Toaster position="top-right" richColors /> {/* Changed: added Toaster component */}
       </body>
     </html>
   );
