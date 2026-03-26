@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import {
     Heart, MapPin, ArrowUpDown, X, LayoutList, LayoutGrid,
-    ChevronRight, Leaf, Info, Loader2, Star, SlidersHorizontal, Menu, ChevronLeft,
+    ChevronRight, Leaf, Info, Loader2, Star, SlidersHorizontal, ChevronLeft,
 } from "lucide-react";
 import api, { IMG } from "@/api/building";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -86,16 +86,29 @@ function CheckRow({ label, checked, onChange, count }: {
     label: string; checked: boolean; onChange: () => void; count?: number;
 }) {
     return (
-        <label className="flex items-center justify-between cursor-pointer group select-none">
-            <div className="flex items-center gap-2">
-                <input type="checkbox" checked={checked} onChange={onChange}
-                    className="accent-[#006ce4] w-3.5 h-3.5 cursor-pointer" />
-                <span className="text-sm text-gray-700 group-hover:text-[#006ce4] transition-colors">
+        <label className="flex items-center justify-between cursor-pointer group py-0.5 select-none">
+            <div className="flex items-center gap-2.5">
+                <button
+                    type="button"
+                    onClick={onChange}
+                    className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                        checked
+                            ? "bg-[#006ce4] border-[#006ce4]"
+                            : "border-gray-300 group-hover:border-[#006ce4] bg-white"
+                    }`}
+                >
+                    {checked && (
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 8">
+                            <path d="M1 4l3 3 5-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    )}
+                </button>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors leading-tight">
                     {label}
                 </span>
             </div>
             {count !== undefined && (
-                <span className="text-xs text-gray-400">{count.toLocaleString()}</span>
+                <span className="text-xs text-gray-400 tabular-nums ml-2">{count.toLocaleString()}</span>
             )}
         </label>
     );
@@ -105,15 +118,21 @@ function CheckRow({ label, checked, onChange, count }: {
 function CounterRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
     return (
         <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-600">{label}</span>
+            <span className="text-sm text-gray-700">{label}</span>
             <div className="flex items-center gap-2">
-                <button onClick={() => onChange(Math.max(0, value - 1))}
-                    className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors text-sm">
+                <button
+                    type="button"
+                    onClick={() => onChange(Math.max(0, value - 1))}
+                    className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors text-sm"
+                >
                     −
                 </button>
                 <span className="text-sm text-gray-700 w-4 text-center">{value}</span>
-                <button onClick={() => onChange(value + 1)}
-                    className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors text-sm">
+                <button
+                    type="button"
+                    onClick={() => onChange(value + 1)}
+                    className="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] transition-colors text-sm"
+                >
                     +
                 </button>
             </div>
@@ -124,12 +143,15 @@ function CounterRow({ label, value, onChange }: { label: string; value: number; 
 // ─── PillButton ───────────────────────────────────────────────────────────────
 function PillButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
     return (
-        <button onClick={onClick}
+        <button
+            type="button"
+            onClick={onClick}
             className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
                 active
                     ? "bg-[#006ce4] text-white border-[#006ce4]"
                     : "border-gray-200 text-gray-600 hover:border-[#006ce4]"
-            }`}>
+            }`}
+        >
             {label}
         </button>
     );
@@ -148,9 +170,9 @@ function ScoreBadge({ value }: { value: number }) {
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="border-b border-gray-100 pb-4">
-            <p className="text-xs font-semibold text-gray-600 mb-2">{title}</p>
-            {children}
+        <div className="py-4 border-b border-gray-100 last:border-0">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{title}</h3>
+            <div className="space-y-1.5">{children}</div>
         </div>
     );
 }
@@ -193,11 +215,17 @@ function Sidebar({ filters, onChange, onReset, allBuildings, open, onClose }: {
     };
 
     const content = (
-        <div className="space-y-4 overflow-y-auto h-full pb-6">
+        <div className="space-y-0 overflow-y-auto h-full pb-6">
             {/* Map */}
-            <div className="rounded-xl overflow-hidden h-32 relative border border-gray-200 shadow-sm">
-                <iframe title="map" width="100%" height="100%" style={{ border: 0 }} loading="lazy"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d96058!2d28.9784!3d41.0082!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9e7a7777c43%3A0x4c76cf3dcc8b330b!2sIstanbul%2C%20Turkey!5e0!3m2!1sen!2str!4v1620000000000" />
+            <div className="rounded-xl overflow-hidden h-32 relative border border-gray-200 shadow-sm mb-3">
+                <iframe
+                    title="map"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d96058!2d28.9784!3d41.0082!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9e7a7777c43%3A0x4c76cf3dcc8b330b!2sIstanbul%2C%20Turkey!5e0!3m2!1sen!2str!4v1620000000000"
+                />
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
                     <button className="bg-white border border-gray-300 shadow text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 hover:shadow-md whitespace-nowrap">
                         <MapPin size={11} className="text-[#006ce4]" /> Show on map
@@ -205,104 +233,150 @@ function Sidebar({ filters, onChange, onReset, allBuildings, open, onClose }: {
                 </div>
             </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-gray-800">Filter:</p>
-                <button onClick={onReset} className="text-xs text-[#006ce4] hover:underline">Reset all</button>
-            </div>
-
-            <Section title="Property type">
-                <div className="space-y-2">
-                    {BUILDING_TYPES.map(t => (
-                        <CheckRow key={t} label={capitalize(t)} checked={filters.types.includes(t)}
-                            onChange={() => toggle("types", t)} count={typePool.filter(b => b.type === t).length} />
-                    ))}
+            {/* Card wrapper */}
+            <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden">
+                {/* Header */}
+                <div className="px-4 py-3.5 flex items-center justify-between border-b border-gray-100">
+                    <p className="text-sm font-bold text-gray-800">Filter:</p>
+                    <button onClick={onReset} className="text-xs text-[#006ce4] hover:text-blue-700 font-semibold">
+                        Reset all
+                    </button>
                 </div>
-            </Section>
 
-            <Section title="Brand">
-                <input type="text" value={filters.brand} onChange={e => onChange({ brand: e.target.value })}
-                    placeholder="Hilton, Marriott..."
-                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors" />
-            </Section>
+                <div className="px-4">
+                    <Section title="Property type">
+                        {BUILDING_TYPES.map(t => (
+                            <CheckRow
+                                key={t}
+                                label={capitalize(t)}
+                                checked={filters.types.includes(t)}
+                                onChange={() => toggle("types", t)}
+                                count={typePool.filter(b => b.type === t).length}
+                            />
+                        ))}
+                    </Section>
 
-            <Section title="Location">
-                <div className="space-y-2">
-                    <input type="text" value={filters.city} onChange={e => onChange({ city: e.target.value })}
-                        placeholder="City"
-                        className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors" />
-                    <input type="text" value={filters.country} onChange={e => onChange({ country: e.target.value })}
-                        placeholder="Country"
-                        className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors" />
-                </div>
-            </Section>
+                    <Section title="Brand">
+                        <input
+                            type="text"
+                            value={filters.brand}
+                            onChange={e => onChange({ brand: e.target.value })}
+                            placeholder="Hilton, Marriott..."
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors"
+                        />
+                    </Section>
 
-            <Section title="Budget (per night)">
-                <p className="text-xs text-gray-500 mb-2">
-                    <span className="font-semibold text-gray-700">${filters.minPrice}</span>{" – "}
-                    <span className="font-semibold text-gray-700">${filters.maxPrice}</span>
-                </p>
-                <div className="space-y-1.5">
-                    <input type="range" min={0} max={2000} step={10} value={filters.minPrice}
-                        onChange={e => onChange({ minPrice: Math.min(Number(e.target.value), filters.maxPrice - 10) })}
-                        className="w-full accent-[#006ce4]" />
-                    <input type="range" min={0} max={2000} step={10} value={filters.maxPrice}
-                        onChange={e => onChange({ maxPrice: Math.max(Number(e.target.value), filters.minPrice + 10) })}
-                        className="w-full accent-[#006ce4]" />
-                </div>
-                <div className="flex justify-between text-[10px] text-gray-400 mt-1">
-                    <span>$0</span><span>$2000</span>
-                </div>
-            </Section>
+                    <Section title="Location">
+                        <input
+                            type="text"
+                            value={filters.city}
+                            onChange={e => onChange({ city: e.target.value })}
+                            placeholder="City"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors mb-2"
+                        />
+                        <input
+                            type="text"
+                            value={filters.country}
+                            onChange={e => onChange({ country: e.target.value })}
+                            placeholder="Country"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-[#006ce4] transition-colors"
+                        />
+                    </Section>
 
-            <Section title="Rooms">
-                <div className="space-y-2.5">
-                    <CounterRow label="Bedrooms"  value={filters.bedrooms}  onChange={v => onChange({ bedrooms: v })} />
-                    <CounterRow label="Bathrooms" value={filters.bathrooms} onChange={v => onChange({ bathrooms: v })} />
-                </div>
-            </Section>
+                   <Section title="Budget (per night)">
+    <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-gray-500">$0</span>
+        <span className="text-xs bg-blue-50 border border-blue-100 text-[#006ce4] font-semibold px-2 py-0.5 rounded-md">
+            up to ${filters.maxPrice}
+        </span>
+    </div>
+    <div className="relative h-5 flex items-center">
+        <div className="absolute w-full h-1.5 bg-gray-200 rounded-full" />
+        <div
+            className="absolute h-1.5 bg-[#006ce4] rounded-full pointer-events-none"
+            style={{ left: 0, right: `${100 - (filters.maxPrice / 2000) * 100}%` }}
+        />
+        <input
+            type="range" min={0} max={2000} step={10} value={filters.maxPrice}
+            onChange={e => onChange({ maxPrice: Number(e.target.value), minPrice: 0 })}
+            className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white
+                [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#006ce4]
+                [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:hover:scale-110
+                [&::-webkit-slider-thumb]:transition-transform
+                [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
+                [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white
+                [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#006ce4]"
+        />
+    </div>
+    <div className="flex justify-between text-[10px] text-gray-400 mt-2">
+        <span>$0</span><span>$2000</span>
+    </div>
+</Section>
 
-            <Section title="Amenities">
-                <div className="space-y-2">
-                    {AMENITY_OPTIONS.map(a => (
-                        <CheckRow key={a} label={a} checked={filters.amenities.includes(a)}
-                            onChange={() => toggle("amenities", a)} count={amenityPool.filter(b => b.amenities?.includes(a)).length} />
-                    ))}
-                </div>
-            </Section>
-
-            <Section title="Travel group">
-                <div className="flex flex-wrap gap-1.5">
-                    {TRAVEL_GROUPS.map(g => (
-                        <PillButton key={g} label={capitalize(g)} active={filters.travelGroups.includes(g)}
-                            onClick={() => toggle("travelGroups", g)} />
-                    ))}
-                </div>
-                <div className="mt-2 space-y-1">
-                    {TRAVEL_GROUPS.map(g => (
-                        <div key={g} className="flex justify-between text-xs text-gray-400">
-                            <span>{capitalize(g)}</span>
-                            <span>{groupPool.filter(b => b.travelGroups?.includes(g)).length}</span>
+                    <Section title="Rooms">
+                        <CounterRow label="Bedrooms"  value={filters.bedrooms}  onChange={v => onChange({ bedrooms: v })} />
+                        <div className="mt-2.5">
+                            <CounterRow label="Bathrooms" value={filters.bathrooms} onChange={v => onChange({ bathrooms: v })} />
                         </div>
-                    ))}
-                </div>
-            </Section>
+                    </Section>
 
-            <Section title="Availability">
-                <CheckRow label="Available only" checked={filters.availableOnly}
-                    onChange={() => onChange({ availableOnly: !filters.availableOnly })}
-                    count={availPool.filter(b => b.isAvailable).length} />
-            </Section>
+                    <Section title="Amenities">
+                        {AMENITY_OPTIONS.map(a => (
+                            <CheckRow
+                                key={a}
+                                label={a}
+                                checked={filters.amenities.includes(a)}
+                                onChange={() => toggle("amenities", a)}
+                                count={amenityPool.filter(b => b.amenities?.includes(a)).length}
+                            />
+                        ))}
+                    </Section>
 
-            <div className="pb-2">
-                <p className="text-xs font-semibold text-gray-600 mb-2">Rating</p>
-                <div className="space-y-2">
-                    {RATING_FILTERS.map(r => (
-                        <CheckRow key={r.value} label={r.label}
-                            checked={filters.minRating === r.value}
-                            onChange={() => onChange({ minRating: filters.minRating === r.value ? 0 : r.value })}
-                            count={ratingPool.filter(b => b.rating >= r.value).length} />
-                    ))}
+                    <Section title="Travel group">
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {TRAVEL_GROUPS.map(g => (
+                                <PillButton
+                                    key={g}
+                                    label={capitalize(g)}
+                                    active={filters.travelGroups.includes(g)}
+                                    onClick={() => toggle("travelGroups", g)}
+                                />
+                            ))}
+                        </div>
+                        {TRAVEL_GROUPS.map(g => (
+                            <CheckRow
+                                key={g}
+                                label={capitalize(g)}
+                                checked={filters.travelGroups.includes(g)}
+                                onChange={() => toggle("travelGroups", g)}
+                                count={groupPool.filter(b => b.travelGroups?.includes(g)).length}
+                            />
+                        ))}
+                    </Section>
+
+                    <Section title="Availability">
+                        <CheckRow
+                            label="Available only"
+                            checked={filters.availableOnly}
+                            onChange={() => onChange({ availableOnly: !filters.availableOnly })}
+                            count={availPool.filter(b => b.isAvailable).length}
+                        />
+                    </Section>
+
+                    <Section title="Rating">
+                        {RATING_FILTERS.map(r => (
+                            <CheckRow
+                                key={r.value}
+                                label={r.label}
+                                checked={filters.minRating === r.value}
+                                onChange={() => onChange({ minRating: filters.minRating === r.value ? 0 : r.value })}
+                                count={ratingPool.filter(b => b.rating >= r.value).length}
+                            />
+                        ))}
+                    </Section>
                 </div>
             </div>
         </div>
@@ -311,30 +385,32 @@ function Sidebar({ filters, onChange, onReset, allBuildings, open, onClose }: {
     return (
         <>
             {/* Desktop sidebar */}
-            <aside className="hidden lg:block w-56 flex-shrink-0 space-y-4">
+            <aside className="hidden lg:block w-[268px] flex-shrink-0 self-start sticky top-4">
                 {content}
             </aside>
 
             {/* Mobile drawer overlay */}
             {open && (
                 <div className="lg:hidden fixed inset-0 z-50 flex">
-                    {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-                    {/* Drawer */}
-                    <div className="relative z-10 bg-white w-72 max-w-[85vw] h-full shadow-2xl p-4 flex flex-col">
-                        <div className="flex items-center justify-between mb-3">
+                    <div className="relative z-10 bg-white w-72 max-w-[85vw] h-full shadow-2xl flex flex-col">
+                        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
                             <p className="text-base font-bold text-gray-800">Filters</p>
                             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
                                 <X size={18} className="text-gray-600" />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex-1 overflow-y-auto px-4">
                             {content}
                         </div>
-                        <button onClick={onClose}
-                            className="mt-3 w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
-                            Show results
-                        </button>
+                        <div className="px-4 py-4 border-t border-gray-100">
+                            <button
+                                onClick={onClose}
+                                className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
+                            >
+                                Show results
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -342,7 +418,7 @@ function Sidebar({ filters, onChange, onReset, allBuildings, open, onClose }: {
     );
 }
 
-// ─── List Card (responsive horizontal → vertical on mobile) ──────────────────
+// ─── List Card ────────────────────────────────────────────────────────────────
 function ListCard({ building }: { building: Building }) {
     const searchParams = useSearchParams();
     const [saved, setSaved] = useState(false);
@@ -355,8 +431,11 @@ function ListCard({ building }: { building: Building }) {
             {/* Image */}
             <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 h-52 sm:h-auto">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
-                <button onClick={() => setSaved(!saved)}
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow">
+                <button
+                    type="button"
+                    onClick={() => setSaved(!saved)}
+                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow"
+                >
                     <Heart size={16} fill={saved ? "#cc0000" : "none"} className={saved ? "text-red-500" : "text-gray-600"} />
                 </button>
                 {!building.isAvailable && (
@@ -442,7 +521,6 @@ function ListCard({ building }: { building: Building }) {
                                     <span className="text-xs text-gray-500">{building.rating}</span>
                                 </div>
                             </div>
-                            {/* Mobile: compact score */}
                             <div className="flex items-center gap-1 sm:hidden">
                                 <Star size={12} className="text-amber-400 fill-amber-400" />
                                 <span className="text-xs font-semibold text-gray-700">{building.rating}</span>
@@ -461,7 +539,7 @@ function ListCard({ building }: { building: Building }) {
                                 <Info size={13} className="text-gray-400" />
                             </p>
                             <p className="text-xs text-gray-500">per night</p>
-                            <Link 
+                            <Link
                                 href={building.isAvailable ? `/hoteldetail/${building._id}?${searchParams.toString()}` : "#"}
                                 className={`mt-2 font-semibold px-4 py-2 rounded-lg text-xs transition-colors flex items-center gap-1 whitespace-nowrap ${
                                     building.isAvailable
@@ -490,8 +568,11 @@ function GridCard({ building }: { building: Building }) {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full">
             <div className="relative h-44 flex-shrink-0">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
-                <button onClick={() => setSaved(!saved)}
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow">
+                <button
+                    type="button"
+                    onClick={() => setSaved(!saved)}
+                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow"
+                >
                     <Heart size={15} fill={saved ? "#cc0000" : "none"} className={saved ? "text-red-500" : "text-gray-600"} />
                 </button>
                 <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-amber-700 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
@@ -562,12 +643,15 @@ function GridCard({ building }: { building: Building }) {
                         <p className="text-base font-bold text-gray-900 leading-none">${building.pricePerNight}</p>
                         <p className="text-[10px] text-gray-400 mt-0.5">per night</p>
                     </div>
-                    <button disabled={!building.isAvailable}
+                    <button
+                        type="button"
+                        disabled={!building.isAvailable}
                         className={`font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${
                             building.isAvailable
                                 ? "bg-[#006ce4] hover:bg-[#0055b3] text-white"
                                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                        }`}>
+                        }`}
+                    >
                         {building.isAvailable ? <>Book <ChevronRight size={12} /></> : "N/A"}
                     </button>
                 </div>
@@ -595,20 +679,22 @@ export default function SearchResults() {
     const [page, setPage]                 = useState(initialPage);
     const limit = 6;
 
-    // URL-də səhifə dəyişəndə state-i yenilə
+    // Sync page from URL only on initial mount / direct URL navigation
     useEffect(() => {
         const p = Number(searchParams.get("page")) || 1;
         if (p !== page) setPage(p);
-    }, [searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
+    // Push page to URL (only for pagination buttons, NOT filter changes)
     const updatePage = (p: number) => {
+        setPage(p);
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", p.toString());
-        router.push(`?${params.toString()}`);
-        window.scrollTo(0, 0);
+        router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // Mobile-da həmişə list mode
+    // Mobile always list
     useEffect(() => {
         const check = () => { if (window.innerWidth < 640) setViewMode("list"); };
         check();
@@ -678,22 +764,23 @@ export default function SearchResults() {
         });
     }, [allBuildings, filters, sortBy]);
 
+    // ── Filter change: only update state, reset page locally (no URL push, no scroll)
     const handleChange = (p: Partial<Filters>) => {
         setFilters(prev => ({ ...prev, ...p }));
-        updatePage(1); // Filter dəyişəndə 1-ci səhifəyə qayıt
+        setPage(1);
     };
+
     const resetFilters = () => {
         setFilters(DEFAULT_FILTERS);
-        updatePage(1);
+        setPage(1);
     };
 
-    const totalPages    = Math.ceil(displayed.length / limit);
+    const totalPages     = Math.ceil(displayed.length / limit);
     const paginatedItems = displayed.slice((page - 1) * limit, page * limit);
 
-    // Pagination Calculation logic
     const getPageRange = () => {
         const delta = 2;
-        const range = [];
+        const range: (number | string)[] = [];
         for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {
             range.push(i);
         }
@@ -756,8 +843,11 @@ export default function SearchResults() {
                             </h1>
                             <div className="flex items-center gap-2">
                                 {/* Mobile filter button */}
-                                <button onClick={() => setSidebarOpen(true)}
-                                    className="lg:hidden border border-gray-300 bg-white rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 text-gray-700 hover:border-gray-400 transition-colors">
+                                <button
+                                    type="button"
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="lg:hidden border border-gray-300 bg-white rounded-lg px-3 py-1.5 text-xs flex items-center gap-1.5 text-gray-700 hover:border-gray-400 transition-colors"
+                                >
                                     <SlidersHorizontal size={13} />
                                     Filters
                                     {chips.length > 0 && (
@@ -766,13 +856,20 @@ export default function SearchResults() {
                                         </span>
                                     )}
                                 </button>
-                                {/* List/Grid toggle — desktop only */}
-                                <button onClick={() => setViewMode("list")}
-                                    className={`hidden sm:flex border rounded-lg px-3 py-1.5 text-xs items-center gap-1.5 transition-colors ${viewMode === "list" ? "border-[#006ce4] text-[#006ce4] bg-blue-50" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}>
+
+                                {/* List/Grid toggle */}
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode("list")}
+                                    className={`hidden sm:flex border rounded-lg px-3 py-1.5 text-xs items-center gap-1.5 transition-colors ${viewMode === "list" ? "border-[#006ce4] text-[#006ce4] bg-blue-50" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}
+                                >
                                     <LayoutList size={13} /> List
                                 </button>
-                                <button onClick={() => setViewMode("grid")}
-                                    className={`hidden sm:flex border rounded-lg px-3 py-1.5 text-xs items-center gap-1.5 transition-colors ${viewMode === "grid" ? "border-[#006ce4] text-[#006ce4] bg-blue-50" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}>
+                                <button
+                                    type="button"
+                                    onClick={() => setViewMode("grid")}
+                                    className={`hidden sm:flex border rounded-lg px-3 py-1.5 text-xs items-center gap-1.5 transition-colors ${viewMode === "grid" ? "border-[#006ce4] text-[#006ce4] bg-blue-50" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"}`}
+                                >
                                     <LayoutGrid size={13} /> Grid
                                 </button>
                             </div>
@@ -781,13 +878,20 @@ export default function SearchResults() {
                         {/* Sort + chips */}
                         <div className="flex items-center gap-2 mb-4 flex-wrap">
                             <div className="relative group">
-                                <button className="border border-gray-300 bg-white rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-gray-400 flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    className="border border-gray-300 bg-white rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 hover:border-gray-400 flex items-center gap-1.5"
+                                >
                                     <ArrowUpDown size={12} /> Sort: {sortLabel}
                                 </button>
                                 <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 hidden group-hover:block min-w-[180px]">
-                                    {([["rating","Top rated"],["price_asc","Price: low to high"],["price_desc","Price: high to low"]] as const).map(([val, label]) => (
-                                        <button key={val} onClick={() => setSortBy(val)}
-                                            className={`w-full text-left px-4 py-2 text-xs hover:bg-gray-50 ${sortBy === val ? "text-[#006ce4] font-semibold" : "text-gray-700"}`}>
+                                    {([ ["rating","Top rated"], ["price_asc","Price: low to high"], ["price_desc","Price: high to low"] ] as const).map(([val, label]) => (
+                                        <button
+                                            key={val}
+                                            type="button"
+                                            onClick={() => setSortBy(val)}
+                                            className={`w-full text-left px-4 py-2 text-xs hover:bg-gray-50 ${sortBy === val ? "text-[#006ce4] font-semibold" : "text-gray-700"}`}
+                                        >
                                             {label}
                                         </button>
                                     ))}
@@ -797,12 +901,16 @@ export default function SearchResults() {
                             {chips.map(chip => (
                                 <div key={chip.label} className="flex items-center gap-1.5 bg-white border border-[#006ce4] rounded-full px-3 py-1.5">
                                     <span className="text-xs font-medium text-gray-700">{chip.label}</span>
-                                    <button onClick={chip.onRemove} className="text-gray-400 hover:text-gray-600"><X size={13} /></button>
+                                    <button type="button" onClick={chip.onRemove} className="text-gray-400 hover:text-gray-600">
+                                        <X size={13} />
+                                    </button>
                                 </div>
                             ))}
 
                             {chips.length > 0 && (
-                                <button onClick={resetFilters} className="text-xs text-[#006ce4] hover:underline ml-1">Clear all</button>
+                                <button type="button" onClick={resetFilters} className="text-xs text-[#006ce4] hover:underline ml-1">
+                                    Clear all
+                                </button>
                             )}
                         </div>
 
@@ -815,13 +923,17 @@ export default function SearchResults() {
                         ) : error ? (
                             <div className="text-center py-20">
                                 <p className="text-red-500 font-medium mb-2">{error}</p>
-                                <button onClick={() => window.location.reload()} className="text-[#006ce4] text-sm hover:underline">Try again</button>
+                                <button type="button" onClick={() => window.location.reload()} className="text-[#006ce4] text-sm hover:underline">
+                                    Try again
+                                </button>
                             </div>
                         ) : displayed.length === 0 ? (
                             <div className="text-center py-20">
                                 <SlidersHorizontal size={40} className="text-gray-300 mx-auto mb-4" />
                                 <p className="text-gray-500 font-medium">No properties match your filters</p>
-                                <button onClick={resetFilters} className="mt-3 text-[#006ce4] text-sm hover:underline">Reset filters</button>
+                                <button type="button" onClick={resetFilters} className="mt-3 text-[#006ce4] text-sm hover:underline">
+                                    Reset filters
+                                </button>
                             </div>
                         ) : (
                             <>
@@ -835,43 +947,56 @@ export default function SearchResults() {
                                     </div>
                                 )}
 
-                                {/* Pagination Controls */}
+                                {/* Pagination */}
                                 {totalPages > 1 && (
                                     <div className="mt-10 py-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                                         <p className="text-sm text-gray-500 order-2 sm:order-1">
-                                            Showing <span className="font-semibold text-gray-900">{Math.min((page - 1) * limit + 1, displayed.length)}</span> – <span className="font-semibold text-gray-900">{Math.min(page * limit, displayed.length)}</span> of <span className="font-semibold text-gray-900">{displayed.length}</span> properties
+                                            Showing{" "}
+                                            <span className="font-semibold text-gray-900">
+                                                {Math.min((page - 1) * limit + 1, displayed.length)}
+                                            </span>
+                                            {" – "}
+                                            <span className="font-semibold text-gray-900">
+                                                {Math.min(page * limit, displayed.length)}
+                                            </span>
+                                            {" of "}
+                                            <span className="font-semibold text-gray-900">{displayed.length}</span>
+                                            {" properties"}
                                         </p>
-                                        
+
                                         <div className="flex items-center gap-1.5 order-1 sm:order-2">
                                             <button
+                                                type="button"
                                                 onClick={() => updatePage(Math.max(1, page - 1))}
                                                 disabled={page === 1}
                                                 className="p-2 rounded-full border border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-white"
                                             >
                                                 <ChevronLeft size={16} />
                                             </button>
-                                            
+
                                             <div className="flex items-center gap-1">
-                                                {getPageRange().map((p, i) => (
+                                                {getPageRange().map((p, i) =>
                                                     p === "..." ? (
                                                         <span key={`els-${i}`} className="px-1.5 text-gray-400">...</span>
                                                     ) : (
                                                         <button
                                                             key={i}
+                                                            type="button"
                                                             onClick={() => updatePage(Number(p))}
                                                             className={`w-9 h-9 rounded-full text-sm font-semibold transition-all ${
-                                                                page === Number(p) 
-                                                                    ? "bg-[#006ce4] text-white shadow-md shadow-blue-200" 
+                                                                page === Number(p)
+                                                                    ? "bg-[#006ce4] text-white shadow-md shadow-blue-200"
                                                                     : "text-gray-500 hover:bg-gray-100"
                                                             }`}
                                                         >
                                                             {p}
                                                         </button>
                                                     )
-                                                ))}
+                                                )}
                                             </div>
 
                                             <button
+                                                type="button"
                                                 onClick={() => updatePage(Math.min(totalPages, page + 1))}
                                                 disabled={page === totalPages}
                                                 className="p-2 rounded-full border border-gray-200 text-gray-500 hover:border-[#006ce4] hover:text-[#006ce4] disabled:opacity-30 disabled:cursor-not-allowed transition-all bg-white"

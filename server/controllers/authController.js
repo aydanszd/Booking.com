@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../config/jwt');
-const crypto = require('crypto'); // Add crypto
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // POST /api/auth/register
 exports.register = async (req, res) => {
@@ -57,13 +58,22 @@ exports.updateMe = async (req, res) => {
     }
 };
 
-const sendEmail = require('../utils/sendEmail');
-
 // POST /api/auth/forgot-password
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+
+        // ── DEBUG ──────────────────────────────────────────
+        console.log('\n📧 FORGOT PASSWORD İSTƏYİ:');
+        console.log('   Axtarılan email :', email);
+        console.log('   SMTP_EMAIL      :', process.env.SMTP_EMAIL   || '❌ yoxdur');
+        console.log('   SMTP_PASSWORD   :', process.env.SMTP_PASSWORD ? '✅ var' : '❌ yoxdur');
+        console.log('   CLIENT_URL      :', process.env.CLIENT_URL   || '❌ yoxdur');
+        // ───────────────────────────────────────────────────
+
         const user = await User.findOne({ email });
+
+        console.log('   Tapılan user    :', user ? `✅ ${user.email}` : '❌ tapılmadı');
 
         if (!user) {
             return res.status(404).json({ message: "Bu email ilə istifadəçi tapılmadı" });
@@ -73,15 +83,15 @@ exports.forgotPassword = async (req, res) => {
         const resetToken = crypto.randomBytes(20).toString('hex');
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 dəqiqə
-
         await user.save();
 
         const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
-        
-        // Email mesajını hazırla
+        console.log('   Reset URL       :', resetUrl);
+
         const message = `Şifrənizi sıfırlamaq üçün bu linkə daxil olun: ${resetUrl}\n\nBu link 10 dəqiqə ərzində etibarlıdır.`;
 
         try {
+            console.log('\n📨 Email göndərilir...');
             await sendEmail({
                 email: user.email,
                 subject: 'Şifrə Sıfırlama Tokeni',
@@ -98,15 +108,18 @@ exports.forgotPassword = async (req, res) => {
                     </div>
                 `
             });
-
+            console.log('✅ Email uğurla göndərildi!');
             res.json({ message: "Şifrə sıfırlama linki emailinizə göndərildi", resetUrl });
+
         } catch (err) {
-            console.error('Email error details:', err.message);
-            
-            // Email göndərilməsə belə, istifadəçini bloklamamaq üçün linki ekranda göstəririk
-            res.json({ 
+            console.error('\n❌ EMAIL XƏTASI:');
+            console.error('   Xəta növü :', err.code    || 'naməlum');
+            console.error('   Mesaj     :', err.message);
+            console.error('   Tam xəta  :', err);
+
+            res.json({
                 success: true,
-                message: "Email göndərilə bilmədi (SMTP Ayarlarınızı .env faylında düzgün doldurduğunuzdan əmin olun!), lakin test üçün linkiniz budur:", 
+                message: "Email göndərilə bilmədi. SMTP ayarlarını yoxlayın.",
                 resetUrl,
                 error: err.message
             });
@@ -134,7 +147,6 @@ exports.resetPassword = async (req, res) => {
         user.password = password;
         user.resetPasswordToken = null;
         user.resetPasswordExpire = null;
-
         await user.save();
 
         res.json({ message: "Şifrəniz uğurla yeniləndi" });
