@@ -8,6 +8,7 @@ import bookingApi from "@/api/booking";
 import { toast } from "sonner";
 import DateRangePicker from "@/components/DateRangePicker";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 
 const BASE = "http://localhost:5000";
 
@@ -28,10 +29,11 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 
 function fmtDate(d: string) {
     if (!d) return "";
-    return new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "short", year: "numeric" });
+    return new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function CarDetailPage() {
+    const t = useTranslations("cars");
     const params = useParams();
     const id = params.id as string;
     const searchParams = useSearchParams();
@@ -57,11 +59,11 @@ export default function CarDetailPage() {
 
     const handleReviewSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (reviewScore === 0) { setReviewError("Ulduz seçin"); return; }
-        if (!reviewComment.trim()) { setReviewError("Şərh yazın"); return; }
+        if (reviewScore === 0) { setReviewError(t("selectStars")); return; }
+        if (!reviewComment.trim()) { setReviewError(t("writeReview")); return; }
         setReviewError("");
         const token = localStorage.getItem("token");
-        if (!token) { setReviewError("Rəy yazmaq üçün daxil olun"); return; }
+        if (!token) { setReviewError(t("signInToReview")); return; }
         try {
             setReviewSubmitting(true);
             const res = await axios.post(
@@ -74,7 +76,7 @@ export default function CarDetailPage() {
             setReviewScore(0);
             setReviewComment("");
         } catch (err: any) {
-            setReviewError(err.response?.data?.message || "Xəta baş verdi");
+            setReviewError(err.response?.data?.message || t("errorOccurred"));
         } finally {
             setReviewSubmitting(false);
         }
@@ -149,7 +151,7 @@ export default function CarDetailPage() {
     if (loading || !car) return (
         <div className="flex flex-col items-center justify-center py-40 gap-4">
             <Loader2 className="animate-spin text-blue-600" size={40} />
-            <p className="text-gray-500 font-medium">Loading car details...</p>
+            <p className="text-gray-500 font-medium">{t("loading")}</p>
         </div>
     );
 
@@ -190,8 +192,8 @@ export default function CarDetailPage() {
                                         <Users size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Seats</p>
-                                        <p className="text-sm font-black text-gray-900">{car.seats} Adults</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase">{t("seats2")}</p>
+                                        <p className="text-sm font-black text-gray-900">{car.seats} {t("adults")}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -199,7 +201,7 @@ export default function CarDetailPage() {
                                         <Disc size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Gearbox</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase">{t("gearbox")}</p>
                                         <p className="text-sm font-black text-gray-900 uppercase">{car.transmission}</p>
                                     </div>
                                 </div>
@@ -208,8 +210,8 @@ export default function CarDetailPage() {
                                         <Fuel size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase">Fuel</p>
-                                        <p className="text-sm font-black text-gray-900">Petrol / Full to Full</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase">{t("fuel")}</p>
+                                        <p className="text-sm font-black text-gray-900">{t("petrol")} / {t("fuelPolicy")}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -217,8 +219,8 @@ export default function CarDetailPage() {
                                         <CheckCircle2 size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase">AC</p>
-                                        <p className="text-sm font-black text-gray-900">Included</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase">{t("ac")}</p>
+                                        <p className="text-sm font-black text-gray-900">{t("included")}</p>
                                     </div>
                                 </div>
                             </div>

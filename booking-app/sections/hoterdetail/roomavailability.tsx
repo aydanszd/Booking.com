@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import DateRangePicker from "@/components/DateRangePicker";
+import { useTranslations } from "next-intl";
 
 interface Room {
     id: number;
@@ -22,25 +23,8 @@ interface Room {
     view?: string;
 }
 
-const DEFAULT_ROOMS: Room[] = [
-    {
-        id: 1,
-        name: "Standard Double Room",
-        guests: 2,
-        bedOptions: ["1 double bed"],
-        size: 25,
-        amenities: ["AC", "TV", "Free WiFi"],
-        extraAmenities: ["Shower", "Toilet", "Towels"],
-        price: 0, // Will be overridden
-        features: [
-            { icon: "breakfast", label: "Breakfast included", highlight: true },
-            { icon: "wifi", label: "High speed WiFi", highlight: true },
-            { icon: "cancel", label: "No cancellation fee" },
-        ],
-    }
-];
-
 export default function RoomAvailability({ building }: { building: any }) {
+    const t = useTranslations("hotel");
     const searchParams = useSearchParams();
     const router = useRouter();
     const [checkIn, setCheckIn] = useState(searchParams.get("checkIn") || "");
@@ -56,13 +40,13 @@ export default function RoomAvailability({ building }: { building: any }) {
 
     const handleBooking = () => {
         if (!checkIn || !checkOut) {
-            toast.error("Zəhmət olmasa tarixləri seçin");
+            toast.error(t("selectDates"));
             return;
         }
 
         const token = localStorage.getItem("token");
         if (!token) {
-            toast.error("Rezervasiya üçün daxil olun");
+            toast.error(t("signInToBook"));
             router.push("/signin");
             return;
         }
@@ -71,7 +55,7 @@ export default function RoomAvailability({ building }: { building: any }) {
         const end = new Date(checkOut);
         const nights = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
         if (nights <= 0) {
-            toast.error("Giriş tarixi çıxış tarixindən əvvəl olmalıdır");
+            toast.error(t("checkInBeforeOut"));
             return;
         }
 
@@ -95,9 +79,9 @@ export default function RoomAvailability({ building }: { building: any }) {
         <div id="availability" className="py-8 scroll-mt-24">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-2xl font-bold text-gray-900">Availability</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{t("availability")}</h2>
                     <div className="flex items-center gap-1.5 text-[#006ce4] text-sm font-medium cursor-pointer hover:underline">
-                        <Tag size={14} /> Price Match Guarantee
+                        <Tag size={14} /> {t("priceMatchGuarantee")}
                     </div>
                 </div>
 
@@ -109,15 +93,15 @@ export default function RoomAvailability({ building }: { building: any }) {
                             endDate={checkOut}
                             onStartChange={setCheckIn}
                             onEndChange={setCheckOut}
-                            startLabel="Check-in"
-                            endLabel="Check-out"
+                            startLabel={t("checkIn")}
+                            endLabel={t("checkOut")}
                         />
                     </div>
                     <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-xl px-4 py-3 bg-white h-fit">
                         <Users size={18} className="text-gray-400 shrink-0" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 uppercase font-bold">Guests</span>
-                            <span className="text-sm font-semibold">2 adults · 0 children · 1 room</span>
+                            <span className="text-[10px] text-gray-400 uppercase font-bold">{t("guests")}</span>
+                            <span className="text-sm font-semibold">{t("guestsDefault")}</span>
                         </div>
                     </div>
                 </div>
@@ -126,17 +110,17 @@ export default function RoomAvailability({ building }: { building: any }) {
                     <table className="w-full text-left">
                         <thead className="bg-[#1a3c6e] text-white text-xs uppercase tracking-wider">
                             <tr>
-                                <th className="px-5 py-4 font-bold">Room Type</th>
-                                <th className="px-5 py-4 font-bold text-center">Number of guests</th>
-                                <th className="px-5 py-4 font-bold">Price per night</th>
-                                <th className="px-5 py-4 font-bold">Choices</th>
-                                <th className="px-5 py-4 font-bold">Select rooms</th>
-                                <th className="px-5 py-4 font-bold">Reserve</th>
+                                <th className="px-5 py-4 font-bold">{t("roomType")}</th>
+                                <th className="px-5 py-4 font-bold text-center">{t("numGuests")}</th>
+                                <th className="px-5 py-4 font-bold">{t("pricePerNight")}</th>
+                                <th className="px-5 py-4 font-bold">{t("choices")}</th>
+                                <th className="px-5 py-4 font-bold">{t("selectRooms")}</th>
+                                <th className="px-5 py-4 font-bold">{t("reserve")}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {[
-                                { name: building.title + " Standard", guests: building.maxGuests || 2, price: building.pricePerNight }
+                                { name: building.title + " " + t("standard"), guests: building.maxGuests || 2, price: building.pricePerNight }
                             ].map((row, i) => (
                                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-5 py-6">
@@ -156,7 +140,7 @@ export default function RoomAvailability({ building }: { building: any }) {
                                     </td>
                                     <td className="px-5 py-6">
                                         <p className="text-xl font-bold text-gray-900">${row.price}</p>
-                                        <p className="text-[10px] text-gray-400">per night</p>
+                                        <p className="text-[10px] text-gray-400">{t("pricePerNight").toLowerCase()}</p>
                                         {checkIn && checkOut && (
                                             <p className="text-xs font-bold text-green-600 mt-1">
                                                 Total: ${building.pricePerNight * qty * Math.max(1, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000*60*60*24)))}
@@ -166,16 +150,16 @@ export default function RoomAvailability({ building }: { building: any }) {
                                     <td className="px-5 py-6">
                                         <div className="space-y-1.5">
                                             <div className="flex items-center gap-1.5 text-[#008009] text-xs font-semibold">
-                                                <CheckCircle2 size={14} /> Free Cancellation
+                                                <CheckCircle2 size={14} /> {t("freeCancellation")}
                                             </div>
                                             <div className="flex items-center gap-1.5 text-gray-600 text-xs">
-                                                <CreditCard size={14} /> No prepayment needed
+                                                <CreditCard size={14} /> {t("noPrepayment")}
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-5 py-6">
-                                        <select 
-                                            value={qty} 
+                                        <select
+                                            value={qty}
                                             onChange={e => setQty(Number(e.target.value))}
                                             className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#006ce4]"
                                         >
@@ -183,14 +167,14 @@ export default function RoomAvailability({ building }: { building: any }) {
                                         </select>
                                     </td>
                                     <td className="px-5 py-6">
-                                        <button 
+                                        <button
                                             onClick={handleBooking}
                                             className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-2"
                                         >
-                                            I'll reserve
+                                            {t("illReserve")}
                                         </button>
                                         <p className="text-[9px] text-gray-400 mt-1.5 text-center flex items-center justify-center gap-1">
-                                            <AlertCircle size={10} /> Confirmation is immediate
+                                            <AlertCircle size={10} /> {t("confirmImmediate")}
                                         </p>
                                     </td>
                                 </tr>

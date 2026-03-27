@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Star, MessageSquareQuote, Send, CornerDownRight, Loader2, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 
 const BASE = "http://localhost:5000";
 
@@ -31,10 +32,11 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 
 function fmtDate(d: string) {
     if (!d) return "";
-    return new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "short", year: "numeric" });
+    return new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function Reviews({ building, onReviewAdded }: { building: any; onReviewAdded?: () => void }) {
+    const t = useTranslations("hotel");
     const router = useRouter();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [score, setScore] = useState(0);
@@ -49,12 +51,12 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (score === 0) { setError("Ulduz seçin"); return; }
-        if (!comment.trim()) { setError("Şərh yazın"); return; }
+        if (score === 0) { setError(t("selectStars")); return; }
+        if (!comment.trim()) { setError(t("commentRequired")); return; }
         setError("");
 
         const token = localStorage.getItem("token");
-        if (!token) { setError("Rəy yazmaq üçün daxil olun"); return; }
+        if (!token) { setError(t("signInToReview")); return; }
 
         try {
             setSubmitting(true);
@@ -68,7 +70,7 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
             setComment("");
             onReviewAdded?.();
         } catch (err: any) {
-            setError(err.response?.data?.message || "Xəta baş verdi");
+            setError(err.response?.data?.message || t("errorOccurred"));
         } finally {
             setSubmitting(false);
         }
@@ -76,9 +78,16 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
 
     const reviews: any[] = building.reviews || [];
 
+    const getRatingLabel = (rating: number) => {
+        if (rating >= 9) return t("excellent");
+        if (rating >= 7) return t("veryGood");
+        if (rating >= 5) return t("good");
+        return t("noReviews");
+    };
+
     return (
         <div className="bg-white rounded-3xl p-10 shadow-sm border border-gray-100 mb-20">
-            <h2 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-tighter">Guest Reviews</h2>
+            <h2 className="text-2xl font-black text-gray-900 mb-8 uppercase tracking-tighter">{t("guestReviews")}</h2>
 
             {/* Overall rating */}
             <div className="flex items-center gap-6 mb-10">
@@ -87,11 +96,11 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
                 </div>
                 <div>
                     <p className="text-2xl font-black text-gray-900">
-                        {building.rating >= 9 ? "Əla" : building.rating >= 7 ? "Çox yaxşı" : building.rating >= 5 ? "Yaxşı" : "Rəy yoxdur"}
+                        {building.rating ? getRatingLabel(building.rating) : t("noReviews")}
                     </p>
                     <p className="text-sm font-bold text-gray-400 mt-1 flex items-center gap-2">
                         <MessageSquareQuote size={16} className="text-blue-600" />
-                        {reviews.length} rəy əsasında
+                        {t("basedOn", { count: reviews.length })}
                     </p>
                 </div>
             </div>
@@ -122,7 +131,7 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
                                 <div className="mt-4 ml-4 bg-blue-50 border border-blue-100 rounded-xl p-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <CornerDownRight size={14} className="text-blue-600" />
-                                        <span className="text-xs font-black text-blue-700 uppercase tracking-wide">Admin cavabı</span>
+                                        <span className="text-xs font-black text-blue-700 uppercase tracking-wide">{t("adminReply")}</span>
                                         {r.adminReplyAt && (
                                             <span className="text-xs text-blue-400">{fmtDate(r.adminReplyAt)}</span>
                                         )}
@@ -137,34 +146,34 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
 
             {/* Submit review form */}
             <div className="border-t border-gray-100 pt-8">
-                <h3 className="text-lg font-bold text-gray-900 mb-5">Rəyinizi bildirin</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-5">{t("shareReview")}</h3>
                 {!isLoggedIn ? (
                     <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-2xl p-5">
-                        <p className="text-sm font-semibold text-blue-700">Rəy yazmaq üçün daxil olun</p>
+                        <p className="text-sm font-semibold text-blue-700">{t("signInToReview")}</p>
                         <button
                             onClick={() => router.push("/signin")}
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors"
                         >
-                            <LogIn size={15} /> Daxil ol
+                            <LogIn size={15} /> {t("signIn")}
                         </button>
                     </div>
                 ) : success ? (
                     <div className="bg-green-50 border border-green-100 rounded-2xl p-6 text-center">
-                        <p className="text-green-700 font-bold">Rəyiniz göndərildi! Təşəkkür edirik.</p>
+                        <p className="text-green-700 font-bold">{t("reviewSubmitted")}</p>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Qiymət (1–10)</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">{t("rating")}</label>
                             <StarRating value={score} onChange={setScore} />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Şərh</label>
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">{t("comment")}</label>
                             <textarea
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 rows={4}
-                                placeholder="Təcrübənizi bölüşün..."
+                                placeholder={t("commentPlaceholder")}
                                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-400 resize-none"
                             />
                         </div>
@@ -175,7 +184,7 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
                             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
                         >
                             {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                            Göndər
+                            {t("submit")}
                         </button>
                     </form>
                 )}

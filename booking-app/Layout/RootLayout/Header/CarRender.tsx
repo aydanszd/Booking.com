@@ -7,14 +7,8 @@ import {
     MapPin, Calendar, Search,
     X, ChevronDown, ChevronLeft, ChevronRight, Clock,
 } from "lucide-react";
-
-const NAV_ITEMS = [
-    { icon: Bed, label: "Stays", href: "/" },
-    { icon: Plane, label: "Flights", href: "/flights" },
-    { icon: Car, label: "Car rental", href: "/carrender" },
-    { icon: Ticket, label: "Attractions", href: "/attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
-];
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const SUGGESTIONS = [
     "Baku, Azerbaijan",
@@ -208,8 +202,18 @@ const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
 export default function CarRentalHeader() {
+    const tNav = useTranslations("nav");
+    const tHeader = useTranslations("header");
     const router = useRouter();
-    const [activeNav, setActiveNav] = useState<string>("Car rental");
+    const [activeNav, setActiveNav] = useState<string>("carRental");
+
+    const NAV_ITEMS = [
+        { icon: Bed, labelKey: "stays" as const, href: "/" },
+        { icon: Plane, labelKey: "flights" as const, href: "/flights" },
+        { icon: Car, labelKey: "carRental" as const, href: "/carrender" },
+        { icon: Ticket, labelKey: "attractions" as const, href: "/attractions" },
+        { icon: CarTaxiFront, labelKey: "airportTaxis" as const, href: "/_airporttaxis" },
+    ];
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
     const [calendarTab, setCalendarTab] = useState<string>("calendar");
@@ -299,33 +303,27 @@ export default function CarRentalHeader() {
                             />
                         </Link>
                         <div className="flex items-center gap-3 text-white text-sm font-medium">
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors">
-                                <img src="https://flagcdn.com/w40/gb.png" alt="English" className="w-6 h-6 rounded-full object-cover" />
-                            </button>
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
-                                <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
-                            </button>
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">List your property</Link>
-                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">Register</Link>
-                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">Sign in</Link>
+                            <LanguageSwitcher />
+                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{tHeader("listProperty")}</Link>
+                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{tHeader("register")}</Link>
+                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{tHeader("signIn")}</Link>
                         </div>
                     </div>
 
                     {/* Nav tabs */}
                     <div className="flex gap-1 -mt-4.5">
-                        {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
+                        {NAV_ITEMS.map(({ icon: Icon, labelKey, href }) => (
                             <Link
-                                key={label}
+                                key={labelKey}
                                 href={href}
-                                onClick={() => setActiveNav(label)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
+                                onClick={() => setActiveNav(labelKey)}
+                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === labelKey
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
                                 <Icon size={16} />
-                                {label}
+                                {tNav(labelKey)}
                             </Link>
                         ))}
                     </div>
@@ -334,8 +332,8 @@ export default function CarRentalHeader() {
 
             <div className="bg-[#003b94] px-6 pb-10">
                 <div className="max-w-6xl mx-auto translate-y-16">
-                    <h1 className="text-white text-5xl font-bold mb-2">Car hire for any kind of trip</h1>
-                    <p className="text-white/90 text-2xl mb-7">Great cars at great prices, from the biggest car rental companies</p>
+                    <h1 className="text-white text-5xl font-bold mb-2">{tHeader("carHireTitle")}</h1>
+                    <p className="text-white/90 text-2xl mb-7">{tHeader("carHireSubtitle")}</p>
 
                     {/* Search bar */}
                     <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
@@ -350,7 +348,7 @@ export default function CarRentalHeader() {
                                 <input
                                     value={pickupLocation}
                                     onChange={(e) => setPickupLocation(e.target.value)}
-                                    placeholder="Pick-up location"
+                                    placeholder={tHeader("pickupLocation")}
                                     className="flex-1 text-sm text-gray-800 bg-transparent outline-none"
                                     onClick={(e) => e.stopPropagation()}
                                 />
@@ -382,7 +380,7 @@ export default function CarRentalHeader() {
                                     <input
                                         value={dropoffLocation}
                                         onChange={(e) => setDropoffLocation(e.target.value)}
-                                        placeholder="Drop-off location"
+                                        placeholder={tHeader("dropoffLocation")}
                                         className="flex-1 text-sm text-gray-800 bg-transparent outline-none"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -412,9 +410,9 @@ export default function CarRentalHeader() {
                             >
                                 <Calendar size={20} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
-                                    <span className="text-xs text-gray-400">Pick-up date</span>
+                                    <span className="text-xs text-gray-400">{tHeader("pickupDate")}</span>
                                     <span className="text-sm text-gray-800 whitespace-nowrap">
-                                        {checkIn ? formatDate(checkIn) : "Select date"}
+                                        {checkIn ? formatDate(checkIn) : tHeader("selectDate")}
                                     </span>
                                 </div>
                             </div>
@@ -484,21 +482,21 @@ export default function CarRentalHeader() {
                                             {checkIn && checkOut
                                                 ? `${formatDate(checkIn)} → ${formatDate(checkOut)}`
                                                 : checkIn
-                                                    ? "Select drop-off date"
-                                                    : "Select pick-up date"}
+                                                    ? tHeader("selectDropoff")
+                                                    : tHeader("selectPickup")}
                                         </div>
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => { setCheckIn(null); setCheckOut(null); }}
                                                 className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded hover:bg-gray-100 transition-colors"
                                             >
-                                                Clear
+                                                {tHeader("clear")}
                                             </button>
                                             <button
                                                 onClick={() => setShowDate(false)}
                                                 className="text-xs bg-[#003b94] text-white px-4 py-1.5 rounded-lg hover:bg-[#002d73] transition-colors font-medium"
                                             >
-                                                Done
+                                                {tHeader("done")}
                                             </button>
                                         </div>
                                     </div>
@@ -511,7 +509,7 @@ export default function CarRentalHeader() {
                             <div className="flex items-center gap-2 bg-white rounded h-13 px-3.5">
                                 <Clock size={18} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
-                                    <span className="text-xs text-gray-400">Time</span>
+                                    <span className="text-xs text-gray-400">{tHeader("time")}</span>
                                     <select
                                         value={pickupTime}
                                         onChange={(e) => setPickupTime(e.target.value)}
@@ -531,9 +529,9 @@ export default function CarRentalHeader() {
                             >
                                 <Calendar size={20} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
-                                    <span className="text-xs text-gray-400">Drop-off date</span>
+                                    <span className="text-xs text-gray-400">{tHeader("dropoffDate")}</span>
                                     <span className="text-sm text-gray-800 whitespace-nowrap">
-                                        {checkOut ? formatDate(checkOut) : "Select date"}
+                                        {checkOut ? formatDate(checkOut) : tHeader("selectDate")}
                                     </span>
                                 </div>
                             </div>
@@ -544,7 +542,7 @@ export default function CarRentalHeader() {
                             <div className="flex items-center gap-2 bg-white rounded h-13 px-3.5">
                                 <Clock size={18} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
-                                    <span className="text-xs text-gray-400">Time</span>
+                                    <span className="text-xs text-gray-400">{tHeader("time")}</span>
                                     <select
                                         value={dropoffTime}
                                         onChange={(e) => setDropoffTime(e.target.value)}
@@ -559,7 +557,7 @@ export default function CarRentalHeader() {
                         {/* Search button */}
                         <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
                             <Search size={18} />
-                            Search
+                            {tHeader("searchBtn")}
                         </button>
                     </div>
                 </div>

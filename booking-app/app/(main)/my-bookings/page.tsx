@@ -3,15 +3,16 @@ import { useState, useEffect } from "react";
 import bookingApi from "@/api/booking";
 import {
     Loader2, Calendar, MapPin,
-    Trash2, ExternalLink, SlidersHorizontal, ArrowLeft, Search,
+    Trash2, ExternalLink, ArrowLeft, Search,
     Building2, Car, Plane, Users
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 function fmtDate(d: string) {
     if (!d) return "—";
-    return new Date(d).toLocaleDateString("tr-TR");
+    return new Date(d).toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
 function toImgUrl(path: string | undefined, fallback: string): string {
@@ -20,15 +21,22 @@ function toImgUrl(path: string | undefined, fallback: string): string {
     return `http://localhost:5000${path}`;
 }
 
-function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: string) => void }) {
+function BookingCard({ booking, onCancel, t }: { booking: any; onCancel: (id: string) => void; t: any }) {
     const type: "building" | "car" | "flight" = booking.type;
+
+    const STATUS_MAP: Record<string, string> = {
+        confirmed: t("confirmed"),
+        cancelled: t("cancelled"),
+        completed: t("completed"),
+        pending: t("pending"),
+    };
 
     const typeConfig = {
         building: {
             icon: <Building2 size={22} className="text-blue-600" />,
-            label: "Otel",
+            label: t("hotel"),
             color: "blue",
-            title: booking.building?.title || "Otel",
+            title: booking.building?.title || t("hotel"),
             subtitle: booking.building?.location ? `${booking.building.location.city}, ${booking.building.location.country}` : "",
             image: toImgUrl(booking.building?.images?.[0], "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80"),
             link: booking.building?._id ? `/hoteldetail/${booking.building._id}` : null,
@@ -37,14 +45,14 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-blue-500">
                             <Calendar size={13} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Check-in</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t("checkIn")}</span>
                         </div>
                         <p className="text-lg font-black text-gray-800">{fmtDate(booking.checkIn)}</p>
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-amber-500">
                             <Calendar size={13} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Check-out</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t("checkOut")}</span>
                         </div>
                         <p className="text-lg font-black text-gray-800">{fmtDate(booking.checkOut)}</p>
                     </div>
@@ -53,9 +61,9 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
         },
         car: {
             icon: <Car size={22} className="text-violet-600" />,
-            label: "Avtomobil",
+            label: t("car"),
             color: "violet",
-            title: booking.car?.title || `${booking.car?.brand || ""} ${booking.car?.model || ""}`.trim() || "Avtomobil",
+            title: booking.car?.title || `${booking.car?.brand || ""} ${booking.car?.model || ""}`.trim() || t("car"),
             subtitle: booking.car?.location ? `${booking.car.location.city}, ${booking.car.location.country}` : "",
             image: toImgUrl(booking.car?.images?.[0], "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=500&q=80"),
             link: booking.car?._id ? `/cardetail/${booking.car._id}` : null,
@@ -64,14 +72,14 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-violet-500">
                             <Calendar size={13} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Pick-up</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t("pickUp")}</span>
                         </div>
                         <p className="text-lg font-black text-gray-800">{fmtDate(booking.pickUp)}</p>
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-amber-500">
                             <Calendar size={13} />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Drop-off</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{t("dropOff")}</span>
                         </div>
                         <p className="text-lg font-black text-gray-800">{fmtDate(booking.dropOff)}</p>
                     </div>
@@ -80,9 +88,9 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
         },
         flight: {
             icon: <Plane size={22} className="text-sky-600" />,
-            label: "Uçuş",
+            label: t("flight"),
             color: "sky",
-            title: booking.flight?.airline || "Uçuş",
+            title: booking.flight?.airline || t("flight"),
             subtitle: booking.flight?.flightNumber || "",
             image: toImgUrl(booking.flight?.logoUrl, "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&q=80"),
             link: null,
@@ -92,7 +100,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                         <div className="flex items-center justify-between">
                             <div className="text-center">
                                 <p className="text-xl font-black text-gray-900">
-                                    {booking.flight.departureTime ? new Date(booking.flight.departureTime).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                                    {booking.flight.departureTime ? new Date(booking.flight.departureTime).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "—"}
                                 </p>
                                 <p className="text-xs font-bold text-gray-400">{booking.flight.origin?.code} · {booking.flight.origin?.city}</p>
                             </div>
@@ -101,7 +109,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                             </div>
                             <div className="text-center">
                                 <p className="text-xl font-black text-gray-900">
-                                    {booking.flight.arrivalTime ? new Date(booking.flight.arrivalTime).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                                    {booking.flight.arrivalTime ? new Date(booking.flight.arrivalTime).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "—"}
                                 </p>
                                 <p className="text-xs font-bold text-gray-400">{booking.flight.destination?.code} · {booking.flight.destination?.city}</p>
                             </div>
@@ -109,7 +117,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                     )}
                     {booking.passengers && (
                         <div className="flex items-center gap-2 text-gray-500 text-xs font-bold">
-                            <Users size={13} /> {booking.passengers} Sərnişin
+                            <Users size={13} /> {booking.passengers} {t("passengers")}
                         </div>
                     )}
                 </div>
@@ -143,7 +151,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                         booking.status === "completed" ? "bg-blue-500 text-white" :
                         "bg-amber-400 text-white"
                     }`}>
-                        {booking.status}
+                        {STATUS_MAP[booking.status] || booking.status}
                     </span>
                 </div>
                 <div className="absolute bottom-5 left-5">
@@ -179,7 +187,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                     <div className="flex items-center gap-3">
                         <p className="text-3xl font-black text-gray-900">${booking.totalPrice}</p>
                         <span className="text-[10px] font-black text-gray-300 uppercase underline decoration-blue-600 decoration-2 underline-offset-4">
-                            Verified Payment
+                            {t("verifiedPayment")}
                         </span>
                     </div>
                     {booking.status !== "cancelled" && (
@@ -187,7 +195,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
                             onClick={() => onCancel(booking._id)}
                             className="flex items-center gap-2 text-xs font-black text-red-400 hover:text-red-600 transition-all uppercase tracking-widest hover:underline decoration-2 underline-offset-8"
                         >
-                            <Trash2 size={15} /> Ləğv et
+                            <Trash2 size={15} /> {t("cancel")}
                         </button>
                     )}
                 </div>
@@ -197,6 +205,7 @@ function BookingCard({ booking, onCancel }: { booking: any; onCancel: (id: strin
 }
 
 export default function MyBookings() {
+    const t = useTranslations("myBookings");
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -208,7 +217,7 @@ export default function MyBookings() {
             const res = await bookingApi.getMyBookings();
             setBookings(res.data);
         } catch {
-            toast.error("Rezervasiyaları gətirmək mümkün olmadı");
+            toast.error(t("cancelError"));
         } finally {
             setLoading(false);
         }
@@ -217,13 +226,13 @@ export default function MyBookings() {
     useEffect(() => { fetchBookings(); }, []);
 
     const handleCancel = async (id: string) => {
-        if (!confirm("Rezervasiyanı ləğv etmək istəyirsiniz?")) return;
+        if (!confirm(t("cancelConfirm"))) return;
         try {
             await bookingApi.cancelBooking(id);
-            toast.success("Rezervasiya ləğv edildi");
+            toast.success(t("cancelSuccess"));
             fetchBookings();
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Xəta baş verdi");
+            toast.error(err.response?.data?.message || t("cancelError"));
         }
     };
 
@@ -244,6 +253,13 @@ export default function MyBookings() {
         </div>
     );
 
+    const TYPE_TABS = [
+        { key: "all", label: t("all"), icon: null },
+        { key: "building", label: t("hotel"), icon: <Building2 size={13} /> },
+        { key: "car", label: t("car"), icon: <Car size={13} /> },
+        { key: "flight", label: t("flight"), icon: <Plane size={13} /> },
+    ];
+
     return (
         <div className="min-h-screen bg-gray-50 pt-16 pb-20">
             <div className="max-w-5xl mx-auto px-6">
@@ -253,34 +269,28 @@ export default function MyBookings() {
                             <Link href="/" className="p-2.5 bg-white rounded-2xl text-gray-400 hover:text-blue-600 transition-all shadow-sm border border-gray-100">
                                 <ArrowLeft size={18} />
                             </Link>
-                            <span className="text-xs font-black text-blue-600 uppercase tracking-widest">Your Account</span>
+                            <span className="text-xs font-black text-blue-600 uppercase tracking-widest">{t("yourAccount")}</span>
                         </div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tighter">My Bookings</h1>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tighter">{t("title")}</h1>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
-                        {/* Type tabs */}
                         <div className="flex gap-1 bg-white border border-gray-200 rounded-2xl p-1">
-                            {[
-                                { key: "all", label: "Hamısı", icon: null },
-                                { key: "building", label: "Otel", icon: <Building2 size={13} /> },
-                                { key: "car", label: "Avtomobil", icon: <Car size={13} /> },
-                                { key: "flight", label: "Uçuş", icon: <Plane size={13} /> },
-                            ].map(t => (
+                            {TYPE_TABS.map(tab => (
                                 <button
-                                    key={t.key}
-                                    onClick={() => setFilterType(t.key)}
+                                    key={tab.key}
+                                    onClick={() => setFilterType(tab.key)}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                        filterType === t.key ? "bg-blue-600 text-white shadow" : "text-gray-500 hover:text-gray-700"
+                                        filterType === tab.key ? "bg-blue-600 text-white shadow" : "text-gray-500 hover:text-gray-700"
                                     }`}
                                 >
-                                    {t.icon} {t.label}
+                                    {tab.icon} {tab.label}
                                 </button>
                             ))}
                         </div>
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Axtar..."
+                                placeholder={t("searchPlaceholder")}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                                 className="pl-10 pr-4 py-3 bg-white rounded-2xl text-sm font-semibold text-gray-700 outline-none border border-gray-100 shadow-sm focus:border-blue-500 transition-all w-52"
@@ -295,18 +305,18 @@ export default function MyBookings() {
                         <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                             <Building2 size={36} className="text-blue-600" />
                         </div>
-                        <h3 className="text-2xl font-black text-gray-900 mb-3">Rezervasiya tapılmadı</h3>
+                        <h3 className="text-2xl font-black text-gray-900 mb-3">{t("noBookings")}</h3>
                         <p className="text-gray-400 font-bold max-w-sm mx-auto mb-8 text-xs uppercase tracking-widest">
-                            Otel, avtomobil və ya uçuş rezervasiyası edin
+                            {t("noBookingsDesc")}
                         </p>
                         <Link href="/" className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-4 rounded-3xl text-sm transition-all shadow-xl shadow-blue-100 inline-block">
-                            Kəşf et
+                            {t("explore")}
                         </Link>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {filtered.map(booking => (
-                            <BookingCard key={booking._id} booking={booking} onCancel={handleCancel} />
+                            <BookingCard key={booking._id} booking={booking} onCancel={handleCancel} t={t} />
                         ))}
                     </div>
                 )}

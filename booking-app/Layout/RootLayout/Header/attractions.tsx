@@ -6,14 +6,8 @@ import {
     MapPin, Calendar, Search,
     X, ChevronLeft, ChevronRight, ChevronDown,
 } from "lucide-react";
-
-const NAV_ITEMS = [
-    { icon: Bed, label: "Stays", href: "/" },
-    { icon: Plane, label: "Flights", href: "/flights" },
-    { icon: Car, label: "Car rental", href: "/carrender" },
-    { icon: Ticket, label: "Attractions", href: "/attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
-];
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const SUGGESTIONS = [
     "Baku, Azerbaijan",
@@ -204,7 +198,9 @@ function CalendarMonth({
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 
 export default function AttractionsHeader() {
-    const [activeNav, setActiveNav] = useState("Attractions");
+    const tNav = useTranslations("nav");
+    const tHeader = useTranslations("header");
+    const [activeNav, setActiveNav] = useState("attractions");
     const [destination, setDestination] = useState("");
     const [showLocation, setShowLocation] = useState(false);
     const [showDate, setShowDate] = useState(false);
@@ -217,6 +213,14 @@ export default function AttractionsHeader() {
     const [rightMonth, setRightMonth] = useState(initRight.getMonth());
     const locationRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
+
+    const NAV_ITEMS = [
+        { icon: Bed, labelKey: "stays" as const, href: "/" },
+        { icon: Plane, labelKey: "flights" as const, href: "/flights" },
+        { icon: Car, labelKey: "carRental" as const, href: "/carrender" },
+        { icon: Ticket, labelKey: "attractions" as const, href: "/attractions" },
+        { icon: CarTaxiFront, labelKey: "airportTaxis" as const, href: "/_airporttaxis" },
+    ];
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -268,7 +272,7 @@ export default function AttractionsHeader() {
     const dateLabel =
         checkIn && checkOut ? `${formatDate(checkIn)} — ${formatDate(checkOut)}` :
             checkIn ? `${formatDate(checkIn)} — ?` :
-                "Select dates";
+                tHeader("selectDate");
 
     return (
         <div className="font-sans relative z-10">
@@ -283,32 +287,26 @@ export default function AttractionsHeader() {
                             />
                         </Link>
                         <div className="flex items-center gap-3 text-white text-sm font-medium">
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors">
-                                <img src="https://flagcdn.com/w40/gb.png" alt="English" className="w-6 h-6 rounded-full object-cover" />
-                            </button>
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
-                                <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
-                            </button>
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">List your property</Link>
-                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">Register</Link>
-                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">Sign in</Link>
+                            <LanguageSwitcher />
+                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{tHeader("listProperty")}</Link>
+                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{tHeader("register")}</Link>
+                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{tHeader("signIn")}</Link>
                         </div>
                     </div>
 
                     <div className="flex gap-1 -mt-4.5">
-                        {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
+                        {NAV_ITEMS.map(({ icon: Icon, labelKey, href }) => (
                             <Link
-                                key={label}
+                                key={labelKey}
                                 href={href}
-                                onClick={() => setActiveNav(label)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
+                                onClick={() => setActiveNav(labelKey)}
+                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === labelKey
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
                                 <Icon size={16} />
-                                {label}
+                                {tNav(labelKey)}
                             </Link>
                         ))}
                     </div>
@@ -318,10 +316,10 @@ export default function AttractionsHeader() {
             <div className="bg-[#003b94] px-6 pb-10">
                 <div className="max-w-6xl mx-auto translate-y-15">
                     <h1 className="text-white text-5xl font-bold mb-2">
-                        Attractions, activities and experiences
+                        {tHeader("attractionsTitle")}
                     </h1>
                     <p className="text-white/90 text-2xl mb-7">
-                        Discover new attractions and experiences to match your interests and travel style
+                        {tHeader("attractionsSubtitle")}
                     </p>
 
                     <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
@@ -334,7 +332,7 @@ export default function AttractionsHeader() {
                                 <input
                                     value={destination}
                                     onChange={(e) => setDestination(e.target.value)}
-                                    placeholder="Where are you going?"
+                                    placeholder={tHeader("searchPlaceholder")}
                                     className="flex-1 text-sm text-gray-800 bg-transparent outline-none"
                                     onClick={(e) => e.stopPropagation()}
                                 />
@@ -412,13 +410,13 @@ export default function AttractionsHeader() {
                                             onClick={() => { setCheckIn(null); setCheckOut(null); }}
                                             className="text-sm text-[#0071c2] underline hover:no-underline"
                                         >
-                                            Clear dates
+                                            {tHeader("clearDates")}
                                         </button>
                                         <button
                                             onClick={() => setShowDate(false)}
                                             className="bg-[#0071c2] hover:bg-[#005ea6] text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors"
                                         >
-                                            Apply
+                                            {tHeader("apply")}
                                         </button>
                                     </div>
                                 </div>
@@ -427,7 +425,7 @@ export default function AttractionsHeader() {
 
                         <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
                             <Search size={18} />
-                            Search
+                            {tHeader("searchBtn")}
                         </button>
                     </div>
                 </div>

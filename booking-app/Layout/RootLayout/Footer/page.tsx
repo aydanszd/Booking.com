@@ -1,39 +1,42 @@
 "use client";
-
-const footerColumns = [
-    {
-        title: "Support",
-        links: ["Manage your trips", "Contact Customer Service", "Safety resource centre"],
-    },
-    {
-        title: "Discover",
-        links: [
-            "Genius loyalty programme", "Seasonal and holiday deals", "Travel articles",
-            "Booking.com for Business", "Traveller Review Awards", "Car hire",
-            "Flight finder", "Restaurant reservations",
-        ],
-    },
-    {
-        title: "Terms and settings",
-        links: [
-            "Privacy Notice", "Terms of Service", "Accessibility Statement",
-            "Partner dispute", "Modern Slavery Statement", "Human Rights Statement",
-        ],
-    },
-    {
-        title: "Partners",
-        links: ["Extranet login", "Partner help", "List your property", "Become an affiliate"],
-    },
-    {
-        title: "About",
-        links: [
-            "About Booking.com", "How we work", "Sustainability", "Press centre",
-            "Careers", "Investor relations", "Corporate contact", "Content guidelines and",
-        ],
-    },
-];
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+    const t = useTranslations("footer");
+
+    const footerColumns = [
+        {
+            title: t("support"),
+            links: [t("manageTrips"), t("contactService"), t("safetyResource")],
+        },
+        {
+            title: t("discover"),
+            links: [
+                t("geniusLoyalty"), t("seasonalDeals"), t("travelArticles"),
+                t("bookingBusiness"), t("reviewAwards"), t("carHire"),
+                t("flightFinder"), t("restaurants"),
+            ],
+        },
+        {
+            title: t("terms"),
+            links: [
+                t("privacyNotice"), t("termsService"), t("accessibility"),
+                t("partnerDispute"), t("slaveryStatement"), t("humanRights"),
+            ],
+        },
+        {
+            title: t("partners"),
+            links: [t("extranetLogin"), t("partnerHelp"), t("listProperty"), t("affiliate")],
+        },
+        {
+            title: t("about"),
+            links: [
+                t("aboutBooking"), t("howWeWork"), t("sustainability"), t("pressCentre"),
+                t("careers"), t("investorRelations"), t("corporateContact"),
+            ],
+        },
+    ];
+
     return (
         <div className="bg-gray-100 border-t border-gray-200 mt-10">
             <div className="max-w-6xl mx-auto px-4 py-8">

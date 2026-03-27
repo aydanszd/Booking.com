@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 const CAR_BRANDS = [
     { name: "Surprice", logo: "https://cdn2.rcstatic.com/sp/images/suppliers/1463_logo_200.png" },
@@ -11,12 +12,14 @@ const CAR_BRANDS = [
 ];
 
 export default function CarRentalSections() {
+    const tCars = useTranslations("cars");
+    const tStays = useTranslations("stays");
 
     return (
         <div className="w-6xl px-6 py-10 space-y-12 mx-auto mt-10">
             {/* Popular car hire brands */}
             <section className="mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular car hire brands</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{tCars("popularBrands")}</h2>
                 <div className="flex flex-wrap gap-3 justify-start">
                     {CAR_BRANDS.map((brand) => (
                         <div
@@ -41,19 +44,19 @@ export default function CarRentalSections() {
 
             {/* Travel more, spend less */}
             <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Travel more, spend less</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{tStays("travelMore")}</h2>
                 <div className="border border-gray-200 rounded-xl p-6 flex items-center justify-between bg-white">
                     <div className="flex flex-col gap-2 items-start text-left">
-                        <h3 className="text-base font-bold text-gray-900">Sign in, save money</h3>
+                        <h3 className="text-base font-bold text-gray-900">{tStays("signInSave")}</h3>
                         <p className="text-sm text-gray-600">
-                            Save 10% on select rental cars - just look for the blue Genius label
+                            {tStays("signInSaveDesc")}
                         </p>
                         <div className="flex items-center gap-3 mt-2">
                             <button className="bg-[#006ce4] hover:bg-[#005ea6] text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors">
-                                Sign in
+                                {tStays("signIn")}
                             </button>
                             <button className="text-[#006ce4] text-sm font-semibold hover:underline">
-                                Register
+                                {tStays("register")}
                             </button>
                         </div>
                     </div>
