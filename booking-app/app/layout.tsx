@@ -5,7 +5,9 @@ import HeaderSelector from "@/layout/RootLayout/Header/HeaderSelector";
 import FooterSelector from "@/layout/RootLayout/Footer/FooterSelector";
 import { headers } from "next/headers";
 import GoogleLogger from "@/components/GoogleLogger";
-import { Toaster } from "sonner"; // Changed: added Sonner import
+import { Toaster } from "sonner";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getLocale } from "next-intl/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,16 +33,22 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || "";
   const isAdmin = pathname.startsWith("/admin");
 
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        suppressHydrationWarning
       >
-        <GoogleLogger />
-        {!isAdmin && <HeaderSelector />}
-        {children}
-        {!isAdmin && <FooterSelector />}
-        <Toaster position="top-right" richColors /> {/* Changed: added Toaster component */}
+        <NextIntlClientProvider messages={messages}>
+          <GoogleLogger />
+          {!isAdmin && <HeaderSelector />}
+          {children}
+          {!isAdmin && <FooterSelector />}
+          <Toaster position="top-right" richColors />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

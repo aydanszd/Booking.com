@@ -27,6 +27,7 @@ const bookingSchema = new mongoose.Schema({
     passengers: { type: Number, default: 1 },
 
     totalPrice: { type: Number, required: true },
+    paidAmount: { type: Number, default: 0 },
     currency: { type: String, default: 'USD' },
     status: {
         type: String,

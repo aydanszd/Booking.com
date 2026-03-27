@@ -271,7 +271,7 @@ export default function AttractionsHeader() {
                 "Select dates";
 
     return (
-        <div className="font-sans">
+        <div className="font-sans relative z-10">
             <div className="bg-[#003b94] px-6 pt-3">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex items-center justify-between mb-5">
@@ -374,7 +374,7 @@ export default function AttractionsHeader() {
                                 <span className="text-sm text-gray-800 whitespace-nowrap">{dateLabel}</span>
                             </div>
                             {showDate && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl min-w-[600px]">
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-[9999] bg-white rounded-xl shadow-2xl min-w-[600px]">
                                     <div className="flex items-center gap-4 px-5 pt-5 pb-3">
                                         <button
                                             onClick={prevMonth}

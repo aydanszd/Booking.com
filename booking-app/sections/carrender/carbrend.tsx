@@ -1,7 +1,4 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { MapPin, Calendar } from "lucide-react";
 
 const CAR_BRANDS = [
     { name: "Surprice", logo: "https://cdn2.rcstatic.com/sp/images/suppliers/1463_logo_200.png" },
@@ -14,21 +11,9 @@ const CAR_BRANDS = [
 ];
 
 export default function CarRentalSections() {
-    const [city, setCity] = useState("Baku");
-    const [pickUp, setPickUp] = useState("");
-    const [dropOff, setDropOff] = useState("");
-    const router = useRouter();
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        const params = new URLSearchParams({ city, pickUp, dropOff });
-        router.push(`/carresults?${params.toString()}`);
-    };
 
     return (
         <div className="w-6xl px-6 py-10 space-y-12 mx-auto mt-10">
-            {/* Popular car hire brands */}
-
             {/* Popular car hire brands */}
             <section className="mx-auto">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Popular car hire brands</h2>

@@ -1,35 +1,98 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { carApi } from "@/api/carapi";
 import { CarType } from "@/types/car";
-import { Loader2, Calendar, Users, Disc, Fuel, Check, Star, Car, CheckCircle2, MapPin, Search } from "lucide-react";
+import { Loader2, Users, Disc, Fuel, Star, Car, CheckCircle2, Send, CornerDownRight, LogIn } from "lucide-react";
 import bookingApi from "@/api/booking";
 import { toast } from "sonner";
+import DateRangePicker from "@/components/DateRangePicker";
+import axios from "axios";
+
+const BASE = "http://localhost:5000";
+
+function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+    const [hovered, setHovered] = useState(0);
+    return (
+        <div className="flex gap-1">
+            {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                <button key={n} type="button"
+                    onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
+                    onClick={() => onChange(n)} className="transition-transform hover:scale-110">
+                    <Star size={20} className={n <= (hovered || value) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"} />
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function fmtDate(d: string) {
+    if (!d) return "";
+    return new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "short", year: "numeric" });
+}
 
 export default function CarDetailPage() {
     const params = useParams();
     const id = params.id as string;
     const searchParams = useSearchParams();
     const router = useRouter();
-    
+
     const [car, setCar] = useState<CarType | null>(null);
     const [loading, setLoading] = useState(true);
     const [bookingLoading, setBookingLoading] = useState(false);
-    
-    // Initial dates from URL params or default to today + tomorrow
-    const [pickUp, setPickUp] = useState(searchParams.get("pickUp") || new Date().toISOString().split('T')[0]);
-    const [dropOff, setDropOff] = useState(searchParams.get("dropOff") || new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+
+    const [pickUp, setPickUp] = useState(searchParams.get("pickUp") || "");
+    const [dropOff, setDropOff] = useState(searchParams.get("dropOff") || "");
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [reviewScore, setReviewScore] = useState(0);
+    const [reviewComment, setReviewComment] = useState("");
+    const [reviewSubmitting, setReviewSubmitting] = useState(false);
+    const [reviewSuccess, setReviewSuccess] = useState(false);
+    const [reviewError, setReviewError] = useState("");
+
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem("token"));
+    }, []);
+
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (reviewScore === 0) { setReviewError("Ulduz seçin"); return; }
+        if (!reviewComment.trim()) { setReviewError("Şərh yazın"); return; }
+        setReviewError("");
+        const token = localStorage.getItem("token");
+        if (!token) { setReviewError("Rəy yazmaq üçün daxil olun"); return; }
+        try {
+            setReviewSubmitting(true);
+            const res = await axios.post(
+                `${BASE}/api/cars/${id}/review`,
+                { score: reviewScore, comment: reviewComment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setCar(res.data);
+            setReviewSuccess(true);
+            setReviewScore(0);
+            setReviewComment("");
+        } catch (err: any) {
+            setReviewError(err.response?.data?.message || "Xəta baş verdi");
+        } finally {
+            setReviewSubmitting(false);
+        }
+    };
+
+    const bookedRanges = useMemo(() =>
+        ((car as any)?.bookedDates || []).map((b: any) => ({
+            start: new Date(b.pickUp),
+            end: new Date(b.dropOff),
+        })),
+    [car]);
 
     useEffect(() => {
         const fetchCar = async () => {
             try {
                 setLoading(true);
-                // carApi doesn't have getById? I'll use getAll and filter or add getById to api
-                const res = await carApi.getAll({ page: 1, limit: 100 });
-                const found = res.cars.find(c => c._id === id);
-                if (found) setCar(found);
-                else throw new Error("Car not found");
+                const found = await carApi.getById(id);
+                setCar(found);
             } catch (err: any) {
                 toast.error(err.message);
                 router.push("/carresults");
@@ -77,7 +140,7 @@ export default function CarDetailPage() {
             toast.success("Booking successful!");
             router.push("/my-bookings");
         } catch (err: any) {
-            toast.error(err.response?.data?.message || "Booking failed");
+            toast.error(err.response?.data?.message || err.message || "Booking failed");
         } finally {
             setBookingLoading(false);
         }
@@ -90,9 +153,9 @@ export default function CarDetailPage() {
         </div>
     );
 
-    const start = new Date(pickUp);
-    const end = new Date(dropOff);
-    const days = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    const days = (pickUp && dropOff)
+        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
+        : 1;
 
     return (
         <div className="bg-gray-50 min-h-screen py-10 px-4">
@@ -178,29 +241,18 @@ export default function CarDetailPage() {
 
                     {/* Right: Booking Card */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 sticky top-24 space-y-6">
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 sticky top-24 space-y-5">
                             <h3 className="text-xl font-bold text-gray-900">Booking Summary</h3>
-                            
-                            <div className="space-y-4">
-                                <div className="flex flex-col gap-1.5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Pick-up Date</label>
-                                    <input 
-                                        type="date"
-                                        value={pickUp}
-                                        onChange={(e) => setPickUp(e.target.value)}
-                                        className="bg-transparent text-sm font-black text-gray-900 outline-none w-full"
-                                    />
-                                </div>
-                                <div className="flex flex-col gap-1.5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Drop-off Date</label>
-                                    <input 
-                                        type="date"
-                                        value={dropOff}
-                                        onChange={(e) => setDropOff(e.target.value)}
-                                        className="bg-transparent text-sm font-black text-gray-900 outline-none w-full"
-                                    />
-                                </div>
-                            </div>
+
+                            <DateRangePicker
+                                bookedRanges={bookedRanges}
+                                startDate={pickUp}
+                                endDate={dropOff}
+                                onStartChange={setPickUp}
+                                onEndChange={setDropOff}
+                                startLabel="Pick-up"
+                                endLabel="Drop-off"
+                            />
 
                             <div className="py-6 border-y border-gray-100">
                                 <div className="flex justify-between items-center mb-2">
@@ -237,7 +289,101 @@ export default function CarDetailPage() {
                     </div>
 
                 </div>
+
+                {/* Reviews Section */}
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mt-8">
+                    <div className="flex items-center gap-4 mb-8">
+                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Reviews</h2>
+                        {car.rating > 0 && (
+                            <div className="flex items-center gap-1.5 bg-blue-600 text-white font-black px-3 py-1.5 rounded-xl text-sm">
+                                <Star size={14} fill="white" /> {car.rating}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Review list */}
+                    {((car as any).reviews?.length > 0) ? (
+                        <div className="space-y-4 mb-8">
+                            {((car as any).reviews as any[]).map((r: any) => (
+                                <div key={r._id} className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-black">
+                                                {(r.userName || "G").charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-800">{r.userName || "Guest"}</p>
+                                                <p className="text-xs text-gray-400">{fmtDate(r.createdAt)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1 bg-blue-600 text-white text-xs font-black px-2.5 py-1 rounded-xl">
+                                            <Star size={11} fill="white" /> {r.score}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-700 leading-relaxed">{r.comment}</p>
+                                    {r.adminReply && (
+                                        <div className="mt-4 ml-4 bg-blue-50 border border-blue-100 rounded-xl p-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <CornerDownRight size={14} className="text-blue-600" />
+                                                <span className="text-xs font-black text-blue-700 uppercase">Admin cavabı</span>
+                                                {r.adminReplyAt && <span className="text-xs text-blue-400">{fmtDate(r.adminReplyAt)}</span>}
+                                            </div>
+                                            <p className="text-sm text-blue-800">{r.adminReply}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-gray-400 mb-8">Hələ rəy yoxdur. İlk rəyi siz yazın!</p>
+                    )}
+
+                    {/* Submit form */}
+                    <div className="border-t border-gray-100 pt-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-5">Rəyinizi bildirin</h3>
+                        {!isLoggedIn ? (
+                            <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                                <p className="text-sm font-semibold text-blue-700">Rəy yazmaq üçün daxil olun</p>
+                                <button onClick={() => router.push("/signin")}
+                                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors">
+                                    <LogIn size={15} /> Daxil ol
+                                </button>
+                            </div>
+                        ) : reviewSuccess ? (
+                            <div className="bg-green-50 border border-green-100 rounded-2xl p-5 text-center">
+                                <p className="text-green-700 font-bold">Rəyiniz göndərildi! Təşəkkür edirik.</p>
+                            </div>
+                        ) : (
+                            <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Qiymət (1–10)</label>
+                                    <StarRating value={reviewScore} onChange={setReviewScore} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Şərh</label>
+                                    <textarea
+                                        value={reviewComment}
+                                        onChange={(e) => setReviewComment(e.target.value)}
+                                        rows={4}
+                                        placeholder="Avtomobil haqqında fikirinizi bölüşün..."
+                                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-400 resize-none"
+                                    />
+                                </div>
+                                {reviewError && <p className="text-red-500 text-sm">{reviewError}</p>}
+                                <button
+                                    type="submit"
+                                    disabled={reviewSubmitting}
+                                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+                                >
+                                    {reviewSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                    Göndər
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
+

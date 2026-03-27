@@ -47,6 +47,11 @@ exports.createFlight = async (req, res) => {
         if (typeof body.stops === 'string') body.stops = JSON.parse(body.stops);
         if (typeof body.bookingSites === 'string') body.bookingSites = JSON.parse(body.bookingSites);
 
+        // Handle uploaded logo file (like cars handle images)
+        if (req.file) {
+            body.logoUrl = `/uploads/${req.file.filename}`;
+        }
+
         const flight = await Flight.create(body);
         res.status(201).json(flight);
     } catch (err) {
@@ -59,6 +64,11 @@ exports.updateFlight = async (req, res) => {
         const body = { ...req.body };
         if (typeof body.stops === 'string') body.stops = JSON.parse(body.stops);
         if (typeof body.bookingSites === 'string') body.bookingSites = JSON.parse(body.bookingSites);
+
+        // Only overwrite logoUrl if a new file was uploaded
+        if (req.file) {
+            body.logoUrl = `/uploads/${req.file.filename}`;
+        }
 
         const flight = await Flight.findByIdAndUpdate(req.params.id, body, { new: true });
         if (!flight) return res.status(404).json({ message: 'Tapılmadı' });

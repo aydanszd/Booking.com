@@ -6,9 +6,9 @@ const Flight = require('../models/Flight');
 exports.getMyBookings = async (req, res, next) => {
     try {
         const bookings = await Booking.find({ user: req.user._id })
-            .populate('building', 'title images location pricePerNight')
-            .populate('car', 'title images brand model pricePerDay')
-            .populate('flight', 'airline origin destination departureTime price')
+            .populate('building', 'title images location pricePerNight rating')
+            .populate('car', 'title images brand model pricePerDay location rating')
+            .populate('flight', 'airline origin destination departureTime arrivalTime price logoUrl flightNumber')
             .sort({ createdAt: -1 });
         res.json(bookings);
     } catch (err) { next(err); }
@@ -62,6 +62,8 @@ exports.createBooking = async (req, res, next) => {
             }
         }
 
+        const paidAmount = Math.ceil((totalPrice || 0) * 0.3);
+
         // Rezervasiya yarat
         const booking = await Booking.create({
             user: req.user._id,
@@ -72,7 +74,7 @@ exports.createBooking = async (req, res, next) => {
             checkIn, checkOut,
             pickUp, dropOff,
             guests, passengers,
-            totalPrice, contactInfo, notes,
+            totalPrice, paidAmount, contactInfo, notes,
         });
 
         // Building bookedDates yenilə
@@ -102,7 +104,11 @@ exports.createBooking = async (req, res, next) => {
 
 exports.cancelBooking = async (req, res, next) => {
     try {
-        const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id });
+        const isAdmin = req.user?.role === 'admin';
+        const query = isAdmin
+            ? { _id: req.params.id }
+            : { _id: req.params.id, user: req.user._id };
+        const booking = await Booking.findOne(query);
         if (!booking) return res.status(404).json({ message: 'Tapılmadı' });
         if (booking.status === 'cancelled') {
             return res.status(400).json({ message: 'Artıq ləğv edilib' });
@@ -128,6 +134,49 @@ exports.cancelBooking = async (req, res, next) => {
                 $inc: { bookedSeats: -(booking.passengers || 1) },
             });
         }
+
+        res.json(booking);
+    } catch (err) { next(err); }
+};
+
+exports.updateBookingStatus = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const allowed = ['pending', 'confirmed', 'cancelled', 'completed'];
+        if (!allowed.includes(status)) {
+            return res.status(400).json({ message: 'Yanlış status dəyəri' });
+        }
+
+        const existing = await Booking.findById(req.params.id);
+        if (!existing) return res.status(404).json({ message: 'Rezervasiya tapılmadı' });
+
+        // When cancelling, release the held dates/seats
+        if (status === 'cancelled' && existing.status !== 'cancelled') {
+            if (existing.type === 'building' && existing.building) {
+                await Building.findByIdAndUpdate(existing.building, {
+                    $pull: { bookedDates: { bookingId: existing._id } },
+                });
+            }
+            if (existing.type === 'car' && existing.car) {
+                await Car.findByIdAndUpdate(existing.car, {
+                    $pull: { bookedDates: { bookingId: existing._id } },
+                });
+            }
+            if (existing.type === 'flight' && existing.flight) {
+                await Flight.findByIdAndUpdate(existing.flight, {
+                    $inc: { bookedSeats: -(existing.passengers || 1) },
+                });
+            }
+        }
+
+        existing.status = status;
+        await existing.save();
+
+        const booking = await Booking.findById(existing._id)
+            .populate('user', 'name email')
+            .populate('building', 'title')
+            .populate('car', 'title brand')
+            .populate('flight', 'airline flightNumber');
 
         res.json(booking);
     } catch (err) { next(err); }

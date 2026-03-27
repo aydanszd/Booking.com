@@ -1,5 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { X, ChevronDown, ArrowLeftRight, ChevronLeft, ChevronRight, Users, Plus, Minus } from "lucide-react";
 
 const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -71,6 +72,7 @@ function CalendarMonth({ year, month, selected, hovered, onSelect, onHover }) {
 }
 
 export default function FlightsDates() {
+    const router = useRouter();
     const [from, setFrom] = useState("Baku (BAK)");
     const [to, setTo] = useState("");
     const [showCalendar, setShowCalendar] = useState(false);
@@ -249,7 +251,19 @@ export default function FlightsDates() {
                         </div>
 
                         {/* Search */}
-                        <button className="bg-[#0071c2] hover:bg-[#005fa3] text-white text-sm rounded-[20px] font-bold px-6 py-3 transition-colors shrink-0">
+                        <button
+                            onClick={() => {
+                                const originCity = from.replace(/\s*\(.*?\)/, "").trim();
+                                const params = new URLSearchParams();
+                                if (originCity) params.set("from", originCity);
+                                if (to.trim()) params.set("to", to.trim());
+                                params.set("adults", String(adults));
+                                params.set("children", String(children));
+                                if (selected[0]) params.set("date", selected[0].toISOString().split("T")[0]);
+                                router.push(`/flightdetail?${params.toString()}`);
+                            }}
+                            className="bg-[#0071c2] hover:bg-[#005fa3] text-white text-sm rounded-[20px] font-bold px-6 py-3 transition-colors shrink-0"
+                        >
                             Search
                         </button>
                     </div>

@@ -36,12 +36,8 @@ export const flightApi = {
         return res.json();
     },
 
-    create: async (body: object): Promise<FlightType> => {
-        const res = await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
+    create: async (fd: FormData): Promise<FlightType> => {
+        const res = await fetch(API, { method: "POST", body: fd });
         if (!res.ok) {
             const d = await res.json();
             throw new Error(d.message || "Əlavə edilmədi");
@@ -49,12 +45,8 @@ export const flightApi = {
         return res.json();
     },
 
-    update: async (id: string, body: object): Promise<FlightType> => {
-        const res = await fetch(`${API}/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-        });
+    update: async (id: string, fd: FormData): Promise<FlightType> => {
+        const res = await fetch(`${API}/${id}`, { method: "PUT", body: fd });
         if (!res.ok) {
             const d = await res.json();
             throw new Error(d.message || "Yenilənmədi");

@@ -82,9 +82,33 @@ exports.addReview = async (req, res) => {
         const car = await Car.findById(req.params.id);
         if (!car) return res.status(404).json({ message: 'Tapılmadı' });
 
-        car.reviews.push(req.body);
+        car.reviews.push({
+            userId: req.user._id,
+            userName: req.user.name,
+            score: req.body.score,
+            comment: req.body.comment,
+        });
         const avg = car.reviews.reduce((s, r) => s + r.score, 0) / car.reviews.length;
         car.rating = Math.round(avg * 10) / 10;
+
+        await car.save();
+        res.json(car);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+// POST /api/cars/:id/review/:reviewId/reply
+exports.replyToReview = async (req, res) => {
+    try {
+        const car = await Car.findById(req.params.id);
+        if (!car) return res.status(404).json({ message: 'Tapılmadı' });
+
+        const review = car.reviews.id(req.params.reviewId);
+        if (!review) return res.status(404).json({ message: 'Rəy tapılmadı' });
+
+        review.adminReply = req.body.reply;
+        review.adminReplyAt = new Date();
 
         await car.save();
         res.json(car);

@@ -87,7 +87,7 @@ function formatTime(iso: string) {
 function formatDateLabel(iso: string) {
     if (!iso) return "";
     const d = new Date(iso);
-    return d.toLocaleDateString("tr-TR", { day: "2-digit", month: "short", weekday: "short" });
+    return d.toLocaleDateString("az-AZ", { day: "2-digit", month: "short", weekday: "short" });
 }
 
 function seatsLeft(flight: FlightType) {
@@ -95,12 +95,9 @@ function seatsLeft(flight: FlightType) {
 }
 
 // ─────────────────────────────────────────────
-// Airline Logo — color-coded initials (no external images needed)
+// Airline Logo — color-coded initials
 // ─────────────────────────────────────────────
-
-// Well-known airline IATA/name → brand color pairs
 const AIRLINE_COLORS: Record<string, { bg: string; text: string }> = {
-    // by common name keywords
     ajet: { bg: "#FF6B35", text: "#fff" },
     ajt: { bg: "#FF6B35", text: "#fff" },
     azerbaijan: { bg: "#0057A8", text: "#fff" },
@@ -144,7 +141,6 @@ function AirlineLogo({
     const fontSize = size === "lg" ? "text-base" : size === "sm" ? "text-[9px]" : "text-xs";
     const { bg, text } = getAirlineColor(name);
 
-    // Initials: up to 2 chars from words
     const initials = name
         .split(/\s+/)
         .slice(0, 2)
@@ -152,14 +148,17 @@ function AirlineLogo({
         .join("")
         .toUpperCase() || name.slice(0, 2).toUpperCase();
 
+    // Handle both full URL and relative path
+    const imageUrl = src?.startsWith("/uploads") ? `http://localhost:5000${src}` : src;
+
     return (
         <div
             className={`${sz} rounded-xl flex items-center justify-center shrink-0 shadow-sm overflow-hidden`}
             style={{ background: imgOk === true ? "white" : bg, border: "1px solid #e5e7eb" }}
         >
-            {src && imgOk !== false ? (
+            {imageUrl && imgOk !== false ? (
                 <img
-                    src={src}
+                    src={imageUrl}
                     alt={name}
                     className="w-full h-full object-contain p-1"
                     onLoad={() => setImgOk(true)}
@@ -177,7 +176,7 @@ function AirlineLogo({
 }
 
 // ─────────────────────────────────────────────
-// LegRow (first code style, dynamic data)
+// LegRow
 // ─────────────────────────────────────────────
 function LegRow({ flight }: { flight: FlightType }) {
     const stopCount = flight.stops?.length ?? 0;
@@ -211,7 +210,7 @@ function LegRow({ flight }: { flight: FlightType }) {
 }
 
 // ─────────────────────────────────────────────
-// LegDetail (first code style, dynamic data)
+// LegDetail
 // ─────────────────────────────────────────────
 function LegDetail({ flight, label }: { flight: FlightType; label?: string }) {
     return (
@@ -337,7 +336,7 @@ function LegDetail({ flight, label }: { flight: FlightType; label?: string }) {
 }
 
 // ─────────────────────────────────────────────
-// Sort Tabs (first code style)
+// Sort Tabs
 // ─────────────────────────────────────────────
 type SortKey = "price_asc" | "price_desc" | "duration" | "quality";
 
@@ -376,14 +375,40 @@ function SortTabs({
 }
 
 // ─────────────────────────────────────────────
-// Flight Card (first code style + dynamic data)
+// Flight Card
 // ─────────────────────────────────────────────
 function FlightCard({ flight }: { flight: FlightType }) {
     const [expanded, setExpanded] = useState(false);
     const stopCount = flight.stops?.length ?? 0;
+
+    const handleSelect = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) {
+            window.location.href = "/signin";
+            return;
+        }
+        const params = new URLSearchParams({
+            id: flight._id,
+            airline: flight.airline || "",
+            flightNumber: flight.flightNumber || "",
+            origin: flight.origin?.code || "",
+            originCity: flight.origin?.city || "",
+            destination: flight.destination?.code || "",
+            destinationCity: flight.destination?.city || "",
+            departureTime: flight.departureTime || "",
+            arrivalTime: flight.arrivalTime || "",
+            cabin: flight.cabin || "",
+            price: String(flight.price),
+            adults: "1",
+            children: "0",
+            totalPrice: String(flight.price),
+            logoUrl: flight.logoUrl || "",
+        });
+        window.location.href = `/checkout/flight?${params.toString()}`;
+    };
     const left = seatsLeft(flight);
     const isGood = (flight.flightQuality ?? 0) >= 8;
-    const isCheap = !isGood; // simplistic tag logic; adjust as needed
 
     return (
         <div
@@ -435,7 +460,6 @@ function FlightCard({ flight }: { flight: FlightType }) {
                     {/* Outbound leg */}
                     <div className="space-y-1 divide-y divide-gray-100">
                         <LegRow flight={flight} />
-                        {/* Inbound leg if round-trip */}
                         {flight.inbound && <LegRow flight={flight.inbound} />}
                     </div>
 
@@ -476,7 +500,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
                         </div>
                     </div>
                     <button
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={handleSelect}
                         className="bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap shadow-sm"
                     >
                         Seçin
@@ -484,7 +508,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
                 </div>
             </div>
 
-            {/* Expanded detail panel (first code style) */}
+            {/* Expanded detail panel */}
             {expanded && (
                 <div className="border-t border-blue-100 px-4 pb-5 pt-4 bg-blue-50/30 space-y-3">
                     <LegDetail
@@ -541,7 +565,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
                                     </span>
                                 </p>
                             </div>
-                            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+                            <button onClick={handleSelect} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors shadow-sm">
                                 Seçin
                             </button>
                         </div>
@@ -553,7 +577,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
 }
 
 // ─────────────────────────────────────────────
-// Filter Sidebar (first code style, second code logic)
+// Filter Section
 // ─────────────────────────────────────────────
 function FilterSection({
     title,
@@ -667,16 +691,10 @@ function FilterSidebar({
                 : [...f.cabin, val],
         }));
 
-    const fmtMin = (m: number) => {
-        const h = Math.floor(m / 60);
-        const mn = m % 60;
-        return h > 0 ? `${h}sa. ${mn}dk.` : `${mn}dk.`;
-    };
-
     return (
         <aside className="w-full lg:w-64 shrink-0">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
-                {/* Smart Filter (first code style, decorative) */}
+                {/* Smart Filter */}
                 <div className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-yellow-500 text-base">✦</span>
@@ -847,7 +865,7 @@ function FilterSidebar({
 }
 
 // ─────────────────────────────────────────────
-// Header Dropdown (first code, unchanged)
+// Header Dropdown
 // ─────────────────────────────────────────────
 function HeaderDropdown({
     value,
@@ -934,7 +952,7 @@ function HeaderDropdown({
 }
 
 // ─────────────────────────────────────────────
-// Search Header (first code style)
+// Search Header
 // ─────────────────────────────────────────────
 function SearchHeader({
     filters,
@@ -1262,7 +1280,7 @@ export default function FlightResults() {
                             </div>
                         )}
 
-                        {/* Loading skeleton (first code feel) */}
+                        {/* Loading skeleton */}
                         {loading && flights.length === 0 && (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
@@ -1293,7 +1311,7 @@ export default function FlightResults() {
                         )}
 
                         {/* Pagination */}
-                        {total > LIMIT ? (
+                        {total > LIMIT && (
                             <div className="flex items-center justify-center gap-2 mt-5">
                                 <button
                                     disabled={page === 1}
@@ -1313,13 +1331,6 @@ export default function FlightResults() {
                                     Növbəti →
                                 </button>
                             </div>
-                        ) : (
-                            <button
-                                onClick={fetchFlights}
-                                className="mt-5 w-full py-3 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-white hover:border-blue-300 transition-all font-medium"
-                            >
-                                Daha fazla uçuş göster
-                            </button>
                         )}
                     </div>
                 </div>

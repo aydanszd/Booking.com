@@ -14,13 +14,15 @@ export default function HotelDetail() {
     const [building, setBuilding] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const fetchBuilding = () => {
         if (!id) return;
         api.getBuilding(id)
             .then(res => setBuilding(res.data))
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
-    }, [id]);
+    };
+
+    useEffect(() => { fetchBuilding(); }, [id]);
 
     if (loading) return (
         <div className="flex h-96 items-center justify-center">
@@ -34,7 +36,7 @@ export default function HotelDetail() {
             <HotelImage building={building} />
             <Availability building={building} />
             <Rules building={building} />
-            <Reviews building={building} />
+            <Reviews building={building} onReviewAdded={fetchBuilding} />
         </div>
     );
 }

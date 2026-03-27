@@ -3,7 +3,7 @@ const router = express.Router();
 const { protect, adminOnly } = require('../middleware/auth');
 const {
     getMyBookings, getBooking,
-    createBooking, cancelBooking, getAllBookings,
+    createBooking, cancelBooking, getAllBookings, updateBookingStatus,
 } = require('../controllers/bookingController');
 
 router.get('/', protect, getMyBookings);
@@ -11,5 +11,6 @@ router.get('/admin/all', protect, adminOnly, getAllBookings);
 router.get('/:id', protect, getBooking);
 router.post('/', protect, createBooking);
 router.put('/:id/cancel', protect, cancelBooking);
+router.put('/:id/status', protect, adminOnly, updateBookingStatus);
 
 module.exports = router;

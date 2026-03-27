@@ -7,15 +7,17 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
-const NAV_ITEMS = [
-    { icon: Bed, label: "Stays", href: "/" },
-    { icon: BedDouble, label: "Buildings", href: "/filter" },
-    { icon: Plane, label: "Flights", href: "/flights" },
-    { icon: Car, label: "Car rental", href: "/carrender" },
-    { icon: Ticket, label: "Attractions", href: "/attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
-];
+const NAV_ITEM_KEYS = [
+    { icon: Bed, key: "stays", href: "/" },
+    { icon: BedDouble, key: "buildings", href: "/filter" },
+    { icon: Plane, key: "flights", href: "/flights" },
+    { icon: Car, key: "carRental", href: "/carrender" },
+    { icon: Ticket, key: "attractions", href: "/attractions" },
+    { icon: CarTaxiFront, key: "airportTaxis", href: "/_airporttaxis" },
+] as const;
 
 const SUGGESTIONS = [
     "Baku, Azerbaijan",
@@ -213,7 +215,10 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 
 export default function Header() {
-    const [activeNav, setActiveNav] = useState<string>("Stays");
+    const t = useTranslations("header");
+    const tNav = useTranslations("nav");
+    const tGuests = useTranslations("guests");
+    const [activeNav, setActiveNav] = useState<string>("stays");
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
     const [showGuests, setShowGuests] = useState<boolean>(false);
@@ -229,10 +234,12 @@ export default function Header() {
     const [leftMonth, setLeftMonth] = useState<number>(TODAY.getMonth());
     const [rightYear, setRightYear] = useState<number>(initRight.getFullYear());
     const [rightMonth, setRightMonth] = useState<number>(initRight.getMonth());
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const locationRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
     const guestRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem("token"));
         const handler = (e: MouseEvent) => {
             if (locationRef.current && !locationRef.current.contains(e.target as Node)) setShowLocation(false);
             if (dateRef.current && !dateRef.current.contains(e.target as Node)) setShowDate(false);
@@ -294,44 +301,42 @@ export default function Header() {
 
                         <div className="flex items-center gap-3 text-white text-sm font-medium">
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors">
-                                <img src="https://flagcdn.com/w40/gb.png" alt="English" className="w-6 h-6 rounded-full object-cover" />
-                            </button>
+                            <LanguageSwitcher />
                             <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">List your property</Link>
-                            {typeof window !== "undefined" && localStorage.getItem("token") ? (
+                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{t("listProperty")}</Link>
+                            {isLoggedIn ? (
                                 <>
-                                    <Link href="/my-bookings" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block font-semibold text-amber-400">My Bookings</Link>
-                                    <button 
-                                        onClick={() => { localStorage.removeItem("token"); window.location.reload(); }}
+                                    <Link href="/my-bookings" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block font-semibold text-amber-400">{t("myBookings")}</Link>
+                                    <button
+                                        onClick={() => { localStorage.removeItem("token"); setIsLoggedIn(false); window.location.reload(); }}
                                         className="bg-white text-red-600 border border-red-200 rounded px-3 py-2 cursor-pointer font-semibold hover:bg-red-50 transition-colors block leading-none"
                                     >
-                                        Sign out
+                                        {t("signOut")}
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">Register</Link>
-                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">Sign in</Link>
+                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{t("register")}</Link>
+                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{t("signIn")}</Link>
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="flex gap-1 -mt-4.5">
-                        {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
+                        {NAV_ITEM_KEYS.map(({ icon: Icon, key, href }) => (
                             <Link
-                                key={label}
+                                key={key}
                                 href={href}
-                                onClick={() => setActiveNav(label)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === label
+                                onClick={() => setActiveNav(key)}
+                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === key
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
                                 <Icon size={16} />
-                                {label}
+                                {tNav(key)}
                             </Link>
                         ))}
                     </div>
@@ -340,8 +345,8 @@ export default function Header() {
             <div className="bg-[#003b94] px-6 pb-10">
                 <div className="max-w-6xl mx-auto translate-y-25">
 
-                    <h1 className="text-white text-5xl font-bold mb-2">Find your next stay</h1>
-                    <p className="text-white/90 text-2xl mb-7">Search low prices on hotels, homes and much more...</p>
+                    <h1 className="text-white text-5xl font-bold mb-2">{t("title")}</h1>
+                    <p className="text-white/90 text-2xl mb-7">{t("subtitle")}</p>
                     <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
                         <div ref={locationRef} className="relative flex-1 min-w-50">
                             <div

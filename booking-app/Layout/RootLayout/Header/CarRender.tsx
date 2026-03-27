@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     Bed, Plane, Car, Ticket, CarTaxiFront,
@@ -207,6 +208,7 @@ const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
 export default function CarRentalHeader() {
+    const router = useRouter();
     const [activeNav, setActiveNav] = useState<string>("Car rental");
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
@@ -272,9 +274,15 @@ export default function CarRentalHeader() {
         }
     };
 
+    const toDateStr = (d: Date | null) =>
+        d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}` : "";
+
     const handleSearch = () => {
-        const url = `/filter${pickupLocation ? `?city=${encodeURIComponent(pickupLocation)}` : ''}`;
-        window.location.href = url;
+        const params = new URLSearchParams();
+        if (pickupLocation) params.set("city", pickupLocation);
+        if (checkIn) params.set("pickUp", toDateStr(checkIn));
+        if (checkOut) params.set("dropOff", toDateStr(checkOut));
+        router.push(`/carfilter?${params.toString()}`);
     };
 
     return (
@@ -410,6 +418,92 @@ export default function CarRentalHeader() {
                                     </span>
                                 </div>
                             </div>
+
+                            {/* Calendar dropdown */}
+                            {showDate && (
+                                <div className="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 min-w-[580px]">
+                                    {/* Flex options */}
+                                    <div className="flex gap-2 mb-4 border-b border-gray-100 pb-3">
+                                        {FLEX_OPTIONS.map(opt => (
+                                            <button
+                                                key={opt.label}
+                                                onClick={() => setFlexDays(opt.value)}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${flexDays === opt.value ? "bg-[#003b94] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                                            >
+                                                {opt.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Month navigation */}
+                                    <div className="flex items-start gap-6">
+                                        <div className="relative">
+                                            <button
+                                                onClick={prevMonth}
+                                                disabled={isAtStart}
+                                                className={`absolute left-0 top-0 p-1 rounded-full transition-colors ${isAtStart ? "text-gray-200 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"}`}
+                                            >
+                                                <ChevronLeft size={16} />
+                                            </button>
+                                            <CalendarMonth
+                                                year={leftYear}
+                                                month={leftMonth}
+                                                checkIn={checkIn}
+                                                checkOut={checkOut}
+                                                hoveredDate={hoveredDate}
+                                                onDayClick={handleDayClick}
+                                                onDayHover={setHoveredDate}
+                                                onMonthChange={(m) => setLeftMonth(m)}
+                                                onYearChange={(y) => setLeftYear(y)}
+                                            />
+                                        </div>
+                                        <div className="relative">
+                                            <button
+                                                onClick={nextMonth}
+                                                className="absolute right-0 top-0 p-1 rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
+                                            >
+                                                <ChevronRight size={16} />
+                                            </button>
+                                            <CalendarMonth
+                                                year={rightYear}
+                                                month={rightMonth}
+                                                checkIn={checkIn}
+                                                checkOut={checkOut}
+                                                hoveredDate={hoveredDate}
+                                                onDayClick={handleDayClick}
+                                                onDayHover={setHoveredDate}
+                                                onMonthChange={(m) => setRightMonth(m)}
+                                                onYearChange={(y) => setRightYear(y)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                                        <div className="text-sm text-gray-500">
+                                            {checkIn && checkOut
+                                                ? `${formatDate(checkIn)} → ${formatDate(checkOut)}`
+                                                : checkIn
+                                                    ? "Select drop-off date"
+                                                    : "Select pick-up date"}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => { setCheckIn(null); setCheckOut(null); }}
+                                                className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded hover:bg-gray-100 transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                            <button
+                                                onClick={() => setShowDate(false)}
+                                                className="text-xs bg-[#003b94] text-white px-4 py-1.5 rounded-lg hover:bg-[#002d73] transition-colors font-medium"
+                                            >
+                                                Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Pick-up time */}

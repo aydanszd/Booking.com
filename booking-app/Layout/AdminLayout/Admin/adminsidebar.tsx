@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard, Building2, Hotel, Car, Plane,
     MessageSquare, ShoppingBag, Settings, Users,
-    Menu, Bell, Search, ChevronLeft, LogOut, Calendar,
+    Menu, Bell, Search, ChevronLeft, LogOut, Calendar, CreditCard, Star, Languages,
 } from "lucide-react";
 
 const navGroups = [
@@ -25,12 +25,15 @@ const navGroups = [
             { href: "/admin/messages", label: "Messages", icon: MessageSquare, badge: 7 },
             { href: "/admin/orders",   label: "Orders",   icon: ShoppingBag },
             { href: "/admin/bookings", label: "Bookings", icon: Calendar },
+            { href: "/admin/payments", label: "Payments", icon: CreditCard },
+            { href: "/admin/reviews",  label: "Reviews",  icon: Star },
             { href: "/admin/users",    label: "Users",    icon: Users },
         ],
     },
     {
         label: "System",
         items: [
+            { href: "/admin/translations", label: "Translations", icon: Languages },
             { href: "/admin/settings", label: "Settings", icon: Settings },
         ],
     },
@@ -45,8 +48,11 @@ const pageMeta = {
     "/admin/messages":   { title: "Messages",   subtitle: "Customer communications." },
     "/admin/orders":     { title: "Orders",     subtitle: "Track and manage all orders." },
     "/admin/bookings":   { title: "Bookings",   subtitle: "System wide reservations." },
-    "/admin/users":      { title: "Users",      subtitle: "User accounts and permissions." },
-    "/admin/settings":   { title: "Settings",   subtitle: "Configure your platform." },
+    "/admin/payments":   { title: "Payments",   subtitle: "Reservation payment tracking." },
+    "/admin/reviews":    { title: "Reviews",    subtitle: "Guest reviews and admin replies." },
+    "/admin/users":         { title: "Users",         subtitle: "User accounts and permissions." },
+    "/admin/translations":  { title: "Translations",  subtitle: "Manage EN · TR · RU translations." },
+    "/admin/settings":      { title: "Settings",      subtitle: "Configure your platform." },
 };
 
 function SidebarInner({ collapsed, onNavClick }: { collapsed: boolean; onNavClick: () => void }) {

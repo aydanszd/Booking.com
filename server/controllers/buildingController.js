@@ -91,10 +91,34 @@ exports.addReview = async (req, res) => {
         const building = await Building.findById(req.params.id);
         if (!building) return res.status(404).json({ message: 'Tapılmadı' });
 
-        building.reviews.push(req.body);
+        building.reviews.push({
+            userId: req.user._id,
+            userName: req.user.name,
+            score: req.body.score,
+            comment: req.body.comment,
+        });
 
         const avg = building.reviews.reduce((s, r) => s + r.score, 0) / building.reviews.length;
         building.rating = Math.round(avg * 10) / 10;
+
+        await building.save();
+        res.json(building);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+// POST /api/buildings/:id/review/:reviewId/reply
+exports.replyToReview = async (req, res) => {
+    try {
+        const building = await Building.findById(req.params.id);
+        if (!building) return res.status(404).json({ message: 'Tapılmadı' });
+
+        const review = building.reviews.id(req.params.reviewId);
+        if (!review) return res.status(404).json({ message: 'Rəy tapılmadı' });
+
+        review.adminReply = req.body.reply;
+        review.adminReplyAt = new Date();
 
         await building.save();
         res.json(building);

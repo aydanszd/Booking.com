@@ -1,6 +1,6 @@
 "use client";
-
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface PropertyType {
     image: string;
@@ -48,10 +48,11 @@ const PROPERTY_TYPES: PropertyType[] = [
     },
 ];
 
-const CARD_WIDTH = 272; 
+const CARD_WIDTH = 272;
 const VISIBLE = 4;
 
 export default function BrowseByPropertyType({ city = "Milan" }: { city?: string }) {
+    const t = useTranslations("stays");
     const [index, setIndex] = useState(0);
     const maxIndex = PROPERTY_TYPES.length - VISIBLE;
 
@@ -59,15 +60,12 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
     const next = () => setIndex((i) => Math.min(i + 1, maxIndex));
 
     return (
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-10 ">
-            {/* Header */}
+        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-10">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Browse by property type in {city}
+                {t("browseByType", { city })}
             </h2>
 
-            {/* Slider wrapper */}
             <div className="relative">
-                {/* Left arrow */}
                 <button
                     onClick={prev}
                     disabled={index === 0}
@@ -79,7 +77,7 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
                     </svg>
                 </button>
 
-                <div className="overflow-hidden ">
+                <div className="overflow-hidden">
                     <div
                         className="flex gap-4 transition-transform duration-300 ease-in-out"
                         style={{ transform: `translateX(-${index * CARD_WIDTH}px)` }}
@@ -90,7 +88,6 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
                                 className="shrink-0 w-64 cursor-pointer group"
                                 onClick={() => console.log("Navigate to:", prop.type)}
                             >
-                                {/* Image */}
                                 <div className="w-full h-54 rounded-xl overflow-hidden mb-3">
                                     <img
                                         src={prop.image}
@@ -98,17 +95,14 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                 </div>
-
-                                {/* Info */}
                                 <p className="font-semibold text-gray-900 text-[16px]">{prop.type}</p>
                                 <p className="text-sm text-gray-500 mt-0.5">{prop.dates}</p>
-                                <p className="text-sm text-gray-500">{prop.available} available</p>
+                                <p className="text-sm text-gray-500">{t("available", { count: prop.available })}</p>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Right arrow */}
                 <button
                     onClick={next}
                     disabled={index >= maxIndex}

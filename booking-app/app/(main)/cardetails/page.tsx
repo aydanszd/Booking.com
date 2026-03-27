@@ -1,14 +1,17 @@
 'use client'
 
-import { useState, useEffect, useRef, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
     Users, Settings2, Gauge, MapPin, CheckCircle2, Star,
     ChevronLeft, ChevronRight, Shield, Fuel, Wind,
     Phone, Mail, Info, ArrowRight, Clock, Calendar,
     CreditCard, AlertCircle, ThumbsUp, Car, X, ChevronDown,
-    Loader2, Snowflake, Navigation, Wifi,
+    Loader2, Snowflake, Navigation, Wifi, Send, CornerDownRight, LogIn,
 } from 'lucide-react'
+import axios from 'axios'
+import { toast } from 'sonner'
+import DateRangePicker from '@/components/DateRangePicker'
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails'
@@ -49,12 +52,13 @@ type CarType = {
 }
 
 type Review = {
-    id: number
-    author: string
-    date: string
-    rating: number
+    _id: string
+    userName: string
+    score: number
     comment: string
-    avatar: string
+    adminReply?: string | null
+    adminReplyAt?: string | null
+    createdAt?: string
 }
 
 // ─── Config ────────────────────────────────────────────────────────────────────
@@ -71,13 +75,12 @@ function scoreLabel(v: number) {
     return 'Yeterli'
 }
 
-// ─── Mock Reviews ─────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const MOCK_REVIEWS: Review[] = [
-    { id: 1, author: 'Mehmet Y.', date: 'Şubat 2025', rating: 9, comment: 'Araç çok temizdi, teslim alma süreci hızlıydı. Personel çok yardımseverdi. Kesinlikle tavsiye ederim.', avatar: 'MY' },
-    { id: 2, author: 'Sarah K.', date: 'Ocak 2025', rating: 8, comment: 'Araç iyi durumdaydı. Havalimanından çıkarken biraz bekleme oldu ama genel olarak sorunsuz bir deneyimdi.', avatar: 'SK' },
-    { id: 3, author: 'Ahmet D.', date: 'Aralık 2024', rating: 10, comment: 'Mükemmel! Araç tam istediğim gibiydi, yakıt tüketimi çok düşüktü. Fiyat kalite açısından çok iyi.', avatar: 'AD' },
-]
+function fmtDate(d?: string) {
+    if (!d) return ''
+    return new Date(d).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 // ─── Google Map ───────────────────────────────────────────────────────────────
 // Requires: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local
@@ -330,31 +333,59 @@ function StarRating({ score }: { score: number }) {
     return (
         <div className="flex gap-0.5">
             {[1, 2, 3, 4, 5].map(i => (
-                <Star
-                    key={i}
-                    className={`w-3.5 h-3.5 ${i <= stars ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`}
-                />
+                <Star key={i} className={`w-3.5 h-3.5 ${i <= stars ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`} />
             ))}
         </div>
     )
 }
 
-// ─── Desktop Booking Card (from code 2, styled like code 1) ──────────────────
+function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+    const [hovered, setHovered] = useState(0)
+    return (
+        <div className="flex gap-1">
+            {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                <button key={n} type="button"
+                    onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
+                    onClick={() => onChange(n)} className="transition-transform hover:scale-110">
+                    <Star size={18} className={n <= (hovered || value) ? 'text-amber-400 fill-amber-400' : 'text-gray-300'} />
+                </button>
+            ))}
+        </div>
+    )
+}
 
-function BookingCard({ car }: { car: CarType }) {
-    const [days, setDays] = useState(3)
-    const total = car.pricePerDay * days
+// ─── Desktop Booking Card ─────────────────────────────────────────────────────
+
+function BookingCard({
+    car, pickUp, dropOff, onPickUpChange, onDropOffChange,
+    bookedRanges, onBook, bookingLoading,
+}: {
+    car: CarType
+    pickUp: string
+    dropOff: string
+    onPickUpChange: (d: string) => void
+    onDropOffChange: (d: string) => void
+    bookedRanges: { start: Date; end: Date }[]
+    onBook: () => void
+    bookingLoading: boolean
+}) {
+    const days = (pickUp && dropOff)
+        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
+        : 0
+    const total = car.pricePerDay * (days || 1)
 
     return (
-        <div className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-gray-100">
             {/* Header */}
             <div className="bg-[#003b94] px-5 py-4">
-                <p className="text-white/60 text-xs font-medium mb-0.5">{days} günlük toplam</p>
+                <p className="text-white/60 text-xs font-medium mb-0.5">
+                    {days > 0 ? `${days} günlük toplam` : 'Tarih seçin'}
+                </p>
                 <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                    US${total}
+                    {days > 0 ? `US$${car.pricePerDay * days}` : `US$${car.pricePerDay}`}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
-                    Vergiler dahil{car.winterFee ? ' · Kış ücreti dahil' : ''}
+                    {days > 0 ? `Vergiler dahil${car.winterFee ? ' · Kış ücreti dahil' : ''}` : 'Günlük fiyat'}
                 </p>
             </div>
 
@@ -369,49 +400,16 @@ function BookingCard({ car }: { car: CarType }) {
                     {car.isAvailable ? 'Müsait' : 'Şu an müsait değil'}
                 </div>
 
-                {/* Date pickers */}
-                <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
-                    <div className="p-3 border-b border-gray-200">
-                        <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            Alış tarihi
-                        </div>
-                        <input
-                            type="date"
-                            className="text-xs font-semibold text-gray-800 bg-transparent focus:outline-none w-full"
-                        />
-                    </div>
-                    <div className="p-3">
-                        <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            İade tarihi
-                        </div>
-                        <input
-                            type="date"
-                            className="text-xs font-semibold text-gray-800 bg-transparent focus:outline-none w-full"
-                        />
-                    </div>
-                </div>
-
-                {/* Days selector */}
-                <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                    <span className="text-xs text-gray-500">Kiralama süresi</span>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setDays(d => Math.max(1, d - 1))}
-                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-400 hover:text-blue-600 font-bold text-base leading-none transition-colors"
-                        >
-                            −
-                        </button>
-                        <span className="text-xs font-bold text-gray-800 w-10 text-center">{days} gün</span>
-                        <button
-                            onClick={() => setDays(d => d + 1)}
-                            className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-400 hover:text-blue-600 font-bold text-base leading-none transition-colors"
-                        >
-                            +
-                        </button>
-                    </div>
-                </div>
+                {/* Date picker */}
+                <DateRangePicker
+                    bookedRanges={bookedRanges}
+                    startDate={pickUp}
+                    endDate={dropOff}
+                    onStartChange={onPickUpChange}
+                    onEndChange={onDropOffChange}
+                    startLabel="Alış tarihi"
+                    endLabel="İade tarihi"
+                />
 
                 {/* Location */}
                 <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
@@ -428,36 +426,44 @@ function BookingCard({ car }: { car: CarType }) {
                 </div>
 
                 {/* Price breakdown */}
-                <div className="space-y-1.5 text-xs">
-                    <div className="flex justify-between text-gray-500">
-                        <span>US${car.pricePerDay} × {days} gün</span>
-                        <span>US${total}</span>
-                    </div>
-                    {car.winterFee && (
+                {days > 0 && (
+                    <div className="space-y-1.5 text-xs">
                         <div className="flex justify-between text-gray-500">
-                            <span>Kış mevsimi ücreti</span>
+                            <span>US${car.pricePerDay} × {days} gün</span>
+                            <span>US${car.pricePerDay * days}</span>
+                        </div>
+                        {car.winterFee && (
+                            <div className="flex justify-between text-gray-500">
+                                <span>Kış mevsimi ücreti</span>
+                                <span className="text-emerald-600 font-semibold">Dahil</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between text-gray-500">
+                            <span>Temel sigorta</span>
                             <span className="text-emerald-600 font-semibold">Dahil</span>
                         </div>
-                    )}
-                    <div className="flex justify-between text-gray-500">
-                        <span>Temel sigorta</span>
-                        <span className="text-emerald-600 font-semibold">Dahil</span>
+                        <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
+                            <span>Toplam</span>
+                            <span>US${car.pricePerDay * days}</span>
+                        </div>
                     </div>
-                    <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
-                        <span>Toplam</span>
-                        <span>US${total}</span>
-                    </div>
-                </div>
+                )}
 
                 <button
-                    disabled={!car.isAvailable}
-                    className={`w-full font-bold py-3 rounded-xl transition-colors text-sm ${
-                        car.isAvailable
+                    onClick={onBook}
+                    disabled={!car.isAvailable || bookingLoading || !pickUp || !dropOff}
+                    className={`w-full font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 ${
+                        car.isAvailable && pickUp && dropOff && !bookingLoading
                             ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                 >
-                    {car.isAvailable ? 'Şimdi rezervasyon yap' : 'Şu an müsait değil'}
+                    {bookingLoading
+                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Rezervasyon yapılıyor...</>
+                        : !car.isAvailable ? 'Şu an müsait değil'
+                        : !pickUp || !dropOff ? 'Tarih seçin'
+                        : 'Şimdi rezervasyon yap'
+                    }
                 </button>
 
                 <p className="text-center text-xs text-gray-400">Ücretsiz iptal · Şimdi öde sonra öde</p>
@@ -472,9 +478,9 @@ function MobileStickyBar({ price, days, onBook }: { price: number; days: number;
     return (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
             <div className="flex-1">
-                <p className="text-xs text-gray-400 leading-none">{days} günlük toplam</p>
+                <p className="text-xs text-gray-400 leading-none">{days > 0 ? `${days} günlük toplam` : 'Günlük fiyat'}</p>
                 <p className="text-xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                    US${price * days}
+                    US${days > 0 ? price * days : price}
                 </p>
             </div>
             <button
@@ -489,9 +495,25 @@ function MobileStickyBar({ price, days, onBook }: { price: number; days: number;
 
 // ─── Mobile Booking Sheet ─────────────────────────────────────────────────────
 
-function MobileBookingSheet({ open, onClose, car }: { open: boolean; onClose: () => void; car: CarType }) {
-    const [days, setDays] = useState(3)
-    const total = car.pricePerDay * days
+function MobileBookingSheet({
+    open, onClose, car,
+    pickUp, dropOff, onPickUpChange, onDropOffChange,
+    bookedRanges, onBook, bookingLoading,
+}: {
+    open: boolean
+    onClose: () => void
+    car: CarType
+    pickUp: string
+    dropOff: string
+    onPickUpChange: (d: string) => void
+    onDropOffChange: (d: string) => void
+    bookedRanges: { start: Date; end: Date }[]
+    onBook: () => void
+    bookingLoading: boolean
+}) {
+    const days = (pickUp && dropOff)
+        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
+        : 0
 
     return (
         <>
@@ -511,12 +533,14 @@ function MobileBookingSheet({ open, onClose, car }: { open: boolean; onClose: ()
                     {/* Header */}
                     <div className="bg-[#003b94] px-5 py-4 flex items-start justify-between">
                         <div>
-                            <p className="text-white/60 text-xs font-medium mb-0.5">{days} günlük toplam</p>
+                            <p className="text-white/60 text-xs font-medium mb-0.5">
+                                {days > 0 ? `${days} günlük toplam` : 'Tarih seçin'}
+                            </p>
                             <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                                US${total}
+                                {days > 0 ? `US$${car.pricePerDay * days}` : `US$${car.pricePerDay}`}
                             </p>
                             <p className="text-white/40 text-xs mt-1">
-                                Vergiler dahil{car.winterFee ? ' · Kış ücreti dahil' : ''}
+                                {days > 0 ? `Vergiler dahil${car.winterFee ? ' · Kış ücreti dahil' : ''}` : 'Günlük fiyat'}
                             </p>
                         </div>
                         <button onClick={onClose} className="text-white/60 hover:text-white mt-1">
@@ -535,44 +559,16 @@ function MobileBookingSheet({ open, onClose, car }: { open: boolean; onClose: ()
                             {car.isAvailable ? 'Müsait' : 'Şu an müsait değil'}
                         </div>
 
-                        {/* Dates */}
-                        <div className="bg-gray-50 rounded-xl p-3 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    Alış tarihi
-                                </div>
-                                <input type="date" className="text-xs font-semibold text-gray-800 bg-transparent focus:outline-none" />
-                            </div>
-                            <div className="border-t border-gray-200" />
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    İade tarihi
-                                </div>
-                                <input type="date" className="text-xs font-semibold text-gray-800 bg-transparent focus:outline-none" />
-                            </div>
-                        </div>
-
-                        {/* Days selector */}
-                        <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                            <span className="text-xs text-gray-500">Kiralama süresi</span>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setDays(d => Math.max(1, d - 1))}
-                                    className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-400 hover:text-blue-600 font-bold text-base leading-none transition-colors"
-                                >
-                                    −
-                                </button>
-                                <span className="text-xs font-bold text-gray-800 w-10 text-center">{days} gün</span>
-                                <button
-                                    onClick={() => setDays(d => d + 1)}
-                                    className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-400 hover:text-blue-600 font-bold text-base leading-none transition-colors"
-                                >
-                                    +
-                                </button>
-                            </div>
-                        </div>
+                        {/* Date picker */}
+                        <DateRangePicker
+                            bookedRanges={bookedRanges}
+                            startDate={pickUp}
+                            endDate={dropOff}
+                            onStartChange={onPickUpChange}
+                            onEndChange={onDropOffChange}
+                            startLabel="Alış tarihi"
+                            endLabel="İade tarihi"
+                        />
 
                         {/* Location */}
                         <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
@@ -586,36 +582,44 @@ function MobileBookingSheet({ open, onClose, car }: { open: boolean; onClose: ()
                         </div>
 
                         {/* Price breakdown */}
-                        <div className="space-y-1.5 text-xs">
-                            <div className="flex justify-between text-gray-500">
-                                <span>US${car.pricePerDay} × {days} gün</span>
-                                <span>US${total}</span>
-                            </div>
-                            {car.winterFee && (
+                        {days > 0 && (
+                            <div className="space-y-1.5 text-xs">
                                 <div className="flex justify-between text-gray-500">
-                                    <span>Kış mevsimi ücreti</span>
+                                    <span>US${car.pricePerDay} × {days} gün</span>
+                                    <span>US${car.pricePerDay * days}</span>
+                                </div>
+                                {car.winterFee && (
+                                    <div className="flex justify-between text-gray-500">
+                                        <span>Kış mevsimi ücreti</span>
+                                        <span className="text-emerald-600 font-semibold">Dahil</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-gray-500">
+                                    <span>Temel sigorta</span>
                                     <span className="text-emerald-600 font-semibold">Dahil</span>
                                 </div>
-                            )}
-                            <div className="flex justify-between text-gray-500">
-                                <span>Temel sigorta</span>
-                                <span className="text-emerald-600 font-semibold">Dahil</span>
+                                <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
+                                    <span>Toplam</span>
+                                    <span>US${car.pricePerDay * days}</span>
+                                </div>
                             </div>
-                            <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
-                                <span>Toplam</span>
-                                <span>US${total}</span>
-                            </div>
-                        </div>
+                        )}
 
                         <button
-                            disabled={!car.isAvailable}
-                            className={`w-full font-bold py-3 rounded-xl transition-colors text-sm ${
-                                car.isAvailable
+                            onClick={onBook}
+                            disabled={!car.isAvailable || bookingLoading || !pickUp || !dropOff}
+                            className={`w-full font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 ${
+                                car.isAvailable && pickUp && dropOff && !bookingLoading
                                     ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
                                     : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                         >
-                            {car.isAvailable ? 'Şimdi rezervasyon yap' : 'Şu an müsait değil'}
+                            {bookingLoading
+                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Rezervasyon yapılıyor...</>
+                                : !car.isAvailable ? 'Şu an müsait değil'
+                                : !pickUp || !dropOff ? 'Tarih seçin'
+                                : 'Şimdi rezervasyon yap'
+                            }
                         </button>
                         <p className="text-center text-xs text-gray-400">Ücretsiz iptal · Şimdi öde sonra öde</p>
 
@@ -650,7 +654,77 @@ function CarDetailInner() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [sheetOpen, setSheetOpen] = useState(false)
-    const [days] = useState(3)
+    const [pickUp, setPickUp] = useState(searchParams.get('pickUp') || '')
+    const [dropOff, setDropOff] = useState(searchParams.get('dropOff') || '')
+    const [bookingLoading, setBookingLoading] = useState(false)
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem('token'))
+    }, [])
+
+    const [reviewScore, setReviewScore] = useState(0)
+    const [reviewComment, setReviewComment] = useState('')
+    const [reviewSubmitting, setReviewSubmitting] = useState(false)
+    const [reviewSuccess, setReviewSuccess] = useState(false)
+    const [reviewError, setReviewError] = useState('')
+
+    const handleReviewSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (reviewScore === 0) { setReviewError('Ulduz seçin'); return }
+        if (!reviewComment.trim()) { setReviewError('Şərh yazın'); return }
+        setReviewError('')
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+        if (!token) { setReviewError('Rəy yazmaq üçün daxil olun'); return }
+        try {
+            setReviewSubmitting(true)
+            const res = await axios.post(
+                `${API}/${id}/review`,
+                { score: reviewScore, comment: reviewComment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            setCar(res.data)
+            setReviewSuccess(true)
+            setReviewScore(0)
+            setReviewComment('')
+        } catch (err: any) {
+            setReviewError(err.response?.data?.message || 'Xəta baş verdi')
+        } finally {
+            setReviewSubmitting(false)
+        }
+    }
+
+    const bookedRanges = useMemo(() =>
+        ((car as any)?.bookedDates || []).map((b: any) => ({
+            start: new Date(b.pickUp),
+            end: new Date(b.dropOff),
+        })),
+    [car])
+
+    const days = (pickUp && dropOff)
+        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
+        : 0
+
+    const handleBooking = () => {
+        if (!pickUp || !dropOff) { toast.error('Zəhmət olmasa tarihləri seçin'); return }
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+        if (!token) { toast.error('Rezervasiya üçün daxil olun'); router.push('/signin'); return }
+        if (days <= 0) { toast.error('İade tarixi alış tarixindən sonra olmalıdır'); return }
+        const totalPrice = (car?.pricePerDay || 0) * days
+        const image = car?.images?.[0] || ''
+        const params = new URLSearchParams({
+            type: 'car',
+            id: car?._id || '',
+            title: car?.title || '',
+            image,
+            pickUp,
+            dropOff,
+            pricePerDay: String(car?.pricePerDay || 0),
+            totalPrice: String(totalPrice),
+            days: String(days),
+        })
+        router.push(`/checkout?${params.toString()}`)
+    }
 
     useEffect(() => {
         if (!id) { setError('Araç ID bulunamadı'); setLoading(false); return }
@@ -695,6 +769,7 @@ function CarDetailInner() {
     ]
 
     return (
+        <>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 mt-4 sm:mt-8">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-400 pb-2">
@@ -870,47 +945,96 @@ function CarDetailInner() {
 
                     {/* Reviews */}
                     <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <div className="flex items-center justify-between mb-3 sm:mb-4 flex-wrap gap-2">
-                            <h2 className="text-sm sm:text-base font-bold text-gray-900">Değerlendirmeler</h2>
-                            {car.rating !== undefined && (
-                                <div className="flex items-center gap-1.5 sm:gap-2">
-                                    <div className="bg-amber-100 text-amber-700 text-sm font-black px-2.5 py-1 rounded-lg">
-                                        {car.rating.toFixed(1)}
+                        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900">Rəylər</h2>
+                            {(car.rating ?? 0) > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <div className="bg-amber-100 text-amber-700 text-sm font-black px-2.5 py-1 rounded-lg flex items-center gap-1">
+                                        <Star size={12} className="fill-amber-600 text-amber-600" /> {(car.rating ?? 0).toFixed(1)}
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-700">{scoreLabel(car.rating)}</span>
-                                    {car.providerReviews && (
-                                        <span className="text-xs text-gray-400 hidden sm:inline">{car.providerReviews} yorum</span>
-                                    )}
+                                    <span className="text-sm font-semibold text-gray-700">{scoreLabel(car.rating ?? 0)}</span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="space-y-4">
-                            {MOCK_REVIEWS.map(review => (
-                                <div key={review.id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                            {review.avatar}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="text-sm font-semibold text-gray-800 truncate">{review.author}</span>
-                                                <span className="text-xs text-gray-400 flex-shrink-0">{review.date}</span>
+                        {/* Real reviews */}
+                        {((car as any).reviews?.length > 0) ? (
+                            <div className="space-y-4 mb-6">
+                                {((car as any).reviews as Review[]).map(review => (
+                                    <div key={review._id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                                        <div className="flex items-start gap-3">
+                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                                {(review.userName || 'G').charAt(0).toUpperCase()}
                                             </div>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <StarRating score={review.rating} />
-                                                <span className="text-xs font-bold text-amber-600">{review.rating}/10</span>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-sm font-semibold text-gray-800 truncate">{review.userName || 'Guest'}</span>
+                                                    <span className="text-xs text-gray-400 flex-shrink-0">{fmtDate(review.createdAt)}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <StarRating score={review.score} />
+                                                    <span className="text-xs font-bold text-amber-600">{review.score}/10</span>
+                                                </div>
+                                                <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{review.comment}</p>
+                                                {review.adminReply && (
+                                                    <div className="mt-3 ml-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                                                        <div className="flex items-center gap-1.5 mb-1">
+                                                            <CornerDownRight size={13} className="text-blue-600" />
+                                                            <span className="text-xs font-black text-blue-700 uppercase">Admin cavabı</span>
+                                                            {review.adminReplyAt && <span className="text-xs text-blue-400">{fmtDate(review.adminReplyAt)}</span>}
+                                                        </div>
+                                                        <p className="text-sm text-blue-800">{review.adminReply}</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{review.comment}</p>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-400 mb-6">Hələ rəy yoxdur. İlk rəyi siz yazın!</p>
+                        )}
 
-                        <button className="mt-4 flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline">
-                            Tüm yorumları gör <ArrowRight className="w-4 h-4" />
-                        </button>
+                        {/* Submit review */}
+                        <div className="border-t border-gray-100 pt-5">
+                            <h3 className="text-sm font-bold text-gray-900 mb-4">Rəyinizi bildirin</h3>
+                            {!isLoggedIn ? (
+                                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl p-4">
+                                    <p className="text-sm font-semibold text-blue-700">Rəy yazmaq üçün daxil olun</p>
+                                    <button onClick={() => router.push('/signin')}
+                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors">
+                                        <LogIn size={14} /> Daxil ol
+                                    </button>
+                                </div>
+                            ) : reviewSuccess ? (
+                                <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
+                                    <p className="text-green-700 font-bold text-sm">Rəyiniz göndərildi! Təşəkkür edirik.</p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleReviewSubmit} className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Qiymət (1–10)</label>
+                                        <StarInput value={reviewScore} onChange={setReviewScore} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Şərh</label>
+                                        <textarea
+                                            value={reviewComment}
+                                            onChange={e => setReviewComment(e.target.value)}
+                                            rows={3}
+                                            placeholder="Avtomobil haqqında fikirinizi bölüşün..."
+                                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-blue-400 resize-none"
+                                        />
+                                    </div>
+                                    {reviewError && <p className="text-red-500 text-xs">{reviewError}</p>}
+                                    <button type="submit" disabled={reviewSubmitting}
+                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm">
+                                        {reviewSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                                        Göndər
+                                    </button>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -918,7 +1042,16 @@ function CarDetailInner() {
                 <div className="hidden lg:block w-[300px] flex-shrink-0 sticky top-4 space-y-3">
 
                     {/* Dynamic Booking Card */}
-                    <BookingCard car={car} />
+                    <BookingCard
+                        car={car}
+                        pickUp={pickUp}
+                        dropOff={dropOff}
+                        onPickUpChange={setPickUp}
+                        onDropOffChange={setDropOff}
+                        bookedRanges={bookedRanges}
+                        onBook={handleBooking}
+                        bookingLoading={bookingLoading}
+                    />
 
                     {/* Provider card */}
                     {car.provider && (
@@ -969,6 +1102,24 @@ function CarDetailInner() {
                 </div>
             </div>
         </div>
+
+        {/* Mobile sticky bar */}
+        <MobileStickyBar price={car.pricePerDay} days={days} onBook={() => setSheetOpen(true)} />
+
+        {/* Mobile booking sheet */}
+        <MobileBookingSheet
+            open={sheetOpen}
+            onClose={() => setSheetOpen(false)}
+            car={car}
+            pickUp={pickUp}
+            dropOff={dropOff}
+            onPickUpChange={setPickUp}
+            onDropOffChange={setDropOff}
+            bookedRanges={bookedRanges}
+            onBook={handleBooking}
+            bookingLoading={bookingLoading}
+        />
+        </>
     )
 }
 

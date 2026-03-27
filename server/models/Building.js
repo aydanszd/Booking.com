@@ -2,8 +2,11 @@ const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    userName: { type: String, default: 'Guest' },
     score: { type: Number, min: 0, max: 10 },
     comment: String,
+    adminReply: { type: String, default: null },
+    adminReplyAt: { type: Date, default: null },
 }, { timestamps: true });
 
 const roomSchema = new mongoose.Schema({

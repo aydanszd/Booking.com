@@ -6,6 +6,7 @@ const API = `${BASE}/api/cars`;
 export type FetchCarsParams = {
     page: number;
     limit: number;
+    city?: string;
     category?: string;
 };
 
@@ -15,11 +16,18 @@ export type FetchCarsResponse = {
 };
 
 export const carApi = {
-    getAll: async ({ page, limit, category }: FetchCarsParams): Promise<FetchCarsResponse> => {
+    getAll: async ({ page, limit, city, category }: FetchCarsParams): Promise<FetchCarsResponse> => {
         const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (city) params.set("city", city);
         if (category) params.set("category", category);
         const res = await fetch(`${API}?${params}`);
         if (!res.ok) throw new Error("Məlumatlar yüklənmədi");
+        return res.json();
+    },
+
+    getById: async (id: string): Promise<CarType> => {
+        const res = await fetch(`${API}/${id}`);
+        if (!res.ok) throw new Error("Avtomobil tapılmadı");
         return res.json();
     },
 

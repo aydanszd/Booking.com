@@ -1,21 +1,50 @@
-import axios from "axios";
+import axios from 'axios';
+import { toast } from 'sonner';
 
-const API_URL = "http://localhost:5000/api/bookings";
+const api = axios.create({
+    baseURL: (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api',
+    timeout: 10000,
+});
 
-const getAuthHeaders = () => {
-    if (typeof window === "undefined") return { headers: {} };
-    const token = localStorage.getItem("token");
-    return {
-        headers: {
-            Authorization: `Bearer ${token}`
+// Request interceptor — hər istəyə token əlavə et
+api.interceptors.request.use(
+    (config) => {
+        if (typeof window !== 'undefined') {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
-    };
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Response interceptor
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            toast.error('Zəhmət olmasa daxil olun');
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('token');
+                window.location.href = '/signin';
+            }
+        }
+        if (error.response?.status === 403) {
+            toast.error('Bu əməliyyat üçün icazəniz yoxdur');
+        }
+        return Promise.reject(error);
+    }
+);
+
+const bookingApi = {
+    createBooking: (data: any) => api.post('/bookings', data),
+    getMyBookings: () => api.get('/bookings'),
+    getAllBookings: (params?: any) => api.get('/bookings/admin/all', { params }),
+    getBooking: (id: string) => api.get(`/bookings/${id}`),
+    cancelBooking: (id: string) => api.put(`/bookings/${id}/cancel`),
+    updateBookingStatus: (id: string, data: { status: string }) => api.put(`/bookings/${id}/status`, data),
 };
 
-export default {
-    createBooking: (data: any) => axios.post(API_URL, data, getAuthHeaders()),
-    getMyBookings: () => axios.get(API_URL, getAuthHeaders()), // Base URL is getMyBookings
-    getAllBookings: () => axios.get(API_URL + "/admin/all", getAuthHeaders()),
-    getBooking: (id: string) => axios.get(`${API_URL}/${id}`, getAuthHeaders()),
-    cancelBooking: (id: string) => axios.put(`${API_URL}/${id}/cancel`, {}, getAuthHeaders()),
-};
+export default bookingApi;

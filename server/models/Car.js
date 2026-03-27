@@ -26,8 +26,12 @@ const carSchema = new mongoose.Schema({
     rating: { type: Number, default: 0, min: 0, max: 10 },
     reviews: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        userName: { type: String, default: 'Guest' },
         score: Number,
         comment: String,
+        adminReply: { type: String, default: null },
+        adminReplyAt: { type: Date, default: null },
+        createdAt: { type: Date, default: Date.now },
     }],
     bookedDates: [bookedDateSchema],
     isAvailable: { type: Boolean, default: true },

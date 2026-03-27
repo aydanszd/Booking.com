@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+
 interface PropertyCardProps {
     image: string;
     name: string;
@@ -17,7 +19,16 @@ function PropertyCard({
     reviewLabel,
     reviewCount,
 }: PropertyCardProps) {
+    const t = useTranslations("stays");
     const [saved, setSaved] = useState(false);
+
+    const SCORE_LABELS: Record<string, string> = {
+        "Very poor": t("scoreVeryPoor"),
+        "Good": t("scoreGood"),
+        "Very Good": t("scoreVeryGood"),
+        "Excellent": t("scoreExcellent"),
+        "Exceptional": t("scoreExceptional"),
+    };
 
     return (
         <div className="relative max-w-6xl w-72 rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
@@ -68,9 +79,9 @@ function PropertyCard({
                     </span>
                     <div className="flex flex-col leading-tight">
                         <span className="text-sm font-semibold text-gray-800">
-                            {reviewLabel}
+                            {SCORE_LABELS[reviewLabel] ?? reviewLabel}
                         </span>
-                        <span className="text-xs text-gray-400">{reviewCount} reviews</span>
+                        <span className="text-xs text-gray-400">{t("reviews", { count: reviewCount })}</span>
                     </div>
                 </div>
             </div>
@@ -80,8 +91,7 @@ function PropertyCard({
 
 const SAMPLE_PROPERTIES: PropertyCardProps[] = [
     {
-        image:
-            "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
+        image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
         name: "Apartment On Mc Donalds",
         location: "Baku, Azerbaijan",
         score: 0,
@@ -89,17 +99,15 @@ const SAMPLE_PROPERTIES: PropertyCardProps[] = [
         reviewCount: 0,
     },
     {
-        image:
-            "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80",
+        image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=80",
         name: "City View Studio",
         location: "Baku, Azerbaijan",
         score: 8,
-        reviewLabel: "Very good",
+        reviewLabel: "Very Good",
         reviewCount: 24,
     },
     {
-        image:
-            "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
+        image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80",
         name: "Central Park Apartment",
         location: "Baku, Azerbaijan",
         score: 7,
@@ -109,10 +117,12 @@ const SAMPLE_PROPERTIES: PropertyCardProps[] = [
 ];
 
 export default function StillInterestedSection() {
+    const t = useTranslations("stays");
+
     return (
         <section className="py-10 px-6 max-w-7xl mx-auto items-start translate-x-[-120px] text-[26px] font-sans">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Still interested?
+                {t("stillInterested")}
             </h2>
             <div className="flex gap-5 flex-wrap">
                 {SAMPLE_PROPERTIES.map((prop, i) => (

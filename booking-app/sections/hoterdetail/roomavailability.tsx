@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-    Calendar, Users, Wifi, Wind, Tv, Maximize2, Eye, Coffee, Tag, CreditCard,
-    Ban, CheckCircle2, AlertCircle, ChevronDown, ChevronUp, Info, Loader2
+    Users, Maximize2, Wind, Tag, CreditCard,
+    CheckCircle2, AlertCircle
 } from "lucide-react";
-import bookingApi from "@/api/booking";
 import { toast } from "sonner";
+import DateRangePicker from "@/components/DateRangePicker";
 
 interface Room {
     id: number;
@@ -45,10 +45,16 @@ export default function RoomAvailability({ building }: { building: any }) {
     const router = useRouter();
     const [checkIn, setCheckIn] = useState(searchParams.get("checkIn") || "");
     const [checkOut, setCheckOut] = useState(searchParams.get("checkOut") || "");
-    const [bookingLoading, setBookingLoading] = useState(false);
     const [qty, setQty] = useState(1);
 
-    const handleBooking = async () => {
+    const bookedRanges = useMemo(() =>
+        (building?.bookedDates || []).map((b: any) => ({
+            start: new Date(b.checkIn),
+            end: new Date(b.checkOut),
+        })),
+    [building]);
+
+    const handleBooking = () => {
         if (!checkIn || !checkOut) {
             toast.error("Zəhmət olmasa tarixləri seçin");
             return;
@@ -69,24 +75,20 @@ export default function RoomAvailability({ building }: { building: any }) {
             return;
         }
 
-        try {
-            setBookingLoading(true);
-            const data = {
-                type: 'building',
-                building: building._id,
-                checkIn,
-                checkOut,
-                totalPrice: building.pricePerNight * qty * nights,
-                guests: { adults: 2, children: 0 }
-            };
-            await bookingApi.createBooking(data);
-            toast.success("Rezervasiya uğurla tamamlandı!");
-            router.push("/my-bookings");
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || "Rezervasiya uğursuz oldu");
-        } finally {
-            setBookingLoading(false);
-        }
+        const totalPrice = building.pricePerNight * qty * nights;
+        const image = building.images?.[0] || "";
+        const params = new URLSearchParams({
+            type: "building",
+            id: building._id,
+            title: building.title || "",
+            image,
+            checkIn,
+            checkOut,
+            pricePerDay: String(building.pricePerNight),
+            totalPrice: String(totalPrice),
+            days: String(nights),
+        });
+        router.push(`/checkout?${params.toString()}`);
     };
 
     return (
@@ -99,35 +101,20 @@ export default function RoomAvailability({ building }: { building: any }) {
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 mb-6">
-                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
-                        <Calendar size={18} className="text-gray-400" />
-                        <div className="flex flex-col w-full">
-                            <span className="text-[10px] text-gray-400 uppercase font-bold">Check-in Date</span>
-                            <input 
-                                type="date"
-                                value={checkIn}
-                                min={new Date().toISOString().split('T')[0]}
-                                onChange={(e) => setCheckIn(e.target.value)}
-                                className="text-sm font-semibold outline-none bg-transparent w-full"
-                            />
-                        </div>
+                <div className="flex flex-col lg:flex-row gap-4 mb-6">
+                    <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm w-full lg:w-80 shrink-0">
+                        <DateRangePicker
+                            bookedRanges={bookedRanges}
+                            startDate={checkIn}
+                            endDate={checkOut}
+                            onStartChange={setCheckIn}
+                            onEndChange={setCheckOut}
+                            startLabel="Check-in"
+                            endLabel="Check-out"
+                        />
                     </div>
-                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
-                        <Calendar size={18} className="text-gray-400" />
-                        <div className="flex flex-col w-full">
-                            <span className="text-[10px] text-gray-400 uppercase font-bold">Check-out Date</span>
-                            <input 
-                                type="date"
-                                value={checkOut}
-                                min={checkIn || new Date().toISOString().split('T')[0]}
-                                onChange={(e) => setCheckOut(e.target.value)}
-                                className="text-sm font-semibold outline-none bg-transparent w-full"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-lg px-4 py-3 bg-white">
-                        <Users size={18} className="text-gray-400" />
+                    <div className="flex-1 flex items-center gap-2 border-2 border-[#febb02] rounded-xl px-4 py-3 bg-white h-fit">
+                        <Users size={18} className="text-gray-400 shrink-0" />
                         <div className="flex flex-col">
                             <span className="text-[10px] text-gray-400 uppercase font-bold">Guests</span>
                             <span className="text-sm font-semibold">2 adults · 0 children · 1 room</span>
@@ -198,10 +185,9 @@ export default function RoomAvailability({ building }: { building: any }) {
                                     <td className="px-5 py-6">
                                         <button 
                                             onClick={handleBooking}
-                                            disabled={bookingLoading}
                                             className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-2"
                                         >
-                                            {bookingLoading ? <Loader2 className="animate-spin" size={16} /> : "I'll reserve"}
+                                            I'll reserve
                                         </button>
                                         <p className="text-[9px] text-gray-400 mt-1.5 text-center flex items-center justify-center gap-1">
                                             <AlertCircle size={10} /> Confirmation is immediate

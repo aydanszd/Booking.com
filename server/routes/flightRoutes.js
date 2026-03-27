@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../config/multer');
 const {
     getFlights, getFlight,
     createFlight, updateFlight, deleteFlight
@@ -7,8 +8,8 @@ const {
 
 router.get('/', getFlights);
 router.get('/:id', getFlight);
-router.post('/', createFlight);
-router.put('/:id', updateFlight);
+router.post('/', upload.single('logo'), createFlight);
+router.put('/:id', upload.single('logo'), updateFlight);
 router.delete('/:id', deleteFlight);
 
 module.exports = router;

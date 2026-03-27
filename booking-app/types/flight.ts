@@ -12,6 +12,7 @@ export type BookingSite = {
 export type FlightType = {
     _id?: string;
     airline: string;
+    logoUrl?: string;
     alliance?: string;
     flightNumber?: string;
     aircraft?: string;

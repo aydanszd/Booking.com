@@ -1,4 +1,6 @@
+"use client";
 import { Calendar, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SearchItem {
     id: number;
@@ -19,9 +21,11 @@ const recentSearches: SearchItem[] = [
 ];
 
 export default function RecentSearches() {
+    const t = useTranslations("stays");
+
     return (
         <section className="max-w-7xl  mt-25 ml-[380px]">
-            <h2 className="text-[26px] font-bold text-gray-900 mb-3">Your recent searches</h2>
+            <h2 className="text-[26px] font-bold text-gray-900 mb-3">{t("recentSearches")}</h2>
 
             <div className="flex flex-wrap gap-3">
                 {recentSearches.map((item) => (
@@ -42,7 +46,7 @@ export default function RecentSearches() {
                             </span>
                             <span className="flex items-center gap-1 text-xs text-gray-500">
                                 <Users className="w-3 h-3 shrink-0" />
-                                {item.people} people
+                                {t("people", { count: item.people })}
                             </span>
                         </div>
                     </div>
