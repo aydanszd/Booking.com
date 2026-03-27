@@ -133,7 +133,7 @@ function SidebarInner({ collapsed, onNavClick }: { collapsed: boolean; onNavClic
                             <div className="text-gray-800 text-[13px] font-semibold truncate">Anar K.</div>
                             <div className="text-gray-400 text-[11px]">Administrator</div>
                         </div>
-                        <LogOut size={14} className="text-gray-400 group-hover:text-red-400 transition-colors flex-shrink-0" />
+                        <LogOut size={14} className="text-gray-400 group-hover:text-red-400 transition-colors shrink-0" />
                     </div>
                 ) : (
                     <div className="flex justify-center">
@@ -156,12 +156,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex w-screen h-screen overflow-hidden bg-gray-50">
             {/* Desktop Sidebar */}
             <aside className={[
-                "hidden lg:flex flex-col h-full bg-white border-r border-gray-100 shadow-sm flex-shrink-0 transition-all duration-300 ease-in-out relative",
-                collapsed ? "w-[64px]" : "w-[216px]",
+                "hidden lg:flex flex-col h-full bg-white border-r border-gray-100 shadow-sm shrink-0 transition-all duration-300 ease-in-out relative",
+                collapsed ? "w-16" : "w-54",
             ].join(" ")}>
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="absolute -right-3 top-[76px] z-10 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center text-gray-500 hover:text-[#006ce4] hover:border-[#006ce4] transition-colors"
+                    className="absolute -right-3 top-19 z-10 w-6 h-6 bg-white border border-gray-200 rounded-full shadow flex items-center justify-center text-gray-500 hover:text-[#006ce4] hover:border-[#006ce4] transition-colors"
                 >
                     <ChevronLeft size={12} className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
                 </button>
@@ -183,7 +183,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Main Content */}
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-                <header className="h-16 bg-white border-b border-gray-100 flex items-center px-5 gap-3 flex-shrink-0 w-full">
+                <header className="h-16 bg-white border-b border-gray-100 flex items-center px-5 gap-3 shrink-0 w-full">
                     <button
                         className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
                         onClick={() => setMobileOpen(true)}

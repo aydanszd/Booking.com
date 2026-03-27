@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import bookingApi from "@/api/booking";
+import { useTranslations } from "next-intl";
 
 const BASE = "http://localhost:5000";
 
@@ -19,11 +20,11 @@ const CABIN_LABELS: Record<string, string> = {
 
 function fmt(iso: string) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" });
+    return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
 function fmtDate(iso: string) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" });
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
 }
 function fmtCard(val: string) {
     return val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
@@ -35,6 +36,7 @@ function fmtExpiry(val: string) {
 
 // ─── Receipt ──────────────────────────────────────────────────────────────────
 function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
+    const t = useTranslations("checkout");
     const receiptRef = useRef<HTMLDivElement>(null);
 
     const handleDownloadPDF = async () => {
@@ -271,7 +273,7 @@ function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
             doc.save(`ticket-${data.bookingId}.pdf`);
         } catch (err) {
             console.error("PDF error:", err);
-            toast.error("PDF yaradılarkən xəta baş verdi");
+            toast.error(t("pdfError"));
         }
     };
 
@@ -283,8 +285,8 @@ function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
                     <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                         <CheckCircle2 size={28} className="text-white" />
                     </div>
-                    <h2 className="text-2xl font-black">Rezervasiya Təsdiqləndi!</h2>
-                    <p className="text-blue-100 text-sm mt-1 font-medium">Biletiniz hazırdır</p>
+                    <h2 className="text-2xl font-black">{t("confirmationTitle")}</h2>
+                    <p className="text-blue-100 text-sm mt-1 font-medium">{t("ticketReady")}</p>
                     <p className="text-blue-200 text-xs mt-1">№ {data.bookingId}</p>
                 </div>
 
@@ -318,16 +320,16 @@ function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
                     {/* Passengers */}
                     <div>
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <Users size={13} /> Sərnişinlər ({data.passengers.length} nəfər)
+                            <Users size={13} /> {t("passengersCount", { count: data.passengers.length })}
                         </h3>
                         <div className="space-y-2">
                             {data.passengers.map((p: any, i: number) => (
                                 <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5">
                                     <div>
                                         <p className="text-sm font-black text-gray-800">{p.fullName}</p>
-                                        <p className="text-xs text-gray-400 font-medium">{p.type === "child" ? "Uşaq" : "Böyük"}</p>
+                                        <p className="text-xs text-gray-400 font-medium">{p.type === "child" ? t("childType") : t("adultType")}</p>
                                     </div>
-                                    <p className="text-xs font-black text-gray-500">Ş/V: {p.idNumber}</p>
+                                    <p className="text-xs font-black text-gray-500">{t("idRef", { id: p.idNumber })}</p>
                                 </div>
                             ))}
                         </div>
@@ -335,7 +337,7 @@ function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
 
                     {/* Total */}
                     <div className="bg-blue-600 rounded-2xl px-6 py-4 flex items-center justify-between">
-                        <span className="text-blue-100 text-sm font-bold">Ümumi ödəniş</span>
+                        <span className="text-blue-100 text-sm font-bold">{t("totalPayment")}</span>
                         <span className="text-white text-2xl font-black">${data.totalPrice}</span>
                     </div>
                 </div>
@@ -346,13 +348,13 @@ function Receipt({ data, onClose }: { data: any; onClose: () => void }) {
                         onClick={handleDownloadPDF}
                         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black py-3.5 rounded-2xl transition-all"
                     >
-                        <Download size={18} /> PDF Yüklə
+                        <Download size={18} /> {t("downloadPDF")}
                     </button>
                     <button
                         onClick={onClose}
                         className="w-full flex items-center justify-center gap-2 border-2 border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 font-black py-3.5 rounded-2xl transition-all"
                     >
-                        Rezervasiyalarıma Get <ArrowRight size={16} />
+                        {t("goToBookings")} <ArrowRight size={16} />
                     </button>
                 </div>
             </div>
@@ -367,6 +369,7 @@ function PassengerFields({ index, type, data, onChange }: {
     data: { fullName: string; idNumber: string };
     onChange: (field: "fullName" | "idNumber", val: string) => void;
 }) {
+    const t = useTranslations("checkout");
     return (
         <div className="bg-gray-50 rounded-2xl p-5 space-y-3">
             <div className="flex items-center gap-2 mb-1">
@@ -374,30 +377,30 @@ function PassengerFields({ index, type, data, onChange }: {
                     <span className="text-white text-[10px] font-black">{index + 1}</span>
                 </div>
                 <span className="text-sm font-black text-gray-700">
-                    {type === "adult" ? `Böyük ${index + 1}` : `Uşaq ${index + 1}`}
+                    {type === "adult" ? t("adultPassenger", { num: index + 1 }) : t("childPassenger", { num: index + 1 })}
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium ml-1">
-                    {type === "adult" ? "(12+ yaş)" : "(2–11 yaş)"}
+                    {type === "adult" ? `(${t("adultAgeRange")})` : `(${t("childAgeRange")})`}
                 </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Ad Soyad</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t("fullName")}</label>
                     <input
                         type="text"
                         value={data.fullName}
                         onChange={e => onChange("fullName", e.target.value)}
-                        placeholder="Məs: Əli Həsənov"
+                        placeholder={t("fullNamePlaceholder")}
                         className="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 transition-colors bg-white"
                     />
                 </div>
                 <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Şəxsiyyət / Pasport №</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{t("idPassport")}</label>
                     <input
                         type="text"
                         value={data.idNumber}
                         onChange={e => onChange("idNumber", e.target.value)}
-                        placeholder="AZE12345678"
+                        placeholder="ID12345678"
                         className="w-full px-3 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-semibold text-gray-800 outline-none focus:border-blue-500 transition-colors bg-white"
                     />
                 </div>
@@ -408,6 +411,7 @@ function PassengerFields({ index, type, data, onChange }: {
 
 // ─── Inner Page ───────────────────────────────────────────────────────────────
 function FlightCheckoutInner() {
+    const t = useTranslations("checkout");
     const router = useRouter();
     const sp = useSearchParams();
 
@@ -462,15 +466,15 @@ function FlightCheckoutInner() {
         e.preventDefault();
 
         for (let i = 0; i < passengerData.length; i++) {
-            if (!passengerData[i].fullName.trim()) { toast.error(`${i + 1}. sərnişinin adını daxil edin`); return; }
-            if (!passengerData[i].idNumber.trim()) { toast.error(`${i + 1}. sərnişinin Ş/V nömrəsini daxil edin`); return; }
+            if (!passengerData[i].fullName.trim()) { toast.error(t("passengerNameRequired", { num: i + 1 })); return; }
+            if (!passengerData[i].idNumber.trim()) { toast.error(t("passengerIdRequired", { num: i + 1 })); return; }
         }
-        if (cardNumber.replace(/\s/g, "").length !== 16) { toast.error("Kart nömrəsini tam daxil edin"); return; }
-        if (expiry.length < 5) { toast.error("Son istifadə tarixini daxil edin"); return; }
-        if (cvv.length < 3) { toast.error("CVV kodunu daxil edin"); return; }
+        if (cardNumber.replace(/\s/g, "").length !== 16) { toast.error(t("cardRequired")); return; }
+        if (expiry.length < 5) { toast.error(t("expiryRequired")); return; }
+        if (cvv.length < 3) { toast.error(t("cvvRequired")); return; }
 
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) { toast.error("Rezervasiya üçün daxil olun"); router.push("/signin"); return; }
+        if (!token) { toast.error(t("signInRequired")); router.push("/signin"); return; }
 
         try {
             setLoading(true);
@@ -498,7 +502,7 @@ function FlightCheckoutInner() {
                 })),
             });
         } catch (err: any) {
-            toast.error(err.response?.data?.message || err.message || "Rezervasiya uğursuz oldu");
+            toast.error(err.response?.data?.message || err.message || t("bookingFailed"));
         } finally {
             setLoading(false);
         }
@@ -516,11 +520,11 @@ function FlightCheckoutInner() {
             <div className="max-w-5xl mx-auto">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-xs text-gray-400 mb-8 font-semibold uppercase tracking-widest">
-                    <span className="text-blue-600">Uçuşlar</span>
+                    <span className="text-blue-600">{t("typeFlight")}</span>
                     <ChevronRight size={12} />
-                    <span className="text-blue-600">Seçim</span>
+                    <span className="text-blue-600">{t("selectionStep")}</span>
                     <ChevronRight size={12} />
-                    <span className="text-gray-700">Ödəniş</span>
+                    <span className="text-gray-700">{t("paymentStep")}</span>
                 </nav>
 
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
@@ -535,19 +539,19 @@ function FlightCheckoutInner() {
                                     <Users size={18} className="text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-black text-gray-900">Sərnişin sayı</h2>
-                                    <p className="text-xs text-gray-400 font-medium">Cəmi: {totalPassengers} nəfər · ${totalPrice}</p>
+                                    <h2 className="text-base font-black text-gray-900">{t("passengerCount")}</h2>
+                                    <p className="text-xs text-gray-400 font-medium">{t("totalPassengersInfo", { count: totalPassengers, amount: totalPrice })}</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 {[
-                                    { label: "Böyük", sub: "12+ yaş", value: adults, min: 1, set: (v: number) => { setAdults(v); adjustPassengers(v, children); } },
-                                    { label: "Uşaq", sub: "2–11 yaş", value: children, min: 0, set: (v: number) => { setChildren(v); adjustPassengers(adults, v); } },
-                                ].map(({ label, sub, value, min, set }) => (
-                                    <div key={label} className="flex items-center justify-between bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100">
+                                    { labelKey: "adultLabel", subKey: "adultAgeRange", value: adults, min: 1, set: (v: number) => { setAdults(v); adjustPassengers(v, children); } },
+                                    { labelKey: "childLabel", subKey: "childAgeRange", value: children, min: 0, set: (v: number) => { setChildren(v); adjustPassengers(adults, v); } },
+                                ].map(({ labelKey, subKey, value, min, set }) => (
+                                    <div key={labelKey} className="flex items-center justify-between bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100">
                                         <div>
-                                            <p className="text-sm font-black text-gray-800">{label}</p>
-                                            <p className="text-[10px] text-gray-400">{sub}</p>
+                                            <p className="text-sm font-black text-gray-800">{t(labelKey as any)}</p>
+                                            <p className="text-[10px] text-gray-400">{t(subKey as any)}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button type="button" onClick={() => set(Math.max(min, value - 1))} className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-blue-400 hover:text-blue-600 font-bold text-lg transition-colors">−</button>
@@ -566,8 +570,8 @@ function FlightCheckoutInner() {
                                     <User size={18} className="text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-black text-gray-900">Sərnişin məlumatları</h2>
-                                    <p className="text-xs text-gray-400 font-medium">{adults} böyük{children > 0 ? `, ${children} uşaq` : ""}</p>
+                                    <h2 className="text-base font-black text-gray-900">{t("passengerInfo")}</h2>
+                                    <p className="text-xs text-gray-400 font-medium">{children > 0 ? t("adultsChildrenCount", { adults, children }) : t("adultsCount", { count: adults })}</p>
                                 </div>
                             </div>
                             <div className="space-y-4">
@@ -599,14 +603,14 @@ function FlightCheckoutInner() {
                                     <CreditCard size={18} className="text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-black text-gray-900">Ödəniş məlumatları</h2>
-                                    <p className="text-xs text-gray-400 font-medium">Tam məbləğ — ${totalPrice}</p>
+                                    <h2 className="text-base font-black text-gray-900">{t("paymentInfo")}</h2>
+                                    <p className="text-xs text-gray-400 font-medium">{t("fullAmount", { amount: totalPrice })}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Kart nömrəsi</label>
+                                    <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">{t("cardNumber")}</label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -621,7 +625,7 @@ function FlightCheckoutInner() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Son tarix</label>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">{t("expiryDate")}</label>
                                         <input
                                             type="text"
                                             value={expiry}
@@ -632,7 +636,7 @@ function FlightCheckoutInner() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">CVV</label>
+                                        <label className="block text-[11px] font-black uppercase tracking-widest text-gray-400 mb-1.5">{t("cvv")}</label>
                                         <div className="relative">
                                             <input
                                                 type="password"
@@ -656,15 +660,15 @@ function FlightCheckoutInner() {
                             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-black py-4 rounded-2xl text-base transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center justify-center gap-2"
                         >
                             {loading
-                                ? <><Loader2 size={20} className="animate-spin" /> Emal olunur...</>
-                                : <><Lock size={16} /> ${totalPrice} Ödə və Bilet Al</>
+                                ? <><Loader2 size={20} className="animate-spin" /> {t("processing")}</>
+                                : <><Lock size={16} /> {t("payAndGetTicket", { amount: totalPrice })}</>
                             }
                         </button>
 
                         <div className="flex items-center justify-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            <span className="flex items-center gap-1"><Shield size={12} /> SSL Şifrəli</span>
-                            <span className="flex items-center gap-1"><CheckCircle2 size={12} /> Təhlükəsiz</span>
-                            <span className="flex items-center gap-1"><Lock size={12} /> Qorunur</span>
+                            <span className="flex items-center gap-1"><Shield size={12} /> {t("sslLabel")}</span>
+                            <span className="flex items-center gap-1"><CheckCircle2 size={12} /> {t("secureLabel")}</span>
+                            <span className="flex items-center gap-1"><Lock size={12} /> {t("protectedLabel")}</span>
                         </div>
                     </form>
 
@@ -712,13 +716,13 @@ function FlightCheckoutInner() {
                                 <div className="space-y-2">
                                     {adults > 0 && (
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500 font-medium">{adults} Böyük × ${price}</span>
+                                            <span className="text-gray-500 font-medium">{t("adultsPassengers", { count: adults, price })}</span>
                                             <span className="font-bold text-gray-800">${price * adults}</span>
                                         </div>
                                     )}
                                     {children > 0 && (
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500 font-medium">{children} Uşaq × ${price}</span>
+                                            <span className="text-gray-500 font-medium">{t("childrenPassengers", { count: children, price })}</span>
                                             <span className="font-bold text-gray-800">${price * children}</span>
                                         </div>
                                     )}
@@ -727,9 +731,9 @@ function FlightCheckoutInner() {
                                 {/* Total */}
                                 <div className="border-t-2 border-dashed border-gray-100 pt-4">
                                     <div className="bg-blue-600 rounded-2xl p-4 text-white text-center">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-1">Ümumi ödəniş</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-200 mb-1">{t("totalPayment")}</p>
                                         <p className="text-3xl font-black">${totalPrice}</p>
-                                        <p className="text-blue-200 text-xs mt-1">{totalPassengers} sərnişin · Tam məbləğ</p>
+                                        <p className="text-blue-200 text-xs mt-1">{t("totalPassengersFull", { count: totalPassengers })}</p>
                                     </div>
                                 </div>
                             </div>

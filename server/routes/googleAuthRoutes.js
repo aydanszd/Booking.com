@@ -1,6 +1,6 @@
 const express    = require('express');
 const passport   = require('passport');
-const { googleCallback } = require('../controllers/Googleauthcontroller');
+const { googleCallback } = require('../controllers/googleAuthController');
 const router     = express.Router();
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';

@@ -7,8 +7,8 @@ import {
     Search, Filter, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import CarFormModal from "@/components/Carformmodal";
-import CarDeleteModal from "@/components/Cardeletemodal";
+import CarFormModal from "@/components/modals/CarFormModal";
+import CarDeleteModal from "@/components/modals/CarDeleteModal";
 
 const LIMIT = 10;
 
@@ -115,7 +115,7 @@ export default function AdminCarsPage() {
                             <Filter size={13} /> Filtr {filterCat && `· ${CAT_LABEL[filterCat]}`}
                         </button>
                         {showFilter && (
-                            <div className="absolute top-10 left-0 z-20 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 min-w-[180px]">
+                            <div className="absolute top-10 left-0 z-20 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 min-w-45">
                                 {CATEGORIES.map((c) => (
                                     <button
                                         key={c}
@@ -142,8 +142,8 @@ export default function AdminCarsPage() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
-                    <table className="w-full text-sm min-w-[860px]">
+                <div className="overflow-x-auto max-h-140 overflow-y-auto">
+                    <table className="w-full text-sm min-w-215">
                         <thead className="sticky top-0 z-10">
                             <tr className="bg-gray-50">
                                 {["Maşın", "Kateqoriya", "Ötürücü", "Oturacaq", "Qiymət/Gün", "Şəhər", "Reytinq", "Status", "Əməliyyat"].map((h) => (

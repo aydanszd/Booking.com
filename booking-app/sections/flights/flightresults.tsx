@@ -5,6 +5,7 @@ import { FlightType } from "@/types/flight";
 import { flightApi } from "@/api/flight";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const CABIN_LABELS: Record<string, string> = {
     economy: "Economy",
@@ -15,11 +16,7 @@ const CABIN_LABELS: Record<string, string> = {
 
 function fmt(iso: string) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" });
-}
-
-function fmtDuration(min: number) {
-    return `${Math.floor(min / 60)}s ${min % 60}dəq`;
+    return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
 
 function AirlineLogo({ logoUrl, airline }: { logoUrl?: string; airline: string }) {
@@ -39,14 +36,17 @@ function AirlineLogo({ logoUrl, airline }: { logoUrl?: string; airline: string }
 }
 
 function FlightCard({ flight }: { flight: FlightType }) {
+    const t = useTranslations("flights");
     const router = useRouter();
     const avail = flight.totalSeats - flight.bookedSeats;
     const stopCount = flight.stops?.length ?? 0;
 
+    const fmtDuration = (min: number) => t("durationFmt", { h: Math.floor(min / 60), m: min % 60 });
+
     const handleSelect = () => {
         if (avail === 0) return;
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) { toast.error("Rezervasiya üçün daxil olun"); router.push("/signin"); return; }
+        if (!token) { toast.error(t("signInToBook")); router.push("/signin"); return; }
         const params = new URLSearchParams({
             id: flight._id!,
             airline: flight.airline || "",
@@ -91,10 +91,10 @@ function FlightCard({ flight }: { flight: FlightType }) {
                 <div className="text-center">
                     <p className="font-bold text-lg text-gray-900">{fmt(flight.departureTime)}</p>
                     <p className="text-xs font-semibold text-gray-500">{flight.origin.code}</p>
-                    <p className="text-[10px] text-gray-400 truncate max-w-[80px]">{flight.origin.city}</p>
+                    <p className="text-[10px] text-gray-400 truncate max-w-20">{flight.origin.city}</p>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center gap-1 min-w-[80px]">
+                <div className="flex-1 flex flex-col items-center gap-1 min-w-20">
                     <p className="text-[10px] text-gray-400">{flight.duration ? fmtDuration(flight.duration) : ""}</p>
                     <div className="flex items-center w-full gap-1">
                         <div className="flex-1 h-px bg-gray-200" />
@@ -102,14 +102,14 @@ function FlightCard({ flight }: { flight: FlightType }) {
                         <div className="flex-1 h-px bg-gray-200" />
                     </div>
                     <p className={`text-[10px] font-medium ${stopCount === 0 ? "text-emerald-600" : "text-orange-500"}`}>
-                        {stopCount === 0 ? "Birbaşa" : stopCount === 1 ? "1 Dayanacaq" : "2+ Dayanacaq"}
+                        {stopCount === 0 ? t("direct") : stopCount === 1 ? t("oneStop") : t("twoPlus")}
                     </p>
                 </div>
 
                 <div className="text-center">
                     <p className="font-bold text-lg text-gray-900">{fmt(flight.arrivalTime)}</p>
                     <p className="text-xs font-semibold text-gray-500">{flight.destination.code}</p>
-                    <p className="text-[10px] text-gray-400 truncate max-w-[80px]">{flight.destination.city}</p>
+                    <p className="text-[10px] text-gray-400 truncate max-w-20">{flight.destination.city}</p>
                 </div>
             </div>
 
@@ -117,14 +117,14 @@ function FlightCard({ flight }: { flight: FlightType }) {
             <div className="sm:text-right flex sm:flex-col flex-row items-center sm:items-end gap-3 sm:gap-1 sm:w-36 shrink-0">
                 <div>
                     <p className="text-xl font-bold text-gray-900">${flight.price}</p>
-                    <p className="text-[11px] text-gray-400">nəfər başına</p>
+                    <p className="text-[11px] text-gray-400">{t("perPerson")}</p>
                     {flight.baggagePerPax && (
                         <p className="text-[10px] text-gray-400 flex items-center gap-0.5 justify-end mt-0.5">
                             <Luggage size={10} /> {flight.baggagePerPax}
                         </p>
                     )}
                     <p className={`text-[10px] font-medium mt-0.5 ${avail === 0 ? "text-red-500" : avail <= 5 ? "text-orange-500" : "text-emerald-600"}`}>
-                        {avail === 0 ? "Dolu" : avail <= 5 ? `Yalnız ${avail} yer qaldı` : `${avail} yer mövcuddur`}
+                        {avail === 0 ? t("full") : avail <= 5 ? t("seatsLeft", { count: avail }) : t("seatsAvailable", { count: avail })}
                     </p>
                 </div>
                 <button
@@ -136,7 +136,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
                             : "bg-gray-200 text-gray-400 cursor-not-allowed"
                     }`}
                 >
-                    {avail > 0 ? <>Seç <ChevronRight size={13} /></> : "Mövcud deyil"}
+                    {avail > 0 ? <>{t("select")} <ChevronRight size={13} /></> : t("notAvailable")}
                 </button>
             </div>
         </div>
@@ -144,6 +144,7 @@ function FlightCard({ flight }: { flight: FlightType }) {
 }
 
 export default function FlightResults() {
+    const t = useTranslations("flights");
     const [allFlights, setAllFlights] = useState<FlightType[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -173,7 +174,7 @@ export default function FlightResults() {
     return (
         <section className="max-w-6xl mx-auto px-4 py-8">
             <p className="text-sm text-gray-600 mb-5">
-                <span className="font-bold text-gray-900">{allFlights.length}</span> uçuş tapıldı
+                <span className="font-bold text-gray-900">{t("flightsCount", { count: allFlights.length })}</span>
             </p>
             <div className="space-y-3">
                 {allFlights.map(f => <FlightCard key={f._id} flight={f} />)}

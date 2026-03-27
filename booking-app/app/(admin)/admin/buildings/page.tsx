@@ -4,9 +4,9 @@ import { Search, Filter } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { Building } from '@/types/building';
 import { useBuildings } from '@/hooks/useBuildings';
-import BuildingStats from '@/components/buildingStash';
-import BuildingTable from '@/components/buildingTable';
-import BuildingModal from '@/components/buildingModal';
+import BuildingStats from '@/components/BuildingStats';
+import BuildingTable from '@/components/BuildingTable';
+import BuildingModal from '@/components/modals/BuildingModal';
 
 export default function BuildingsPage() {
     const { buildings, total, loading, fetchBuildings, deleteBuilding } = useBuildings();

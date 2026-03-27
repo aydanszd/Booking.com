@@ -7,8 +7,8 @@ import {
 import { Toaster, toast } from "sonner";
 import { FlightType, ModalType } from "@/types/flight";
 import { flightApi } from "@/api/flight";
-import FlightFormModal from "@/components/flightformmodal";
-import FlightDeleteModal from "@/components/flightdeletemodal";
+import FlightFormModal from "@/components/modals/FlightFormModal";
+import FlightDeleteModal from "@/components/modals/FlightDeleteModal";
 
 const LIMIT = 10;
 
@@ -148,7 +148,7 @@ export function LogoUploadField({
                         <img
                             src={preview}
                             alt="logo preview"
-                            className="h-16 w-auto max-w-[140px] object-contain rounded-lg"
+                            className="h-16 w-auto max-w-35 object-contain rounded-lg"
                         />
                         <button
                             onClick={clear}
@@ -289,7 +289,7 @@ export default function FlightsPage() {
                             <Filter size={13} /> Filtr {filterCabin && `· ${cabinLabel[filterCabin]}`}
                         </button>
                         {showFilter && (
-                            <div className="absolute top-10 left-0 z-20 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 min-w-[180px]">
+                            <div className="absolute top-10 left-0 z-20 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 min-w-45">
                                 {CABINS.map((c) => (
                                     <button
                                         key={c}
@@ -316,8 +316,8 @@ export default function FlightsPage() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
-                    <table className="w-full text-sm min-w-[960px]">
+                <div className="overflow-x-auto max-h-140 overflow-y-auto">
+                    <table className="w-full text-sm min-w-240">
                         <thead className="sticky top-0 z-10">
                             <tr className="bg-gray-50">
                                 {["Uçuş", "Marşrut", "Tarix", "Uçuş / Eniş", "Müddət", "Kabinə", "Oturacaq", "Qiymət", "Status", "Əməliyyat"].map((h) => (

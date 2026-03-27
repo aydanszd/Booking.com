@@ -57,7 +57,7 @@ export default function CarDetailPage() {
         setIsLoggedIn(!!localStorage.getItem("token"));
     }, []);
 
-    const handleReviewSubmit = async (e: React.FormEvent) => {
+    const handleReviewSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         if (reviewScore === 0) { setReviewError(t("selectStars")); return; }
         if (!reviewComment.trim()) { setReviewError(t("writeReview")); return; }
@@ -107,13 +107,13 @@ export default function CarDetailPage() {
 
     const handleBooking = async () => {
         if (!pickUp || !dropOff) {
-            toast.error("Please select dates");
+            toast.error(t("selectDates"));
             return;
         }
 
         const token = localStorage.getItem("token");
         if (!token) {
-            toast.error("Please sign in to book");
+            toast.error(t("signInToBook"));
             router.push("/signin");
             return;
         }
@@ -123,9 +123,9 @@ export default function CarDetailPage() {
             const start = new Date(pickUp);
             const end = new Date(dropOff);
             const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-            
+
             if (days <= 0) {
-                toast.error("Drop-off date must be after pick-up date");
+                toast.error(t("dropBeforePickup"));
                 return;
             }
 
@@ -137,12 +137,12 @@ export default function CarDetailPage() {
                 totalPrice: (car?.pricePerDay || 0) * days,
                 guests: { adults: 1, children: 0 }
             };
-            
+
             await bookingApi.createBooking(data);
-            toast.success("Booking successful!");
+            toast.success(t("bookingSuccess"));
             router.push("/my-bookings");
         } catch (err: any) {
-            toast.error(err.response?.data?.message || err.message || "Booking failed");
+            toast.error(err.response?.data?.message || err.message || t("bookingFailed"));
         } finally {
             setBookingLoading(false);
         }
@@ -227,7 +227,7 @@ export default function CarDetailPage() {
 
                             <div className="mt-8">
                                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                     Car features
+                                    {t("features")}
                                 </h3>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                     {(car.features || ["Air Conditioning", "Bluetooth", "USB Port", "Cruise Control"]).map((f: string) => (
@@ -244,7 +244,7 @@ export default function CarDetailPage() {
                     {/* Right: Booking Card */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 sticky top-24 space-y-5">
-                            <h3 className="text-xl font-bold text-gray-900">Booking Summary</h3>
+                            <h3 className="text-xl font-bold text-gray-900">{t("bookingSummary")}</h3>
 
                             <DateRangePicker
                                 bookedRanges={bookedRanges}
@@ -252,26 +252,26 @@ export default function CarDetailPage() {
                                 endDate={dropOff}
                                 onStartChange={setPickUp}
                                 onEndChange={setDropOff}
-                                startLabel="Pick-up"
-                                endLabel="Drop-off"
+                                startLabel={t("pickUpLabel")}
+                                endLabel={t("dropOffLabel")}
                             />
 
                             <div className="py-6 border-y border-gray-100">
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-bold text-gray-500 uppercase">Rental price</span>
-                                    <span className="text-sm font-black text-gray-900">${car.pricePerDay} / day</span>
+                                    <span className="text-sm font-bold text-gray-500 uppercase">{t("rentalPrice")}</span>
+                                    <span className="text-sm font-black text-gray-900">${car.pricePerDay} {t("perDay")}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <span className="text-sm font-bold text-gray-500 uppercase">Duration</span>
-                                    <span className="text-sm font-black text-gray-900">{days} day(s)</span>
+                                    <span className="text-sm font-bold text-gray-500 uppercase">{t("duration")}</span>
+                                    <span className="text-sm font-black text-gray-900">{t("days", { count: days })}</span>
                                 </div>
                                 <div className="flex justify-between items-end pt-4">
                                     <div>
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total cost</p>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("totalCost")}</p>
                                         <p className="text-4xl font-black text-gray-900">${car.pricePerDay * days}</p>
                                     </div>
                                     <div className="text-xs text-[#008009] font-bold bg-green-50 px-2 py-1 rounded">
-                                        Best Price
+                                        {t("bestPrice")}
                                     </div>
                                 </div>
                             </div>
@@ -281,11 +281,11 @@ export default function CarDetailPage() {
                                 disabled={bookingLoading}
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl text-lg transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center justify-center gap-2"
                             >
-                                {bookingLoading ? <Loader2 className="animate-spin" size={24} /> : "Book This Car"}
+                                {bookingLoading ? <Loader2 className="animate-spin" size={24} /> : t("bookCar")}
                             </button>
-                            
+
                             <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-tighter">
-                                No hidden fees • 24/7 Support
+                                {t("noHiddenFees")}
                             </p>
                         </div>
                     </div>
@@ -295,8 +295,8 @@ export default function CarDetailPage() {
                 {/* Reviews Section */}
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mt-8">
                     <div className="flex items-center gap-4 mb-8">
-                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Reviews</h2>
-                        {car.rating > 0 && (
+                        <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{t("reviews")}</h2>
+                        {(car.rating ?? 0) > 0 && (
                             <div className="flex items-center gap-1.5 bg-blue-600 text-white font-black px-3 py-1.5 rounded-xl text-sm">
                                 <Star size={14} fill="white" /> {car.rating}
                             </div>
@@ -327,7 +327,7 @@ export default function CarDetailPage() {
                                         <div className="mt-4 ml-4 bg-blue-50 border border-blue-100 rounded-xl p-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <CornerDownRight size={14} className="text-blue-600" />
-                                                <span className="text-xs font-black text-blue-700 uppercase">Admin cavabı</span>
+                                                <span className="text-xs font-black text-blue-700 uppercase">{t("adminReply")}</span>
                                                 {r.adminReplyAt && <span className="text-xs text-blue-400">{fmtDate(r.adminReplyAt)}</span>}
                                             </div>
                                             <p className="text-sm text-blue-800">{r.adminReply}</p>
@@ -337,37 +337,37 @@ export default function CarDetailPage() {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-400 mb-8">Hələ rəy yoxdur. İlk rəyi siz yazın!</p>
+                        <p className="text-sm text-gray-400 mb-8">{t("noReviews")}</p>
                     )}
 
                     {/* Submit form */}
                     <div className="border-t border-gray-100 pt-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-5">Rəyinizi bildirin</h3>
+                        <h3 className="text-lg font-bold text-gray-900 mb-5">{t("shareReview")}</h3>
                         {!isLoggedIn ? (
                             <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-2xl p-5">
-                                <p className="text-sm font-semibold text-blue-700">Rəy yazmaq üçün daxil olun</p>
+                                <p className="text-sm font-semibold text-blue-700">{t("signInToReview")}</p>
                                 <button onClick={() => router.push("/signin")}
                                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors">
-                                    <LogIn size={15} /> Daxil ol
+                                    <LogIn size={15} /> {t("signIn")}
                                 </button>
                             </div>
                         ) : reviewSuccess ? (
                             <div className="bg-green-50 border border-green-100 rounded-2xl p-5 text-center">
-                                <p className="text-green-700 font-bold">Rəyiniz göndərildi! Təşəkkür edirik.</p>
+                                <p className="text-green-700 font-bold">{t("reviewSubmitted")}</p>
                             </div>
                         ) : (
                             <form onSubmit={handleReviewSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Qiymət (1–10)</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">{t("rating")}</label>
                                     <StarRating value={reviewScore} onChange={setReviewScore} />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Şərh</label>
+                                    <label className="block text-xs font-bold text-gray-500 uppercase mb-2">{t("comment")}</label>
                                     <textarea
                                         value={reviewComment}
                                         onChange={(e) => setReviewComment(e.target.value)}
                                         rows={4}
-                                        placeholder="Avtomobil haqqında fikirinizi bölüşün..."
+                                        placeholder={t("commentPlaceholder")}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-400 resize-none"
                                     />
                                 </div>
@@ -378,7 +378,7 @@ export default function CarDetailPage() {
                                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
                                 >
                                     {reviewSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                                    Göndər
+                                    {t("submit")}
                                 </button>
                             </form>
                         )}

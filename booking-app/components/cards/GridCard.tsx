@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Heart, MapPin, ChevronRight, Leaf, Star } from "lucide-react";
-import { Building } from "@/types/user-front/buildingsfilter";
-import { capitalize, scoreLabel } from "@/utils/user-front/buildingsfilter";
-import { imgUrl } from "@/api/user-front/buildingsfilter";
+import { Building } from "@/types/buildingFilter";
+import { capitalize, scoreLabel } from "@/lib/buildings/utils";
+import { imgUrl } from "@/lib/buildings/api";
 
 interface Props {
     building: Building;
@@ -18,7 +18,7 @@ export function GridCard({ building }: Props) {
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full">
-            <div className="relative h-44 flex-shrink-0">
+            <div className="relative h-44 shrink-0">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
                 <button
                     type="button"
@@ -62,7 +62,7 @@ export function GridCard({ building }: Props) {
                         <p className="text-[10px] text-gray-400 font-medium">{building.brand}</p>
                     )}
                     <p className="text-xs text-gray-500 flex items-center gap-0.5">
-                        <MapPin size={10} className="text-gray-400 flex-shrink-0" />
+                        <MapPin size={10} className="text-gray-400 shrink-0" />
                         <span className="truncate">
                             {building.location.city}, {building.location.country}
                         </span>
@@ -115,7 +115,7 @@ export function GridCard({ building }: Props) {
                     <button
                         type="button"
                         disabled={!building.isAvailable}
-                        className={`font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${building.isAvailable
+                        className={`font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${building.isAvailable
                                 ? "bg-[#006ce4] hover:bg-[#0055b3] text-white"
                                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
                             }`}

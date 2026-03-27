@@ -6,11 +6,11 @@ import {
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { Filters } from "@/types/user-front/buildingsfilter";
-import { DEFAULT_FILTERS } from "@/const/user-front/buildingsfilter";
-import { capitalize } from "@/utils/user-front/buildingsfilter";
-import { useBuildings } from "@/api/user-front/buildingsfilter";
-import { Sidebar } from "@/components/buildingsfilter/Sidebar";
+import { Filters } from "@/types/buildingFilter";
+import { DEFAULT_FILTERS } from "@/lib/buildings/constants";
+import { capitalize } from "@/lib/buildings/utils";
+import { useBuildings } from "@/lib/buildings/api";
+import { Sidebar } from "@/components/filters/Sidebar";
 import { ListCard } from "@/components/cards/ListCard";
 import { GridCard } from "@/components/cards/GridCard";
 
@@ -210,7 +210,7 @@ export default function SearchResults() {
                                 >
                                     <ArrowUpDown size={12} /> Sort: {sortLabel}
                                 </button>
-                                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 hidden group-hover:block min-w-[180px]">
+                                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 hidden group-hover:block min-w-45">
                                     {(
                                         [
                                             ["rating", "Top rated"],

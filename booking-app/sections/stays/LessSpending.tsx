@@ -17,29 +17,6 @@ const footerLinks2 = [
     "Guides", "Discover", "Discover monthly stays",
 ];
 
-const footerColumns = [
-    {
-        titleKey: "footerSupportTitle",
-        links: ["Manage your trips", "Contact Customer Service", "Safety resource centre"],
-    },
-    {
-        titleKey: "footerDiscoverTitle",
-        links: ["Genius loyalty programme", "Seasonal and holiday deals", "Travel articles", "Booking.com for Business", "Traveller Review Awards", "Car hire", "Flight finder", "Restaurant reservations"],
-    },
-    {
-        titleKey: "footerTermsTitle",
-        links: ["Privacy Notice", "Terms of Service", "Accessibility Statement", "Partner dispute", "Modern Slavery Statement", "Human Rights Statement"],
-    },
-    {
-        titleKey: "footerPartnersTitle",
-        links: ["Extranet login", "Partner help", "List your property", "Become an affiliate"],
-    },
-    {
-        titleKey: "footerAboutTitle",
-        links: ["About Booking.com", "How we work", "Sustainability", "Press centre", "Careers", "Investor relations", "Corporate contact", "Content guidelines and"],
-    },
-];
-
 export default function BookingSections() {
     const t = useTranslations("stays");
     const [activeTab, setActiveTab] = useState<typeof TAB_KEYS[number]>("tabDomestic");

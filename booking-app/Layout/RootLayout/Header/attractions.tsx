@@ -105,7 +105,7 @@ function CalendarMonth({
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showMonthPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-36 mt-1 max-h-56 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-36 mt-1 max-h-56 overflow-y-auto">
                             {MONTHS.map((m, i) => {
                                 const isPast = year === currentYear && i < TODAY.getMonth();
                                 return (
@@ -135,7 +135,7 @@ function CalendarMonth({
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showYearPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-24 mt-1 max-h-56 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-24 mt-1 max-h-56 overflow-y-auto">
                             {years.map((y) => (
                                 <div
                                     key={y}
@@ -372,7 +372,7 @@ export default function AttractionsHeader() {
                                 <span className="text-sm text-gray-800 whitespace-nowrap">{dateLabel}</span>
                             </div>
                             {showDate && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-[9999] bg-white rounded-xl shadow-2xl min-w-[600px]">
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-9999 bg-white rounded-xl shadow-2xl min-w-150">
                                     <div className="flex items-center gap-4 px-5 pt-5 pb-3">
                                         <button
                                             onClick={prevMonth}

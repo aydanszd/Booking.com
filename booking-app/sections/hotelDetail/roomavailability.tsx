@@ -9,20 +9,6 @@ import { toast } from "sonner";
 import DateRangePicker from "@/components/DateRangePicker";
 import { useTranslations } from "next-intl";
 
-interface Room {
-    id: number;
-    name: string;
-    guests: number;
-    bedOptions: string[];
-    size: number;
-    amenities: string[];
-    extraAmenities: string[];
-    price: number;
-    features: any[];
-    urgency?: string;
-    view?: string;
-}
-
 export default function RoomAvailability({ building }: { building: any }) {
     const t = useTranslations("hotel");
     const searchParams = useSearchParams();

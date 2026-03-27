@@ -101,7 +101,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
     const rangeEnd = checkOut || hoveredDate;
 
     return (
-        <div className="w-65 mt-[-30px]">
+        <div className="w-65 -mt-7.5">
             <div ref={headerRef} className="flex items-center justify-center gap-1 mb-3 relative">
                 <div className="relative">
                     <button
@@ -112,7 +112,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showMonthPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-35 mt-1 max-h-55 overflow-y-auto">
                             {MONTHS.map((m, i) => {
                                 const isPast = year === currentYear && i < TODAY.getMonth();
                                 return (
@@ -140,7 +140,7 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
                         <ChevronDown size={13} className="text-gray-500" />
                     </button>
                     {showYearPicker && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-[100] bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22.5 mt-1 max-h-55 overflow-y-auto">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 w-22.5 mt-1 max-h-55 overflow-y-auto">
                             {years.map((y: number) => (
                                 <div
                                     key={y}
@@ -216,7 +216,6 @@ export default function CarRentalHeader() {
     ];
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
-    const [calendarTab, setCalendarTab] = useState<string>("calendar");
     const [pickupLocation, setPickupLocation] = useState<string>("");
     const [dropoffLocation, setDropoffLocation] = useState<string>("");
     const [showDropoffSuggestions, setShowDropoffSuggestions] = useState<boolean>(false);
@@ -230,7 +229,7 @@ export default function CarRentalHeader() {
     const [leftMonth, setLeftMonth] = useState<number>(TODAY.getMonth());
     const [rightYear, setRightYear] = useState<number>(initRight.getFullYear());
     const [rightMonth, setRightMonth] = useState<number>(initRight.getMonth());
-    const [differentDropoff, setDifferentDropoff] = useState<boolean>(true);
+    const [differentDropoff] = useState<boolean>(true);
     const locationRef = useRef<HTMLDivElement>(null);
     const dropoffRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
@@ -419,7 +418,7 @@ export default function CarRentalHeader() {
 
                             {/* Calendar dropdown */}
                             {showDate && (
-                                <div className="absolute top-[calc(100%+8px)] left-0 z-[200] bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 min-w-[580px]">
+                                <div className="absolute top-[calc(100%+8px)] left-0 z-200 bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 min-w-145">
                                     {/* Flex options */}
                                     <div className="flex gap-2 mb-4 border-b border-gray-100 pb-3">
                                         {FLEX_OPTIONS.map(opt => (

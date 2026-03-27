@@ -8,6 +8,7 @@ import {
     MapPin, Calendar, ArrowLeft, Star,
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const BASE = "http://localhost:5000";
 
@@ -19,10 +20,11 @@ function imgSrc(path: string | undefined) {
 
 function fmtDate(d: string) {
     if (!d) return "";
-    return new Date(d).toLocaleDateString("az-AZ", { day: "numeric", month: "short", year: "numeric" });
+    return new Date(d).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 function CarDetailListInner() {
+    const t = useTranslations("cars");
     const sp = useSearchParams();
     const router = useRouter();
 
@@ -62,7 +64,7 @@ function CarDetailListInner() {
                         onClick={() => router.back()}
                         className="flex items-center gap-2 text-blue-200 hover:text-white text-sm mb-4 transition-colors"
                     >
-                        <ArrowLeft size={16} /> Geri
+                        <ArrowLeft size={16} /> {t("back")}
                     </button>
                     <div className="flex flex-wrap items-center gap-4">
                         {city && (
@@ -74,7 +76,7 @@ function CarDetailListInner() {
                         {pickUp && dropOff && (
                             <div className="flex items-center gap-1.5 text-blue-200 text-sm">
                                 <Calendar size={14} />
-                                <span>{fmtDate(pickUp)} — {fmtDate(dropOff)} · {days} gün</span>
+                                <span>{fmtDate(pickUp)} — {fmtDate(dropOff)} · {t("days", { count: days })}</span>
                             </div>
                         )}
                     </div>
@@ -85,28 +87,28 @@ function CarDetailListInner() {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                         <Loader2 size={36} className="animate-spin text-[#006ce4]" />
-                        <p className="text-gray-500 text-sm font-medium">Avtomobillər axtarılır...</p>
+                        <p className="text-gray-500 text-sm font-medium">{t("searching")}</p>
                     </div>
                 ) : cars.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
                         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Car size={28} className="text-blue-300" />
                         </div>
-                        <h3 className="text-lg font-black text-gray-800 mb-2">Avtomobil tapılmadı</h3>
+                        <h3 className="text-lg font-black text-gray-800 mb-2">{t("notFound")}</h3>
                         <p className="text-sm text-gray-400 mb-6">
-                            {city ? `"${city}" şəhərində mövcud avtomobil yoxdur` : "Axtarış şərtlərinə uyğun avtomobil tapılmadı"}
+                            {city ? t("notFoundInCity", { city }) : t("notFoundDesc")}
                         </p>
                         <button
                             onClick={() => router.push("/carrender")}
                             className="bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors"
                         >
-                            Yenidən axtar
+                            {t("searchAgain")}
                         </button>
                     </div>
                 ) : (
                     <>
                         <p className="text-sm text-gray-500 mb-5">
-                            <span className="font-bold text-gray-900">{cars.length}</span> avtomobil tapıldı
+                            <span className="font-bold text-gray-900">{t("carsFound", { count: cars.length })}</span>
                         </p>
                         <div className="space-y-4">
                             {cars.map(car => {
@@ -152,32 +154,32 @@ function CarDetailListInner() {
 
                                             <div className="grid grid-cols-2 gap-2 mb-4">
                                                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                    <Users size={13} className="text-gray-400" /> {car.seats} oturacaq
+                                                    <Users size={13} className="text-gray-400" /> {t("seats", { count: car.seats })}
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs text-gray-600">
                                                     <Disc size={13} className="text-gray-400" /> {car.transmission}
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                    <Fuel size={13} className="text-gray-400" /> Full to full
+                                                    <Fuel size={13} className="text-gray-400" /> {t("fuelPolicy")}
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                                                    <Check size={13} className="text-green-500" /> Pulsuz ləğv
+                                                    <Check size={13} className="text-green-500" /> {t("freeCancellation")}
                                                 </div>
                                             </div>
 
                                             <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
                                                 <div>
-                                                    <p className="text-xs text-gray-400">${car.pricePerDay} / gün</p>
+                                                    <p className="text-xs text-gray-400">${car.pricePerDay} {t("perDay")}</p>
                                                     <p className="text-2xl font-black text-gray-900">${pickUp && dropOff ? totalPrice : car.pricePerDay}</p>
                                                     {pickUp && dropOff && (
-                                                        <p className="text-[10px] text-gray-400">{days} gün üçün</p>
+                                                        <p className="text-[10px] text-gray-400">{t("forDays", { count: days })}</p>
                                                     )}
                                                 </div>
                                                 <Link
                                                     href={`/cardetail/${car._id}?${detailParams.toString()}`}
                                                     className="bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md shadow-blue-100 text-sm"
                                                 >
-                                                    Detaylara bax
+                                                    {t("viewDetails")}
                                                 </Link>
                                             </div>
                                         </div>

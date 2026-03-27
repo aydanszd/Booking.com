@@ -357,7 +357,7 @@ export default function Header() {
                                 <input
                                     value={location}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
-                                    placeholder="Where are you going?"
+                                    placeholder={t("searchPlaceholder")}
                                     className="flex-1 text-sm text-gray-800 bg-transparent outline-none"
                                     onClick={(e: React.MouseEvent) => e.stopPropagation()}
                                 />
@@ -411,7 +411,7 @@ export default function Header() {
                                                     : "text-gray-500 hover:text-gray-700"
                                                     }`}
                                             >
-                                                {tab === "calendar" ? "Calendar" : "I'm flexible"}
+                                                {tab === "calendar" ? t("calendar") : t("flexible")}
                                             </button>
                                         ))}
                                     </div>
@@ -470,7 +470,7 @@ export default function Header() {
                                     )}
                                     {calendarTab === "flexible" && (
                                         <div className="px-5 py-8 text-center text-gray-500 text-sm">
-                                            Flexible dates coming soon
+                                            {t("flexibleDates")}
                                         </div>
                                     )}
                                     <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-100">
@@ -478,13 +478,13 @@ export default function Header() {
                                             onClick={() => { setCheckIn(null); setCheckOut(null); }}
                                             className="text-sm text-[#0071c2] underline hover:no-underline"
                                         >
-                                            Clear dates
+                                            {t("clearDates")}
                                         </button>
                                         <button
                                             onClick={() => setShowDate(false)}
                                             className="bg-[#0071c2] hover:bg-[#005ea6] text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors"
                                         >
-                                            Apply
+                                            {t("apply")}
                                         </button>
                                     </div>
                                 </div>
@@ -497,7 +497,7 @@ export default function Header() {
                             >
                                 <Users size={26} className="text-gray-500 shrink-0" />
                                 <span className="flex-1 text-sm text-gray-800 whitespace-nowrap">
-                                    {guests.adults} adults · {guests.children} children · {guests.rooms} room
+                                    {guests.adults} {tGuests("adults")} · {guests.children} {tGuests("children")} · {guests.rooms} {tGuests("rooms")}
                                 </span>
                                 <ChevronDown size={16} className="text-gray-400" />
                             </div>
@@ -505,14 +505,14 @@ export default function Header() {
                             {showGuests && (
                                 <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl p-5 min-w-70">
                                     {[
-                                        { key: "adults" as const, label: "Adults", sub: "Age 18+" },
-                                        { key: "children" as const, label: "Children", sub: "Age 0–17" },
-                                        { key: "rooms" as const, label: "Rooms", sub: "" },
-                                    ].map(({ key, label, sub }: { key: "adults" | "children" | "rooms"; label: string; sub: string }) => (
+                                        { key: "adults" as const, labelKey: "adults", subKey: "adultsAge" },
+                                        { key: "children" as const, labelKey: "children", subKey: "childrenAge" },
+                                        { key: "rooms" as const, labelKey: "rooms", subKey: "" },
+                                    ].map(({ key, labelKey, subKey }: { key: "adults" | "children" | "rooms"; labelKey: string; subKey: string }) => (
                                         <div key={key} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-800">{label}</p>
-                                                {sub && <p className="text-xs text-gray-400">{sub}</p>}
+                                                <p className="text-sm font-semibold text-gray-800">{tGuests(labelKey as any)}</p>
+                                                {subKey && <p className="text-xs text-gray-400">{tGuests(subKey as any)}</p>}
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <button
@@ -535,7 +535,7 @@ export default function Header() {
                                         onClick={() => setShowGuests(false)}
                                         className="mt-4 w-full bg-[#003b94] hover:bg-[#00245a] text-white text-sm font-semibold py-2.5 rounded-lg transition-colors"
                                     >
-                                        Done
+                                        {t("done")}
                                     </button>
                                 </div>
                             )}
@@ -564,7 +564,7 @@ export default function Header() {
                             className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0"
                         >
                             <Search size={18} />
-                            Search
+                            {t("searchBtn")}
                         </button>
                     </div>
                     <label className="flex items-center gap-2 mt-3.5 text-black text-sm cursor-pointer select-none">
@@ -574,7 +574,7 @@ export default function Header() {
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEntireHome(e.target.checked)}
                             className="w-4 h-4 cursor-pointer accent-[#0071c2]"
                         />
-                        I'm looking for an entire home or apartment
+                        {t("entireHome")}
                     </label>
                 </div>
             </div>

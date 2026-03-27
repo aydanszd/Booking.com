@@ -1,667 +1,49 @@
 'use client'
 
-import { useState, useEffect, useRef, Suspense, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
-    Users, Settings2, Gauge, MapPin, CheckCircle2, Star,
-    ChevronLeft, ChevronRight, Shield, Fuel, Wind,
-    Phone, Mail, Info, ArrowRight, Clock, Calendar,
-    CreditCard, AlertCircle, ThumbsUp, Car, X, ChevronDown,
-    Loader2, Snowflake, Navigation, Wifi, Send, CornerDownRight, LogIn,
+    Users, Settings2, Gauge, MapPin, CheckCircle2,
+    ChevronRight, Shield, Fuel, Wind,
+    Phone, Mail, Info, CreditCard, AlertCircle, ThumbsUp, Car,
+    Loader2, Snowflake, Navigation, Wifi,
 } from 'lucide-react'
 import axios from 'axios'
 import { toast } from 'sonner'
-import DateRangePicker from '@/components/DateRangePicker'
-import Lightbox from 'yet-another-react-lightbox'
-import 'yet-another-react-lightbox/styles.css'
-import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails'
-import 'yet-another-react-lightbox/plugins/thumbnails.css'
-import Zoom from 'yet-another-react-lightbox/plugins/zoom'
-import Counter from 'yet-another-react-lightbox/plugins/counter'
-import 'yet-another-react-lightbox/plugins/counter.css'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type CarType = {
-    _id: string
-    title: string
-    brand: string
-    model: string
-    category: string
-    transmission: 'automatic' | 'manual'
-    seats: number
-    doors?: number
-    largeBags?: number
-    smallBags?: number
-    mileage: number
-    pricePerDay: number
-    isAvailable: boolean
-    location: { city: string; country: string; address?: string; lat?: number; lng?: number }
-    features: string[]
-    images: string[]
-    rating?: number
-    provider?: string
-    providerLabel?: string
-    providerReviews?: number
-    fuelPolicy?: string
-    minAge?: number
-    deposit?: number
-    winterFee?: boolean
-    includes?: string[]
-    excludes?: string[]
-}
-
-type Review = {
-    _id: string
-    userName: string
-    score: number
-    comment: string
-    adminReply?: string | null
-    adminReplyAt?: string | null
-    createdAt?: string
-}
-
-// ─── Config ────────────────────────────────────────────────────────────────────
+import { useTranslations } from 'next-intl'
+import type { CarDetailType } from './_components/types'
+import GoogleMap from './_components/GoogleMap'
+import ImageGallery from './_components/ImageGallery'
+import SpecBadge from './_components/SpecBadge'
+import BookingCard from './_components/BookingCard'
+import MobileStickyBar from './_components/MobileStickyBar'
+import MobileBookingSheet from './_components/MobileBookingSheet'
+import ReviewSection from './_components/ReviewSection'
 
 const BASE = 'http://localhost:5000'
 const API = `${BASE}/api/cars`
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function scoreLabel(v: number) {
-    if (v >= 9) return 'Süper'
-    if (v >= 8) return 'Çok iyi'
-    if (v >= 7) return 'İyi'
-    return 'Yeterli'
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmtDate(d?: string) {
-    if (!d) return ''
-    return new Date(d).toLocaleDateString('az-AZ', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
-// ─── Google Map ───────────────────────────────────────────────────────────────
-// Requires: NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env.local
-// If lat/lng not provided, falls back to a static embed searched by city name.
-
-function GoogleMap({
-    lat,
-    lng,
-    city,
-    country,
-    apiKey,
-}: {
-    lat?: number
-    lng?: number
-    city?: string
-    country?: string
-    apiKey?: string
-}) {
-    const mapRef = useRef<HTMLDivElement>(null)
-    const mapInstanceRef = useRef<any>(null)
-
-    // Resolve the API key from env if not passed directly
-    const resolvedKey = apiKey ?? (typeof process !== 'undefined'
-        ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
-        : '')
-
-    useEffect(() => {
-        if (!mapRef.current) return
-
-        const loadAndInit = (resolvedLat: number, resolvedLng: number) => {
-            if (mapInstanceRef.current) return
-
-            const existing = document.querySelector('#google-maps-script')
-            const init = () => {
-                const google = (window as any).google
-                if (!google || !mapRef.current) return
-
-                const map = new google.maps.Map(mapRef.current, {
-                    center: { lat: resolvedLat, lng: resolvedLng },
-                    zoom: 14,
-                    disableDefaultUI: false,
-                    zoomControl: true,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: true,
-                    styles: [
-                        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-                        { featureType: 'transit', stylers: [{ visibility: 'simplified' }] },
-                    ],
-                })
-
-                new google.maps.Marker({
-                    position: { lat: resolvedLat, lng: resolvedLng },
-                    map,
-                    icon: {
-                        path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-                        fillColor: '#2563eb',
-                        fillOpacity: 1,
-                        strokeColor: '#fff',
-                        strokeWeight: 2,
-                        scale: 1.8,
-                        anchor: new google.maps.Point(12, 22),
-                    },
-                })
-
-                mapInstanceRef.current = map
-            }
-
-            if (existing) {
-                if ((window as any).google?.maps) init()
-                else existing.addEventListener('load', init)
-                return
-            }
-
-            const script = document.createElement('script')
-            script.id = 'google-maps-script'
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${resolvedKey}`
-            script.async = true
-            script.defer = true
-            script.onload = init
-            document.head.appendChild(script)
-        }
-
-        if (lat !== undefined && lng !== undefined) {
-            loadAndInit(lat, lng)
-        } else if (city) {
-            // Geocode via Google Maps Geocoding API
-            const query = encodeURIComponent(`${city}${country ? ', ' + country : ''}`)
-            fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${resolvedKey}`)
-                .then(r => r.json())
-                .then(data => {
-                    const loc = data?.results?.[0]?.geometry?.location
-                    if (loc) loadAndInit(loc.lat, loc.lng)
-                })
-                .catch(() => loadAndInit(48.8566, 2.3522))
-        }
-
-        return () => {
-            mapInstanceRef.current = null
-        }
-    }, [lat, lng, city, country, resolvedKey])
-
-    // Fallback: if no API key, render a Google Maps embed iframe
-    if (!resolvedKey) {
-        const query = lat && lng
-            ? `${lat},${lng}`
-            : encodeURIComponent(`${city ?? ''}${country ? ', ' + country : ''}`)
-        return (
-            <iframe
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps?q=${query}&output=embed&z=14`}
-            />
-        )
-    }
-
-    return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
-}
-
-// ─── Image Gallery ────────────────────────────────────────────────────────────
-
-function ImageGallery({ images, title }: { images: string[]; title: string }) {
-    const [lightboxOpen, setLightboxOpen] = useState(false)
-    const [lightboxIndex, setLightboxIndex] = useState(0)
-    const [activeThumb, setActiveThumb] = useState(0)
-    const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({})
-
-    const srcs = images.map(img => img.startsWith('http') ? img : `${BASE}${img}`)
-    const slides = srcs.map(src => ({ src }))
-
-    const openAt = (index: number) => {
-        setLightboxIndex(index)
-        setLightboxOpen(true)
-    }
-
-    if (srcs.length === 0) {
-        return (
-            <div className="h-[260px] sm:h-[340px] md:h-[420px] rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center">
-                <Car className="w-20 h-20 text-gray-200" />
-            </div>
-        )
-    }
-
-    return (
-        <div className="relative">
-            {/* Main image */}
-            <div
-                className="relative h-[260px] sm:h-[340px] md:h-[420px] rounded-xl sm:rounded-2xl overflow-hidden bg-gray-100 group cursor-zoom-in"
-                onClick={() => openAt(activeThumb)}
-            >
-                {!imgErrors[activeThumb] ? (
-                    <img
-                        src={srcs[activeThumb]}
-                        alt={title}
-                        onError={() => setImgErrors(p => ({ ...p, [activeThumb]: true }))}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <Car className="w-20 h-20 text-gray-200" />
-                    </div>
-                )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
-                <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm select-none">
-                    {activeThumb + 1} / {srcs.length}
-                    <span className="hidden sm:inline"> · Büyütmek için tıkla</span>
-                </div>
-            </div>
-
-            {/* Thumbnail strip */}
-            {srcs.length > 1 && (
-                <div className="flex gap-1.5 sm:gap-2 mt-2">
-                    {srcs.map((img, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setActiveThumb(i)}
-                            className={`flex-1 h-12 sm:h-16 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${
-                                activeThumb === i
-                                    ? 'border-blue-600 opacity-100'
-                                    : 'border-transparent opacity-55 hover:opacity-90'
-                            }`}
-                        >
-                            {!imgErrors[i] ? (
-                                <img
-                                    src={img}
-                                    alt=""
-                                    onError={() => setImgErrors(p => ({ ...p, [i]: true }))}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                    <Car className="w-5 h-5 text-gray-300" />
-                                </div>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {/* Lightbox */}
-            <Lightbox
-                open={lightboxOpen}
-                close={() => setLightboxOpen(false)}
-                slides={slides}
-                index={lightboxIndex}
-                plugins={[Thumbnails, Zoom, Counter]}
-                thumbnails={{
-                    position: 'bottom',
-                    width: 80,
-                    height: 56,
-                    border: 2,
-                    borderRadius: 8,
-                    padding: 2,
-                    gap: 8,
-                }}
-                zoom={{
-                    maxZoomPixelRatio: 3,
-                    zoomInMultiplier: 2,
-                    doubleTapDelay: 300,
-                    scrollToZoom: true,
-                }}
-                counter={{ container: { style: { top: 0, bottom: 'unset' } } }}
-                styles={{
-                    container: { backgroundColor: 'rgba(0,0,0,0.92)' },
-                }}
-            />
-        </div>
-    )
-}
-
-// ─── Spec Badge ───────────────────────────────────────────────────────────────
-
-function SpecBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
-    return (
-        <div className="flex flex-col items-center gap-1 sm:gap-1.5 bg-gray-50 rounded-xl px-2 sm:px-3 py-2 sm:py-3 min-w-[68px] sm:min-w-[80px]">
-            <div className="text-blue-600">{icon}</div>
-            <span className="text-[10px] sm:text-xs text-gray-600 text-center leading-tight font-medium">{label}</span>
-        </div>
-    )
-}
-
-// ─── Star Rating ──────────────────────────────────────────────────────────────
-
-function StarRating({ score }: { score: number }) {
-    const stars = Math.round(score / 2)
-    return (
-        <div className="flex gap-0.5">
-            {[1, 2, 3, 4, 5].map(i => (
-                <Star key={i} className={`w-3.5 h-3.5 ${i <= stars ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}`} />
-            ))}
-        </div>
-    )
-}
-
-function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-    const [hovered, setHovered] = useState(0)
-    return (
-        <div className="flex gap-1">
-            {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                <button key={n} type="button"
-                    onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
-                    onClick={() => onChange(n)} className="transition-transform hover:scale-110">
-                    <Star size={18} className={n <= (hovered || value) ? 'text-amber-400 fill-amber-400' : 'text-gray-300'} />
-                </button>
-            ))}
-        </div>
-    )
-}
-
-// ─── Desktop Booking Card ─────────────────────────────────────────────────────
-
-function BookingCard({
-    car, pickUp, dropOff, onPickUpChange, onDropOffChange,
-    bookedRanges, onBook, bookingLoading,
-}: {
-    car: CarType
-    pickUp: string
-    dropOff: string
-    onPickUpChange: (d: string) => void
-    onDropOffChange: (d: string) => void
-    bookedRanges: { start: Date; end: Date }[]
-    onBook: () => void
-    bookingLoading: boolean
-}) {
-    const days = (pickUp && dropOff)
-        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
-        : 0
-    const total = car.pricePerDay * (days || 1)
-
-    return (
-        <div className="bg-white rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-gray-100">
-            {/* Header */}
-            <div className="bg-[#003b94] px-5 py-4">
-                <p className="text-white/60 text-xs font-medium mb-0.5">
-                    {days > 0 ? `${days} günlük toplam` : 'Tarih seçin'}
-                </p>
-                <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                    {days > 0 ? `US$${car.pricePerDay * days}` : `US$${car.pricePerDay}`}
-                </p>
-                <p className="text-white/40 text-xs mt-1">
-                    {days > 0 ? `Vergiler dahil${car.winterFee ? ' · Kış ücreti dahil' : ''}` : 'Günlük fiyat'}
-                </p>
-            </div>
-
-            <div className="px-5 py-4 space-y-3">
-                {/* Availability badge */}
-                <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${
-                    car.isAvailable
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-red-50 text-red-600 border border-red-200'
-                }`}>
-                    <div className={`w-2 h-2 rounded-full ${car.isAvailable ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                    {car.isAvailable ? 'Müsait' : 'Şu an müsait değil'}
-                </div>
-
-                {/* Date picker */}
-                <DateRangePicker
-                    bookedRanges={bookedRanges}
-                    startDate={pickUp}
-                    endDate={dropOff}
-                    onStartChange={onPickUpChange}
-                    onEndChange={onDropOffChange}
-                    startLabel="Alış tarihi"
-                    endLabel="İade tarihi"
-                />
-
-                {/* Location */}
-                <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
-                    <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                        <p className="text-xs text-gray-400">Alış / iade yeri</p>
-                        <p className="text-xs font-semibold text-gray-800 mt-0.5">
-                            {car.location.city}, {car.location.country}
-                        </p>
-                        {car.location.address && (
-                            <p className="text-[10px] text-gray-400 mt-0.5">{car.location.address}</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Price breakdown */}
-                {days > 0 && (
-                    <div className="space-y-1.5 text-xs">
-                        <div className="flex justify-between text-gray-500">
-                            <span>US${car.pricePerDay} × {days} gün</span>
-                            <span>US${car.pricePerDay * days}</span>
-                        </div>
-                        {car.winterFee && (
-                            <div className="flex justify-between text-gray-500">
-                                <span>Kış mevsimi ücreti</span>
-                                <span className="text-emerald-600 font-semibold">Dahil</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between text-gray-500">
-                            <span>Temel sigorta</span>
-                            <span className="text-emerald-600 font-semibold">Dahil</span>
-                        </div>
-                        <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
-                            <span>Toplam</span>
-                            <span>US${car.pricePerDay * days}</span>
-                        </div>
-                    </div>
-                )}
-
-                <button
-                    onClick={onBook}
-                    disabled={!car.isAvailable || bookingLoading || !pickUp || !dropOff}
-                    className={`w-full font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 ${
-                        car.isAvailable && pickUp && dropOff && !bookingLoading
-                            ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
-                >
-                    {bookingLoading
-                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Rezervasyon yapılıyor...</>
-                        : !car.isAvailable ? 'Şu an müsait değil'
-                        : !pickUp || !dropOff ? 'Tarih seçin'
-                        : 'Şimdi rezervasyon yap'
-                    }
-                </button>
-
-                <p className="text-center text-xs text-gray-400">Ücretsiz iptal · Şimdi öde sonra öde</p>
-            </div>
-        </div>
-    )
-}
-
-// ─── Mobile Sticky Bottom Bar ─────────────────────────────────────────────────
-
-function MobileStickyBar({ price, days, onBook }: { price: number; days: number; onBook: () => void }) {
-    return (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
-            <div className="flex-1">
-                <p className="text-xs text-gray-400 leading-none">{days > 0 ? `${days} günlük toplam` : 'Günlük fiyat'}</p>
-                <p className="text-xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                    US${days > 0 ? price * days : price}
-                </p>
-            </div>
-            <button
-                onClick={onBook}
-                className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm"
-            >
-                Rezervasyon yap
-            </button>
-        </div>
-    )
-}
-
-// ─── Mobile Booking Sheet ─────────────────────────────────────────────────────
-
-function MobileBookingSheet({
-    open, onClose, car,
-    pickUp, dropOff, onPickUpChange, onDropOffChange,
-    bookedRanges, onBook, bookingLoading,
-}: {
-    open: boolean
-    onClose: () => void
-    car: CarType
-    pickUp: string
-    dropOff: string
-    onPickUpChange: (d: string) => void
-    onDropOffChange: (d: string) => void
-    bookedRanges: { start: Date; end: Date }[]
-    onBook: () => void
-    bookingLoading: boolean
-}) {
-    const days = (pickUp && dropOff)
-        ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
-        : 0
-
-    return (
-        <>
-            <div
-                className={`lg:hidden fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-                onClick={onClose}
-            />
-            <div
-                className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-2xl shadow-2xl transition-transform duration-300 ${open ? 'translate-y-0' : 'translate-y-full'}`}
-            >
-                {/* Handle */}
-                <div className="flex justify-center pt-3 pb-1">
-                    <div className="w-10 h-1 bg-gray-300 rounded-full" />
-                </div>
-
-                <div className="overflow-y-auto max-h-[85vh]">
-                    {/* Header */}
-                    <div className="bg-[#003b94] px-5 py-4 flex items-start justify-between">
-                        <div>
-                            <p className="text-white/60 text-xs font-medium mb-0.5">
-                                {days > 0 ? `${days} günlük toplam` : 'Tarih seçin'}
-                            </p>
-                            <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                                {days > 0 ? `US$${car.pricePerDay * days}` : `US$${car.pricePerDay}`}
-                            </p>
-                            <p className="text-white/40 text-xs mt-1">
-                                {days > 0 ? `Vergiler dahil${car.winterFee ? ' · Kış ücreti dahil' : ''}` : 'Günlük fiyat'}
-                            </p>
-                        </div>
-                        <button onClick={onClose} className="text-white/60 hover:text-white mt-1">
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-
-                    <div className="px-5 py-4 space-y-3">
-                        {/* Availability */}
-                        <div className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${
-                            car.isAvailable
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-red-50 text-red-600 border border-red-200'
-                        }`}>
-                            <div className={`w-2 h-2 rounded-full ${car.isAvailable ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                            {car.isAvailable ? 'Müsait' : 'Şu an müsait değil'}
-                        </div>
-
-                        {/* Date picker */}
-                        <DateRangePicker
-                            bookedRanges={bookedRanges}
-                            startDate={pickUp}
-                            endDate={dropOff}
-                            onStartChange={onPickUpChange}
-                            onEndChange={onDropOffChange}
-                            startLabel="Alış tarihi"
-                            endLabel="İade tarihi"
-                        />
-
-                        {/* Location */}
-                        <div className="flex items-start gap-2 bg-gray-50 rounded-xl p-3">
-                            <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-xs text-gray-400">Alış / iade yeri</p>
-                                <p className="text-xs font-semibold text-gray-800 mt-0.5">
-                                    {car.location.city}, {car.location.country}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Price breakdown */}
-                        {days > 0 && (
-                            <div className="space-y-1.5 text-xs">
-                                <div className="flex justify-between text-gray-500">
-                                    <span>US${car.pricePerDay} × {days} gün</span>
-                                    <span>US${car.pricePerDay * days}</span>
-                                </div>
-                                {car.winterFee && (
-                                    <div className="flex justify-between text-gray-500">
-                                        <span>Kış mevsimi ücreti</span>
-                                        <span className="text-emerald-600 font-semibold">Dahil</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between text-gray-500">
-                                    <span>Temel sigorta</span>
-                                    <span className="text-emerald-600 font-semibold">Dahil</span>
-                                </div>
-                                <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
-                                    <span>Toplam</span>
-                                    <span>US${car.pricePerDay * days}</span>
-                                </div>
-                            </div>
-                        )}
-
-                        <button
-                            onClick={onBook}
-                            disabled={!car.isAvailable || bookingLoading || !pickUp || !dropOff}
-                            className={`w-full font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 ${
-                                car.isAvailable && pickUp && dropOff && !bookingLoading
-                                    ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white'
-                                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                            }`}
-                        >
-                            {bookingLoading
-                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Rezervasyon yapılıyor...</>
-                                : !car.isAvailable ? 'Şu an müsait değil'
-                                : !pickUp || !dropOff ? 'Tarih seçin'
-                                : 'Şimdi rezervasyon yap'
-                            }
-                        </button>
-                        <p className="text-center text-xs text-gray-400">Ücretsiz iptal · Şimdi öde sonra öde</p>
-
-                        {/* Trust badges */}
-                        <div className="flex justify-around pt-2 pb-4">
-                            {[
-                                { icon: <Shield className="w-4 h-4 text-emerald-500" />, text: 'Güvenli ödeme' },
-                                { icon: <ThumbsUp className="w-4 h-4 text-blue-500" />, text: 'Ücretsiz iptal' },
-                                { icon: <Info className="w-4 h-4 text-amber-500" />, text: '7/24 destek' },
-                            ].map(({ icon, text }) => (
-                                <div key={text} className="flex flex-col items-center gap-1 text-center">
-                                    {icon}
-                                    <span className="text-[10px] text-gray-500 font-medium">{text}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
-}
-
-// ─── Inner Page (uses useSearchParams) ───────────────────────────────────────
-
 function CarDetailInner() {
+    const t = useTranslations('cars')
     const router = useRouter()
     const searchParams = useSearchParams()
     const id = searchParams.get('id')
 
-    const [car, setCar] = useState<CarType | null>(null)
+    const scoreLabel = (v: number) => {
+        if (v >= 9) return t('scoreSuper')
+        if (v >= 8) return t('scoreVeryGood')
+        if (v >= 7) return t('scoreGood')
+        return t('scoreOkay')
+    }
+
+    const [car, setCar] = useState<CarDetailType | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [sheetOpen, setSheetOpen] = useState(false)
     const [pickUp, setPickUp] = useState(searchParams.get('pickUp') || '')
     const [dropOff, setDropOff] = useState(searchParams.get('dropOff') || '')
-    const [bookingLoading, setBookingLoading] = useState(false)
+    const [bookingLoading] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-    useEffect(() => {
-        setIsLoggedIn(!!localStorage.getItem('token'))
-    }, [])
 
     const [reviewScore, setReviewScore] = useState(0)
     const [reviewComment, setReviewComment] = useState('')
@@ -669,30 +51,18 @@ function CarDetailInner() {
     const [reviewSuccess, setReviewSuccess] = useState(false)
     const [reviewError, setReviewError] = useState('')
 
-    const handleReviewSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (reviewScore === 0) { setReviewError('Ulduz seçin'); return }
-        if (!reviewComment.trim()) { setReviewError('Şərh yazın'); return }
-        setReviewError('')
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-        if (!token) { setReviewError('Rəy yazmaq üçün daxil olun'); return }
-        try {
-            setReviewSubmitting(true)
-            const res = await axios.post(
-                `${API}/${id}/review`,
-                { score: reviewScore, comment: reviewComment },
-                { headers: { Authorization: `Bearer ${token}` } }
-            )
-            setCar(res.data)
-            setReviewSuccess(true)
-            setReviewScore(0)
-            setReviewComment('')
-        } catch (err: any) {
-            setReviewError(err.response?.data?.message || 'Xəta baş verdi')
-        } finally {
-            setReviewSubmitting(false)
-        }
-    }
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem('token'))
+    }, [])
+
+    useEffect(() => {
+        if (!id) { setError(t('carIdNotFound')); setLoading(false); return }
+        setLoading(true)
+        fetch(`${API}/${id}`)
+            .then(res => { if (!res.ok) throw new Error(t('carNotFound')); return res.json() })
+            .then(data => { setCar(data); setLoading(false) })
+            .catch(e => { setError(e.message); setLoading(false) })
+    }, [id])
 
     const bookedRanges = useMemo(() =>
         ((car as any)?.bookedDates || []).map((b: any) => ({
@@ -706,10 +76,10 @@ function CarDetailInner() {
         : 0
 
     const handleBooking = () => {
-        if (!pickUp || !dropOff) { toast.error('Zəhmət olmasa tarihləri seçin'); return }
+        if (!pickUp || !dropOff) { toast.error(t('selectDates')); return }
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-        if (!token) { toast.error('Rezervasiya üçün daxil olun'); router.push('/signin'); return }
-        if (days <= 0) { toast.error('İade tarixi alış tarixindən sonra olmalıdır'); return }
+        if (!token) { toast.error(t('signInToBook')); router.push('/signin'); return }
+        if (days <= 0) { toast.error(t('dropBeforePickup')); return }
         const totalPrice = (car?.pricePerDay || 0) * days
         const image = car?.images?.[0] || ''
         const params = new URLSearchParams({
@@ -726,27 +96,43 @@ function CarDetailInner() {
         router.push(`/checkout?${params.toString()}`)
     }
 
-    useEffect(() => {
-        if (!id) { setError('Araç ID bulunamadı'); setLoading(false); return }
-        setLoading(true)
-        fetch(`${API}/${id}`)
-            .then(res => { if (!res.ok) throw new Error('Araç bulunamadı'); return res.json() })
-            .then(data => { setCar(data); setLoading(false) })
-            .catch(e => { setError(e.message); setLoading(false) })
-    }, [id])
+    const handleReviewSubmit = async (e: React.SyntheticEvent) => {
+        e.preventDefault()
+        if (reviewScore === 0) { setReviewError(t('selectStars')); return }
+        if (!reviewComment.trim()) { setReviewError(t('writeReview')); return }
+        setReviewError('')
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+        if (!token) { setReviewError(t('signInToReview')); return }
+        try {
+            setReviewSubmitting(true)
+            const res = await axios.post(
+                `${API}/${id}/review`,
+                { score: reviewScore, comment: reviewComment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            setCar(res.data)
+            setReviewSuccess(true)
+            setReviewScore(0)
+            setReviewComment('')
+        } catch (err: any) {
+            setReviewError(err.response?.data?.message || t('errorOccurred'))
+        } finally {
+            setReviewSubmitting(false)
+        }
+    }
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
             <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-            <span className="ml-3 text-gray-500 text-sm">Yükleniyor...</span>
+            <span className="ml-3 text-gray-500 text-sm">{t('loading')}</span>
         </div>
     )
 
     if (error || !car) return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-3">
-            <p className="text-red-500 font-semibold">{error ?? 'Araç bulunamadı'}</p>
+            <p className="text-red-500 font-semibold">{error ?? t('carNotFound')}</p>
             <button onClick={() => router.push('/carfilter')} className="text-blue-600 hover:underline text-sm">
-                Araçlara dön
+                {t('backToCars')}
             </button>
         </div>
     )
@@ -756,374 +142,288 @@ function CarDetailInner() {
     }
 
     const displayIncludes = car.includes ?? [
-        'Üçüncü şahıs sigortası',
-        'Hırsızlık koruması',
-        ...(car.mileage === 0 ? ['Sınırsız kilometre'] : []),
-        ...(car.winterFee ? ['Kış mevsimi ücreti'] : []),
+        t('thirdPartyInsurance'),
+        t('theftProtection'),
+        ...(car.mileage === 0 ? [t('unlimitedMileage')] : []),
+        ...(car.winterFee ? [t('winterSeasonFee')] : []),
     ]
 
     const displayExcludes = car.excludes ?? [
-        'Kasko (ek ücret)',
-        ...(car.minAge && car.minAge > 21 ? [`Genç sürücü ücreti (21–${car.minAge} yaş)`] : []),
-        'Yakıt',
+        t('fullyComprehensive'),
+        ...(car.minAge && car.minAge > 21 ? [t('youngDriverFee', { age: car.minAge })] : []),
+        t('fuel'),
     ]
 
     return (
         <>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 mt-4 sm:mt-8">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-400 pb-2">
-                <span className="hover:text-blue-600 cursor-pointer" onClick={() => router.push('/')}>Ana sayfa</span>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="hover:text-blue-600 cursor-pointer" onClick={() => router.push('/carfilter')}>
-                    {car.location.city}
-                </span>
-                <ChevronRight className="w-3 h-3 flex-shrink-0" />
-                <span className="text-gray-700 font-medium truncate">{car.title}</span>
-            </nav>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 mt-4 sm:mt-8">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-1.5 sm:gap-2 text-xs text-gray-400 pb-2">
+                    <span className="hover:text-blue-600 cursor-pointer" onClick={() => router.push('/')}>{t('home')}</span>
+                    <ChevronRight className="w-3 h-3 shrink-0" />
+                    <span className="hover:text-blue-600 cursor-pointer" onClick={() => router.push('/carfilter')}>
+                        {car.location.city}
+                    </span>
+                    <ChevronRight className="w-3 h-3 shrink-0" />
+                    <span className="text-gray-700 font-medium truncate">{car.title}</span>
+                </nav>
 
-            <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
 
-                {/* ── Left Column ── */}
-                <div className="w-full lg:flex-1 lg:min-w-0 space-y-4 sm:space-y-5">
+                    {/* ── Left Column ── */}
+                    <div className="w-full lg:flex-1 lg:min-w-0 space-y-4 sm:space-y-5">
 
-                    {/* Header */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <div className="flex items-start justify-between gap-3 sm:gap-4 mb-4">
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap ${
-                                        car.isAvailable
-                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                            : 'bg-red-50 text-red-600 border-red-200'
-                                    }`}>
-                                        {car.isAvailable ? 'Müsait' : 'İcarədə'}
-                                    </span>
-                                    <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-full whitespace-nowrap capitalize">
-                                        {car.category}
-                                    </span>
-                                </div>
-                                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                                    {car.title}
-                                </h1>
-                                <p className="text-sm text-gray-400 mt-0.5">{car.brand} {car.model}</p>
-                                <p className="flex items-center gap-1 text-sm text-blue-500 font-semibold mt-1">
-                                    <MapPin className="w-3.5 h-3.5" />
-                                    {car.location.city}, {car.location.country}
-                                </p>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                                <p className="text-xs text-gray-400">Günlük fiyat</p>
-                                <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                                    US${car.pricePerDay}
-                                </p>
-                                {car.rating !== undefined && (
-                                    <div className="flex items-center justify-end gap-1.5 mt-1">
-                                        <div className="bg-amber-100 text-amber-700 text-xs font-black px-2 py-0.5 rounded-lg">
-                                            {car.rating.toFixed(1)}
-                                        </div>
-                                        <span className="text-xs font-semibold text-gray-600">{scoreLabel(car.rating)}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Specs row */}
-                        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-                            <SpecBadge icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />} label={`${car.seats} koltuk`} />
-                            <SpecBadge
-                                icon={<Settings2 className="w-4 h-4 sm:w-5 sm:h-5" />}
-                                label={car.transmission === 'automatic' ? 'Otomatik' : 'Manuel'}
-                            />
-                            <SpecBadge
-                                icon={<Gauge className="w-4 h-4 sm:w-5 sm:h-5" />}
-                                label={car.mileage > 0 ? `${car.mileage.toLocaleString()} km` : 'Sınırsız km'}
-                            />
-                            <SpecBadge icon={<Wind className="w-4 h-4 sm:w-5 sm:h-5" />} label="Klimalı" />
-                            {car.doors && (
-                                <SpecBadge icon={<Car className="w-4 h-4 sm:w-5 sm:h-5" />} label={`${car.doors} kapı`} />
-                            )}
-                            <SpecBadge icon={<Fuel className="w-4 h-4 sm:w-5 sm:h-5" />} label="Benzin" />
-                        </div>
-                    </div>
-
-                    {/* Gallery */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <ImageGallery images={car.images ?? []} title={car.title} />
-                    </div>
-
-                    {/* Extra Features (from code 2) */}
-                    {car.features?.length > 0 && (
+                        {/* Header */}
                         <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Ekstra Özellikler</h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {car.features.map((f, i) => {
-                                    const Icon = Object.entries(featureIcons).find(([k]) => f.includes(k))?.[1] ?? CheckCircle2
-                                    return (
-                                        <div key={i} className="flex items-center gap-2 bg-blue-50 rounded-xl px-3 py-2.5">
-                                            <Icon className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                            <span className="text-sm text-gray-700 font-medium">{f}</span>
+                            <div className="flex items-start justify-between gap-3 sm:gap-4 mb-4">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap ${
+                                            car.isAvailable
+                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                : 'bg-red-50 text-red-600 border-red-200'
+                                        }`}>
+                                            {car.isAvailable ? t('available') : t('notAvailableNow')}
+                                        </span>
+                                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-full whitespace-nowrap capitalize">
+                                            {car.category}
+                                        </span>
+                                    </div>
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                                        {car.title}
+                                    </h1>
+                                    <p className="text-sm text-gray-400 mt-0.5">{car.brand} {car.model}</p>
+                                    <p className="flex items-center gap-1 text-sm text-blue-500 font-semibold mt-1">
+                                        <MapPin className="w-3.5 h-3.5" />
+                                        {car.location.city}, {car.location.country}
+                                    </p>
+                                </div>
+                                <div className="text-right shrink-0">
+                                    <p className="text-xs text-gray-400">{t('dailyPrice')}</p>
+                                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
+                                        US${car.pricePerDay}
+                                    </p>
+                                    {car.rating !== undefined && (
+                                        <div className="flex items-center justify-end gap-1.5 mt-1">
+                                            <div className="bg-amber-100 text-amber-700 text-xs font-black px-2 py-0.5 rounded-lg">
+                                                {car.rating.toFixed(1)}
+                                            </div>
+                                            <span className="text-xs font-semibold text-gray-600">{scoreLabel(car.rating)}</span>
                                         </div>
-                                    )
-                                })}
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
 
-                    {/* Includes / Excludes */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Fiyata dahil olanlar</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-                            <div className="space-y-2">
-                                {displayIncludes.map((item, i) => (
-                                    <div key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                        {item}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="space-y-2 mt-2 sm:mt-0">
-                                {displayExcludes.map((item, i) => (
-                                    <div key={i} className="flex items-start gap-2.5 text-sm text-gray-500">
-                                        <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                                        {item}
-                                    </div>
-                                ))}
+                            {/* Specs row */}
+                            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                                <SpecBadge icon={<Users className="w-4 h-4 sm:w-5 sm:h-5" />} label={t('seats', { count: car.seats })} />
+                                <SpecBadge
+                                    icon={<Settings2 className="w-4 h-4 sm:w-5 sm:h-5" />}
+                                    label={car.transmission === 'automatic' ? t('automatic') : t('manual')}
+                                />
+                                <SpecBadge
+                                    icon={<Gauge className="w-4 h-4 sm:w-5 sm:h-5" />}
+                                    label={car.mileage > 0 ? `${car.mileage.toLocaleString()} km` : t('unlimitedKm')}
+                                />
+                                <SpecBadge icon={<Wind className="w-4 h-4 sm:w-5 sm:h-5" />} label={t('withAC')} />
+                                {car.doors && (
+                                    <SpecBadge icon={<Car className="w-4 h-4 sm:w-5 sm:h-5" />} label={t('doorsCount', { count: car.doors })} />
+                                )}
+                                <SpecBadge icon={<Fuel className="w-4 h-4 sm:w-5 sm:h-5" />} label={t('petrol')} />
                             </div>
                         </div>
 
-                        {car.winterFee && (
-                            <div className="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                                Fiyata kış mevsimi ücreti dahildir
+                        {/* Gallery */}
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <ImageGallery images={car.images ?? []} title={car.title} />
+                        </div>
+
+                        {/* Extra Features */}
+                        {car.features?.length > 0 && (
+                            <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                                <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">{t('extraFeatures')}</h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {car.features.map((f, i) => {
+                                        const Icon = Object.entries(featureIcons).find(([k]) => f.includes(k))?.[1] ?? CheckCircle2
+                                        return (
+                                            <div key={i} className="flex items-center gap-2 bg-blue-50 rounded-xl px-3 py-2.5">
+                                                <Icon className="w-4 h-4 text-blue-500 shrink-0" />
+                                                <span className="text-sm text-gray-700 font-medium">{f}</span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
                             </div>
                         )}
+
+                        {/* Includes / Excludes */}
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">{t('whatsIncluded')}</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+                                <div className="space-y-2">
+                                    {displayIncludes.map((item, i) => (
+                                        <div key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="space-y-2 mt-2 sm:mt-0">
+                                    {displayExcludes.map((item, i) => (
+                                        <div key={i} className="flex items-start gap-2.5 text-sm text-gray-500">
+                                            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                                            {item}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            {car.winterFee && (
+                                <div className="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                                    {t('winterFeeIncludedMsg')}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Policies */}
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">{t('rentalTerms')}</h2>
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                                {[
+                                    { icon: <CreditCard className="w-4 h-4" />, label: t('deposit'), value: `US$${car.deposit ?? 200}` },
+                                    { icon: <Users className="w-4 h-4" />, label: t('minAge'), value: t('ageYears', { count: car.minAge ?? 21 }) },
+                                    { icon: <Fuel className="w-4 h-4" />, label: t('fuelPolicyLabel'), value: car.fuelPolicy ?? t('fuelPolicyDefault') },
+                                    { icon: <Shield className="w-4 h-4" />, label: t('insurance'), value: t('basicInsuranceIncluded') },
+                                ].map(({ icon, label, value }) => (
+                                    <div key={label} className="flex items-start gap-2 sm:gap-3 bg-gray-50 rounded-xl p-2.5 sm:p-3">
+                                        <div className="text-blue-600 mt-0.5 shrink-0">{icon}</div>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{label}</p>
+                                            <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5 leading-tight">{value}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Location Map */}
+                        <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-1">{t('pickupLocationLabel')}</h2>
+                            <div className="flex items-center gap-1.5 mb-1.5 sm:mb-3">
+                                <MapPin className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                <span className="text-sm font-semibold text-blue-600">
+                                    {car.location.city}, {car.location.country}
+                                </span>
+                            </div>
+                            {car.location.address && (
+                                <p className="text-xs text-gray-400 mb-3">{car.location.address}</p>
+                            )}
+                            <div className="h-50 sm:h-60 rounded-xl overflow-hidden border border-gray-200">
+                                <GoogleMap
+                                    lat={car.location.lat}
+                                    lng={car.location.lng}
+                                    city={car.location.city}
+                                    country={car.location.country}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Reviews */}
+                        <ReviewSection
+                            car={car as any}
+                            scoreLabel={scoreLabel}
+                            isLoggedIn={isLoggedIn}
+                            reviewScore={reviewScore}
+                            reviewComment={reviewComment}
+                            reviewSubmitting={reviewSubmitting}
+                            reviewSuccess={reviewSuccess}
+                            reviewError={reviewError}
+                            onScoreChange={setReviewScore}
+                            onCommentChange={setReviewComment}
+                            onSubmit={handleReviewSubmit}
+                            onSignInClick={() => router.push('/signin')}
+                        />
                     </div>
 
-                    {/* Policies */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Kiralama koşulları</h2>
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                            {[
-                                { icon: <CreditCard className="w-4 h-4" />, label: 'Depozit', value: `US$${car.deposit ?? 200}` },
-                                { icon: <Users className="w-4 h-4" />, label: 'Minimum yaş', value: `${car.minAge ?? 21} yaş` },
-                                { icon: <Fuel className="w-4 h-4" />, label: 'Yakıt politikası', value: car.fuelPolicy ?? 'Dolu getir dolu götür' },
-                                { icon: <Shield className="w-4 h-4" />, label: 'Sigorta', value: 'Temel sigorta dahil' },
-                            ].map(({ icon, label, value }) => (
-                                <div key={label} className="flex items-start gap-2 sm:gap-3 bg-gray-50 rounded-xl p-2.5 sm:p-3">
-                                    <div className="text-blue-600 mt-0.5 flex-shrink-0">{icon}</div>
-                                    <div className="min-w-0">
-                                        <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{label}</p>
-                                        <p className="text-xs sm:text-sm font-semibold text-gray-800 mt-0.5 leading-tight">{value}</p>
+                    {/* ── Right Column (desktop) ── */}
+                    <div className="hidden lg:block w-75 shrink-0 sticky top-4 space-y-3">
+                        <BookingCard
+                            car={car}
+                            pickUp={pickUp}
+                            dropOff={dropOff}
+                            onPickUpChange={setPickUp}
+                            onDropOffChange={setDropOff}
+                            bookedRanges={bookedRanges}
+                            onBook={handleBooking}
+                            bookingLoading={bookingLoading}
+                        />
+
+                        {/* Provider card */}
+                        {car.provider && (
+                            <div className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5">
+                                        <span className="text-sm font-black text-blue-700">{car.provider}</span>
                                     </div>
+                                    {car.rating !== undefined && (
+                                        <div>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="bg-amber-100 text-amber-700 text-xs font-black px-2 py-0.5 rounded">
+                                                    {car.rating.toFixed(1)}
+                                                </div>
+                                                <span className="text-xs font-semibold text-gray-700">{scoreLabel(car.rating)}</span>
+                                            </div>
+                                            {car.providerReviews && (
+                                                <p className="text-xs text-gray-400 mt-0.5">{t('providerReviews', { count: car.providerReviews })}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    <button className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 text-xs font-semibold py-2.5 rounded-xl transition-colors">
+                                        <Phone className="w-3.5 h-3.5" /> {t('callProvider')}
+                                    </button>
+                                    <button className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 text-xs font-semibold py-2.5 rounded-xl transition-colors">
+                                        <Mail className="w-3.5 h-3.5" /> {t('emailQuote')}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Trust badges */}
+                        <div className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100 space-y-2.5">
+                            {[
+                                { icon: <Shield className="w-4 h-4 text-emerald-500" />, key: 'securePayment' },
+                                { icon: <ThumbsUp className="w-4 h-4 text-blue-500" />, key: 'freeCancellation' },
+                                { icon: <Info className="w-4 h-4 text-amber-500" />, key: 'support247' },
+                            ].map(({ icon, key }) => (
+                                <div key={key} className="flex items-center gap-2.5 text-xs text-gray-600 font-medium">
+                                    {icon}
+                                    {t(key as any)}
                                 </div>
                             ))}
                         </div>
                     </div>
-
-                    {/* Location Map */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <h2 className="text-sm sm:text-base font-bold text-gray-900 mb-1">Alış konumu</h2>
-                        <div className="flex items-center gap-1.5 mb-1.5 sm:mb-3">
-                            <MapPin className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
-                            <span className="text-sm font-semibold text-blue-600">
-                                {car.location.city}, {car.location.country}
-                            </span>
-                        </div>
-                        {car.location.address && (
-                            <p className="text-xs text-gray-400 mb-3">{car.location.address}</p>
-                        )}
-                        <div className="h-[200px] sm:h-[240px] rounded-xl overflow-hidden border border-gray-200">
-                            <GoogleMap
-                                lat={car.location.lat}
-                                lng={car.location.lng}
-                                city={car.location.city}
-                                country={car.location.country}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Reviews */}
-                    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                            <h2 className="text-sm sm:text-base font-bold text-gray-900">Rəylər</h2>
-                            {(car.rating ?? 0) > 0 && (
-                                <div className="flex items-center gap-2">
-                                    <div className="bg-amber-100 text-amber-700 text-sm font-black px-2.5 py-1 rounded-lg flex items-center gap-1">
-                                        <Star size={12} className="fill-amber-600 text-amber-600" /> {(car.rating ?? 0).toFixed(1)}
-                                    </div>
-                                    <span className="text-sm font-semibold text-gray-700">{scoreLabel(car.rating ?? 0)}</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Real reviews */}
-                        {((car as any).reviews?.length > 0) ? (
-                            <div className="space-y-4 mb-6">
-                                {((car as any).reviews as Review[]).map(review => (
-                                    <div key={review._id} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                                {(review.userName || 'G').charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span className="text-sm font-semibold text-gray-800 truncate">{review.userName || 'Guest'}</span>
-                                                    <span className="text-xs text-gray-400 flex-shrink-0">{fmtDate(review.createdAt)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <StarRating score={review.score} />
-                                                    <span className="text-xs font-bold text-amber-600">{review.score}/10</span>
-                                                </div>
-                                                <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">{review.comment}</p>
-                                                {review.adminReply && (
-                                                    <div className="mt-3 ml-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                                                        <div className="flex items-center gap-1.5 mb-1">
-                                                            <CornerDownRight size={13} className="text-blue-600" />
-                                                            <span className="text-xs font-black text-blue-700 uppercase">Admin cavabı</span>
-                                                            {review.adminReplyAt && <span className="text-xs text-blue-400">{fmtDate(review.adminReplyAt)}</span>}
-                                                        </div>
-                                                        <p className="text-sm text-blue-800">{review.adminReply}</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-gray-400 mb-6">Hələ rəy yoxdur. İlk rəyi siz yazın!</p>
-                        )}
-
-                        {/* Submit review */}
-                        <div className="border-t border-gray-100 pt-5">
-                            <h3 className="text-sm font-bold text-gray-900 mb-4">Rəyinizi bildirin</h3>
-                            {!isLoggedIn ? (
-                                <div className="flex items-center justify-between bg-blue-50 border border-blue-100 rounded-xl p-4">
-                                    <p className="text-sm font-semibold text-blue-700">Rəy yazmaq üçün daxil olun</p>
-                                    <button onClick={() => router.push('/signin')}
-                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors">
-                                        <LogIn size={14} /> Daxil ol
-                                    </button>
-                                </div>
-                            ) : reviewSuccess ? (
-                                <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
-                                    <p className="text-green-700 font-bold text-sm">Rəyiniz göndərildi! Təşəkkür edirik.</p>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleReviewSubmit} className="space-y-3">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Qiymət (1–10)</label>
-                                        <StarInput value={reviewScore} onChange={setReviewScore} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">Şərh</label>
-                                        <textarea
-                                            value={reviewComment}
-                                            onChange={e => setReviewComment(e.target.value)}
-                                            rows={3}
-                                            placeholder="Avtomobil haqqında fikirinizi bölüşün..."
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-blue-400 resize-none"
-                                        />
-                                    </div>
-                                    {reviewError && <p className="text-red-500 text-xs">{reviewError}</p>}
-                                    <button type="submit" disabled={reviewSubmitting}
-                                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm">
-                                        {reviewSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                                        Göndər
-                                    </button>
-                                </form>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Right Column (desktop only) ── */}
-                <div className="hidden lg:block w-[300px] flex-shrink-0 sticky top-4 space-y-3">
-
-                    {/* Dynamic Booking Card */}
-                    <BookingCard
-                        car={car}
-                        pickUp={pickUp}
-                        dropOff={dropOff}
-                        onPickUpChange={setPickUp}
-                        onDropOffChange={setDropOff}
-                        bookedRanges={bookedRanges}
-                        onBook={handleBooking}
-                        bookingLoading={bookingLoading}
-                    />
-
-                    {/* Provider card */}
-                    {car.provider && (
-                        <div className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5">
-                                    <span className="text-sm font-black text-blue-700">{car.provider}</span>
-                                </div>
-                                {car.rating !== undefined && (
-                                    <div>
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="bg-amber-100 text-amber-700 text-xs font-black px-2 py-0.5 rounded">
-                                                {car.rating.toFixed(1)}
-                                            </div>
-                                            <span className="text-xs font-semibold text-gray-700">{scoreLabel(car.rating)}</span>
-                                        </div>
-                                        {car.providerReviews && (
-                                            <p className="text-xs text-gray-400 mt-0.5">{car.providerReviews} değerlendirme</p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <button className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 text-xs font-semibold py-2.5 rounded-xl transition-colors">
-                                    <Phone className="w-3.5 h-3.5" /> Tedarikçiyi ara
-                                </button>
-                                <button className="w-full flex items-center justify-center gap-2 border border-gray-200 hover:border-blue-300 text-gray-700 hover:text-blue-600 text-xs font-semibold py-2.5 rounded-xl transition-colors">
-                                    <Mail className="w-3.5 h-3.5" /> Teklifi e-postayla gönder
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Trust badges */}
-                    <div className="bg-white rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100 space-y-2.5">
-                        {[
-                            { icon: <Shield className="w-4 h-4 text-emerald-500" />, text: 'Güvenli ödeme' },
-                            { icon: <ThumbsUp className="w-4 h-4 text-blue-500" />, text: 'Ücretsiz iptal imkânı' },
-                            { icon: <Info className="w-4 h-4 text-amber-500" />, text: '7/24 müşteri desteği' },
-                        ].map(({ icon, text }) => (
-                            <div key={text} className="flex items-center gap-2.5 text-xs text-gray-600 font-medium">
-                                {icon}
-                                {text}
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </div>
-        </div>
 
-        {/* Mobile sticky bar */}
-        <MobileStickyBar price={car.pricePerDay} days={days} onBook={() => setSheetOpen(true)} />
+            <MobileStickyBar price={car.pricePerDay} days={days} onBook={() => setSheetOpen(true)} />
 
-        {/* Mobile booking sheet */}
-        <MobileBookingSheet
-            open={sheetOpen}
-            onClose={() => setSheetOpen(false)}
-            car={car}
-            pickUp={pickUp}
-            dropOff={dropOff}
-            onPickUpChange={setPickUp}
-            onDropOffChange={setDropOff}
-            bookedRanges={bookedRanges}
-            onBook={handleBooking}
-            bookingLoading={bookingLoading}
-        />
+            <MobileBookingSheet
+                open={sheetOpen}
+                onClose={() => setSheetOpen(false)}
+                car={car}
+                pickUp={pickUp}
+                dropOff={dropOff}
+                onPickUpChange={setPickUp}
+                onDropOffChange={setDropOff}
+                bookedRanges={bookedRanges}
+                onBook={handleBooking}
+                bookingLoading={bookingLoading}
+            />
         </>
     )
 }
-
-// ─── Page export ──────────────────────────────────────────────────────────────
 
 export default function CarDetailPage() {
     return (

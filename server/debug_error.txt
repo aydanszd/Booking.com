@@ -1,4 +1,0 @@
-Error: secretOrPrivateKey must have a value
-    at module.exports [as sign] (C:\Users\AYDAN\Desktop\Booking.com\server\node_modules\jsonwebtoken\sign.js:111:20)
-    at googleCallback (C:\Users\AYDAN\Desktop\Booking.com\server\controllers\Googleauthcontroller.js:27:27)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)

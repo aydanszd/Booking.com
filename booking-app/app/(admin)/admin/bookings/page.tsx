@@ -182,8 +182,8 @@ export default function AdminBookings() {
                 })}
             </div>
 
-            <div className="bg-white rounded-[32px] border border-gray-100 shadow-2xl shadow-gray-200/50 overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[900px]">
+            <div className="bg-white rounded-4xl border border-gray-100 shadow-2xl shadow-gray-200/50 overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-225">
                     <thead>
                         <tr className="bg-gray-50/50">
                             <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100">İstifadəçi</th>
@@ -219,7 +219,7 @@ export default function AdminBookings() {
                                 </td>
                                 {/* Property */}
                                 <td className="px-6 py-5">
-                                    <p className="text-sm font-bold text-gray-700 max-w-[180px] truncate">{getPropertyName(booking)}</p>
+                                    <p className="text-sm font-bold text-gray-700 max-w-45 truncate">{getPropertyName(booking)}</p>
                                 </td>
                                 {/* Period */}
                                 <td className="px-6 py-5">

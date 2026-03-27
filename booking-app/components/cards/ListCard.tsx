@@ -3,9 +3,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { Heart, MapPin, ChevronRight, Leaf, Info, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Building } from "@/types/user-front/buildingsfilter";
-import { capitalize, scoreLabel } from "@/utils/user-front/buildingsfilter";
-import { imgUrl } from "@/api/user-front/buildingsfilter";
+import { Building } from "@/types/buildingFilter";
+import { capitalize, scoreLabel } from "@/lib/buildings/utils";
+import { imgUrl } from "@/lib/buildings/api";
 import { ScoreBadge } from "./ScoreBadge";
 
 interface Props {
@@ -23,7 +23,7 @@ export function ListCard({ building }: Props) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden">
             {/* Image */}
-            <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 h-52 sm:h-auto">
+            <div className="relative w-full sm:w-48 md:w-56 shrink-0 h-52 sm:h-auto">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
                 <button
                     type="button"
@@ -121,7 +121,7 @@ export function ListCard({ building }: Props) {
                     </div>
 
                     {/* Right: score + price */}
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 w-full sm:w-auto flex-shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 mt-1 sm:mt-0">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-2 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 mt-1 sm:mt-0">
                         <div className="flex items-center gap-2">
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-semibold text-gray-800">{scoreLabel(building.rating)}</p>

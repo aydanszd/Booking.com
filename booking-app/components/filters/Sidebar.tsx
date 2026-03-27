@@ -1,13 +1,13 @@
 "use client";
 import { MapPin, X } from "lucide-react";
-import { Building, Filters } from "@/types/user-front/buildingsfilter";
+import { Building, Filters } from "@/types/buildingFilter";
 import {
     BUILDING_TYPES,
     TRAVEL_GROUPS,
     AMENITY_OPTIONS,
     RATING_FILTERS,
-} from "@/const/user-front/buildingsfilter";
-import { capitalize } from "@/utils/user-front/buildingsfilter";
+} from "@/lib/buildings/constants";
+import { capitalize } from "@/lib/buildings/utils";
 import { CheckRow } from "./CheckRow";
 import { CounterRow } from "./CounterRow";
 import { PillButton } from "./PillButton";
@@ -221,7 +221,7 @@ export function Sidebar({ filters, onChange, onReset, allBuildings, open, onClos
     return (
         <>
             {/* Desktop */}
-            <aside className="hidden lg:block w-[268px] flex-shrink-0 self-start sticky top-4">
+            <aside className="hidden lg:block w-67 shrink-0 self-start sticky top-4">
                 {content}
             </aside>
 

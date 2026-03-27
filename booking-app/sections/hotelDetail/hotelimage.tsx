@@ -9,22 +9,12 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import "yet-another-react-lightbox/plugins/counter.css";
 import {
-    Heart, Share2, MapPin, Wifi, ParkingCircle, Plane, Users, Clock,
-    Coffee, CigaretteOff, ChevronRight, ZoomIn, Star
+    Heart, MapPin, Wifi, ParkingCircle, Plane, Users, Clock,
+    Coffee, CigaretteOff, ZoomIn, Star
 } from "lucide-react";
 import { IMG } from "@/api/building";
 
 const TAB_KEYS = ["overview", "infoAndPrices", "features", "houseRules", "userReviews"] as const;
-
-const FEATURE_KEYS = [
-    { icon: Plane, key: "airportShuttle", dataKey: "shuttle" },
-    { icon: CigaretteOff, key: "nonSmoking", dataKey: "smoking" },
-    { icon: ParkingCircle, key: "freeParking", dataKey: "parking" },
-    { icon: Wifi, key: "freeWifi", dataKey: "wifi" },
-    { icon: Users, key: "familyRooms", dataKey: "family" },
-    { icon: Clock, key: "frontDesk24h", dataKey: "reception" },
-    { icon: Coffee, key: "goodBreakfast", dataKey: "breakfast" },
-];
 
 export default function HotelImage({ building }: { building: any }) {
     const t = useTranslations("hotel");

@@ -8,6 +8,7 @@ import {
     ArrowLeft, Users, Calendar, MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 const CABIN_LABELS: Record<string, string> = {
     economy: "Economy",
@@ -18,16 +19,12 @@ const CABIN_LABELS: Record<string, string> = {
 
 function fmt(iso: string) {
     if (!iso) return "—";
-    return new Date(iso).toLocaleTimeString("az-AZ", { hour: "2-digit", minute: "2-digit" });
-}
-
-function fmtDuration(min: number) {
-    return `${Math.floor(min / 60)}s ${min % 60}dəq`;
+    return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
 
 function fmtDate(iso: string) {
     if (!iso) return "";
-    return new Date(iso).toLocaleDateString("az-AZ", { day: "numeric", month: "long", year: "numeric" });
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
 }
 
 function AirlineLogo({ logoUrl, airline }: { logoUrl?: string; airline: string }) {
@@ -47,16 +44,19 @@ function AirlineLogo({ logoUrl, airline }: { logoUrl?: string; airline: string }
 }
 
 function FlightCard({ flight, adults, children }: { flight: FlightType; adults: number; children: number }) {
+    const t = useTranslations("flights");
     const router = useRouter();
     const avail = flight.totalSeats - flight.bookedSeats;
     const stopCount = flight.stops?.length ?? 0;
     const totalPassengers = adults + children;
     const totalPrice = flight.price * totalPassengers;
 
+    const fmtDuration = (min: number) => t("durationFmt", { h: Math.floor(min / 60), m: min % 60 });
+
     const handleSelect = () => {
         if (avail < totalPassengers) return;
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        if (!token) { toast.error("Rezervasiya üçün daxil olun"); router.push("/signin"); return; }
+        if (!token) { toast.error(t("signInToBook")); router.push("/signin"); return; }
         const params = new URLSearchParams({
             id: flight._id!,
             airline: flight.airline || "",
@@ -98,13 +98,13 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
 
             {/* Route */}
             <div className="flex-1 flex items-center gap-3 min-w-0">
-                <div className="text-center min-w-[70px]">
+                <div className="text-center min-w-17.5">
                     <p className="font-black text-xl text-gray-900">{fmt(flight.departureTime)}</p>
                     <p className="text-xs font-bold text-gray-500">{flight.origin?.code}</p>
                     <p className="text-[10px] text-gray-400 truncate">{flight.origin?.city}</p>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center gap-1 min-w-[90px]">
+                <div className="flex-1 flex flex-col items-center gap-1 min-w-22.5">
                     <p className="text-[10px] text-gray-400">{flight.duration ? fmtDuration(flight.duration) : ""}</p>
                     <div className="flex items-center w-full gap-1">
                         <div className="flex-1 h-px bg-gray-200" />
@@ -112,11 +112,11 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
                         <div className="flex-1 h-px bg-gray-200" />
                     </div>
                     <p className={`text-[10px] font-semibold ${stopCount === 0 ? "text-emerald-600" : "text-orange-500"}`}>
-                        {stopCount === 0 ? "Birbaşa" : stopCount === 1 ? "1 Dayanacaq" : "2+ Dayanacaq"}
+                        {stopCount === 0 ? t("direct") : stopCount === 1 ? t("oneStop") : t("twoPlus")}
                     </p>
                 </div>
 
-                <div className="text-center min-w-[70px]">
+                <div className="text-center min-w-17.5">
                     <p className="font-black text-xl text-gray-900">{fmt(flight.arrivalTime)}</p>
                     <p className="text-xs font-bold text-gray-500">{flight.destination?.code}</p>
                     <p className="text-[10px] text-gray-400 truncate">{flight.destination?.city}</p>
@@ -127,10 +127,10 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
             <div className="sm:text-right flex sm:flex-col flex-row items-center sm:items-end gap-3 sm:gap-1 sm:w-40 shrink-0">
                 <div>
                     <p className="text-2xl font-black text-gray-900">${flight.price}</p>
-                    <p className="text-[11px] text-gray-400">nəfər başına</p>
+                    <p className="text-[11px] text-gray-400">{t("perPerson")}</p>
                     {totalPassengers > 1 && (
                         <p className="text-xs font-bold text-[#006ce4] mt-0.5">
-                            Cəmi: ${totalPrice}
+                            {t("total", { amount: totalPrice })}
                         </p>
                     )}
                     {flight.baggagePerPax && (
@@ -144,10 +144,10 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
                         : avail <= 5 ? "text-orange-500"
                         : "text-emerald-600"
                     }`}>
-                        {avail === 0 ? "Dolu"
-                        : avail < totalPassengers ? `Yetərsiz yer (${avail})`
-                        : avail <= 5 ? `Yalnız ${avail} yer qaldı`
-                        : `${avail} yer mövcuddur`}
+                        {avail === 0 ? t("full")
+                        : avail < totalPassengers ? t("notEnoughSeats", { count: avail })
+                        : avail <= 5 ? t("seatsLeft", { count: avail })
+                        : t("seatsAvailable", { count: avail })}
                     </p>
                 </div>
                 <button
@@ -159,7 +159,7 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
                             : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     }`}
                 >
-                    {avail >= totalPassengers ? <>Seç <ChevronRight size={13} /></> : "Mövcud deyil"}
+                    {avail >= totalPassengers ? <>{t("select")} <ChevronRight size={13} /></> : t("notAvailable")}
                 </button>
             </div>
         </div>
@@ -167,6 +167,7 @@ function FlightCard({ flight, adults, children }: { flight: FlightType; adults: 
 }
 
 function FlightDetailInner() {
+    const t = useTranslations("flights");
     const sp = useSearchParams();
     const router = useRouter();
 
@@ -191,7 +192,7 @@ function FlightDetailInner() {
                 });
                 setFlights(data.flights);
             } catch {
-                toast.error("Uçuşlar yüklənərkən xəta baş verdi");
+                toast.error(t("searchingError"));
             } finally {
                 setLoading(false);
             }
@@ -207,14 +208,14 @@ function FlightDetailInner() {
                         onClick={() => router.back()}
                         className="flex items-center gap-2 text-blue-200 hover:text-white text-sm mb-4 transition-colors"
                     >
-                        <ArrowLeft size={16} /> Geri
+                        <ArrowLeft size={16} /> {t("back")}
                     </button>
 
                     <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-2">
                             <MapPin size={16} className="text-blue-300" />
                             <span className="font-bold text-lg">
-                                {from || "Hamısı"} → {to || "Hamısı"}
+                                {from || t("allOption")} → {to || t("allOption")}
                             </span>
                         </div>
                         {date && (
@@ -225,7 +226,7 @@ function FlightDetailInner() {
                         )}
                         <div className="flex items-center gap-1.5 text-blue-200 text-sm">
                             <Users size={14} />
-                            <span>{adults} böyük{children > 0 ? `, ${children} uşaq` : ""}</span>
+                            <span>{children > 0 ? t("adultsChildrenLabel", { adults, children }) : `${adults} ${t("adultsLabel")}`}</span>
                         </div>
                     </div>
                 </div>
@@ -236,30 +237,30 @@ function FlightDetailInner() {
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-24 gap-4">
                         <Loader2 size={36} className="animate-spin text-[#006ce4]" />
-                        <p className="text-gray-500 font-medium text-sm">Uçuşlar axtarılır...</p>
+                        <p className="text-gray-500 font-medium text-sm">{t("loadingFlights")}</p>
                     </div>
                 ) : flights.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
                         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Plane size={28} className="text-blue-300" />
                         </div>
-                        <h3 className="text-lg font-black text-gray-800 mb-2">Uçuş tapılmadı</h3>
+                        <h3 className="text-lg font-black text-gray-800 mb-2">{t("noFlights")}</h3>
                         <p className="text-sm text-gray-400 mb-6">
                             {from && to
-                                ? `"${from}" → "${to}" marşrutu üzrə uçuş mövcud deyil`
-                                : "Axtarış şərtlərinə uyğun uçuş yoxdur"}
+                                ? t("noRouteFlights", { from, to })
+                                : t("noMatchingFlights")}
                         </p>
                         <button
                             onClick={() => router.push("/flights")}
                             className="bg-[#006ce4] hover:bg-[#0057b8] text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors"
                         >
-                            Yenidən axtar
+                            {t("searchAgain")}
                         </button>
                     </div>
                 ) : (
                     <>
                         <p className="text-sm text-gray-500 mb-4">
-                            <span className="font-bold text-gray-900">{flights.length}</span> uçuş tapıldı
+                            <span className="font-bold text-gray-900">{t("flightsCount", { count: flights.length })}</span>
                         </p>
                         <div className="space-y-3">
                             {flights.map(f => (

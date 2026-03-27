@@ -21,16 +21,29 @@ export default function LanguageSwitcher() {
   const [current, setCurrent] = useState("en");
 
   useEffect(() => {
-    setCurrent(readLocaleFromCookie());
+    const pathLocale = LOCALES.find(
+      (l) =>
+        window.location.pathname.startsWith(`/${l.code}/`) ||
+        window.location.pathname === `/${l.code}`
+    );
+    setCurrent(pathLocale?.code ?? readLocaleFromCookie());
   }, []);
 
   const currentLocale = LOCALES.find((l) => l.code === current) ?? LOCALES[0];
 
   const switchLocale = (code: string) => {
-    document.cookie = `locale=${code}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    setCurrent(code);
+    const currentPath = window.location.pathname;
+    const foundLocale = LOCALES.find(
+      (l) => currentPath.startsWith(`/${l.code}/`) || currentPath === `/${l.code}`
+    );
+    const pathWithoutLocale = foundLocale
+      ? currentPath === `/${foundLocale.code}`
+        ? "/"
+        : currentPath.slice(`/${foundLocale.code}`.length)
+      : currentPath;
+    const newPath = `/${code}${pathWithoutLocale === "/" ? "" : pathWithoutLocale}`;
     setOpen(false);
-    window.location.reload();
+    window.location.href = newPath + window.location.search;
   };
 
   return (

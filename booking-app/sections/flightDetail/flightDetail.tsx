@@ -193,7 +193,7 @@ function LegDetail({ flight, label }: { flight: FlightType; label?: string }) {
                     <div className="flex flex-col items-center">
                         <div className="w-3 h-3 rounded-full border-2 border-blue-400 bg-white mt-1" />
                         <div className="w-px bg-gray-200 flex-1 my-1.5" style={{ minHeight: 48 }} />
-                        {flight.stops?.map((s, i) => (
+                        {flight.stops?.map((_s, i) => (
                             <React.Fragment key={i}>
                                 <div className="w-3 h-3 rounded-full border-2 border-amber-400 bg-white" />
                                 <div className="w-px bg-gray-200 flex-1 my-1.5" style={{ minHeight: 32 }} />

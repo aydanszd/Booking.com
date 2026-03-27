@@ -120,7 +120,7 @@ export default function StillInterestedSection() {
     const t = useTranslations("stays");
 
     return (
-        <section className="py-10 px-6 max-w-7xl mx-auto items-start translate-x-[-120px] text-[26px] font-sans">
+        <section className="py-10 px-6 max-w-7xl mx-auto items-start -translate-x-30 text-[26px] font-sans">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {t("stillInterested")}
             </h2>

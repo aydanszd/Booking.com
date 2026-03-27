@@ -1,14 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import HotelImage from "@/sections/hoterdetail/hotelimage";
-import Availability from "@/sections/hoterdetail/roomavailability";
-import Rules from "@/sections/hoterdetail/hotelrule";
-import Reviews from "@/sections/hoterdetail/guestreviews";
+import HotelImage from "@/sections/hotelDetail/hotelimage";
+import Availability from "@/sections/hotelDetail/roomavailability";
+import Rules from "@/sections/hotelDetail/hotelrule";
+import Reviews from "@/sections/hotelDetail/guestreviews";
 import api from "@/api/building";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function HotelDetail() {
+    const t = useTranslations("hotel");
     const params = useParams();
     const id = params.id as string;
     const [building, setBuilding] = useState<any>(null);
@@ -29,7 +31,7 @@ export default function HotelDetail() {
             <Loader2 className="animate-spin text-blue-600" size={40} />
         </div>
     );
-    if (!building) return <div className="p-10 text-center">Hotel not found.</div>;
+    if (!building) return <div className="p-10 text-center">{t("notFound")}</div>;
 
     return (
         <div className="max-w-7xl mx-auto px-4">

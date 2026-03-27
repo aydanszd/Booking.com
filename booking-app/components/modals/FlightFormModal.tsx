@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { X, Plus, Plane, Pencil, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
-import { flightSchema, defaultFlightValues, FlightFormValues } from "@/schemas/flightshema";
+import { flightSchema, defaultFlightValues, FlightFormValues } from "@/schemas/flightSchema";
 import { FlightType } from "@/types/flight";
 import { flightApi } from "@/api/flight";
 
@@ -98,7 +98,7 @@ function LogoUploadField({
                         <img
                             src={localPreview.startsWith("/uploads") ? `http://localhost:5000${localPreview}` : localPreview}
                             alt="logo preview"
-                            className="h-16 w-auto max-w-[140px] object-contain rounded-lg"
+                            className="h-16 w-auto max-w-35 object-contain rounded-lg"
                         />
                         <button
                             type="button"

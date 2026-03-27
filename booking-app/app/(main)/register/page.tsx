@@ -27,7 +27,7 @@ function Field({ label, icon, error, hint, children }: {
         <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-500 tracking-wide">{label}</label>
             <div className="relative flex items-center flex-col">
-                {icon && <span className="absolute left-3 top-[10px] text-gray-400 pointer-events-none z-10">{icon}</span>}
+                {icon && <span className="absolute left-3 top-2.5 text-gray-400 pointer-events-none z-10">{icon}</span>}
                 {children}
             </div>
             {hint && !error && <p className="text-[11px] text-gray-400">{hint}</p>}
@@ -43,7 +43,7 @@ const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputEl
         <input {...props} ref={ref} className={[
             'w-full h-10 rounded-lg border text-sm bg-white text-gray-900 outline-none transition-all',
             'placeholder:text-gray-300 placeholder:text-[13px]',
-            hasIcon ? 'pl-[34px]' : 'pl-3',
+            hasIcon ? 'pl-8.5' : 'pl-3',
             rightSlot ? 'pr-9' : 'pr-3',
             hasError ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-gray-200 focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10',
         ].join(' ')} />
@@ -68,7 +68,7 @@ function Stepper({ current, steps }: { current: number; steps: string[] }) {
                         </span>
                     </div>
                     {i < steps.length - 1 && (
-                        <div className={['flex-1 h-0.5 mx-1 mt-[-12px] transition-all duration-300', i < current ? 'bg-[#1d9e75]' : 'bg-gray-200'].join(' ')} />
+                        <div className={['flex-1 h-0.5 mx-1 -mt-3 transition-all duration-300', i < current ? 'bg-[#1d9e75]' : 'bg-gray-200'].join(' ')} />
                     )}
                 </div>
             ))}
@@ -155,7 +155,7 @@ export default function RegisterForm() {
                 )}
                 <button onClick={onNext} disabled={loading}
                     className={['h-11 rounded-xl text-white text-sm font-semibold transition-all active:scale-[0.99] flex items-center justify-center gap-2',
-                        step > 0 ? 'flex-[2]' : 'flex-1', loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003580] hover:bg-[#00235b]'].join(' ')}>
+                        step > 0 ? 'flex-2' : 'flex-1', loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#003580] hover:bg-[#00235b]'].join(' ')}>
                     {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                     {isLast && loading ? t('creating') : (nextLabel ?? t('continue'))}
                 </button>
@@ -221,7 +221,7 @@ export default function RegisterForm() {
                                     <div className="w-full mt-1.5 space-y-1">
                                         <div className="flex gap-1">
                                             {[0, 1, 2, 3].map((i) => (
-                                                <div key={i} className="flex-1 h-[3px] rounded-full transition-all duration-200" style={{ background: i < strength ? STRENGTH_COLORS[strength - 1] : '#e5e7eb' }} />
+                                                <div key={i} className="flex-1 h-0.75 rounded-full transition-all duration-200" style={{ background: i < strength ? STRENGTH_COLORS[strength - 1] : '#e5e7eb' }} />
                                             ))}
                                         </div>
                                         <p className="text-[11px]" style={{ color: STRENGTH_COLORS[strength - 1] }}>{STRENGTH_LABELS[strength - 1]}</p>

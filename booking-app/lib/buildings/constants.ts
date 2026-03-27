@@ -1,4 +1,4 @@
-import { Filters } from "@/types/user-front/buildingsfilter";
+import { Filters } from "@/types/buildingFilter";
 
 export const DEFAULT_FILTERS: Filters = {
     types: [],

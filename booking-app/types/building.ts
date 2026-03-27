@@ -7,8 +7,7 @@ export const buildingSchema = z.object({
     city: z.string().min(1, 'Şəhər tələb olunur'),
     country: z.string().min(1, 'Ölkə tələb olunur'),
     address: z.string().optional(),
-    pricePerNight: z.number({ invalid_type_error: 'Qiymət rəqəm olmalıdır' })
-        .positive('Qiymət 0-dan böyük olmalıdır'),
+    pricePerNight: z.number().positive('Qiymət 0-dan böyük olmalıdır'),
     minNights: z.number().min(1, 'Minimum 1 gecə').optional(),
     maxGuests: z.number().min(1, 'Minimum 1 qonaq').optional(),
     amenities: z.string().optional(),

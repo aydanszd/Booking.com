@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { X, Plus, Upload, Pencil, Car } from "lucide-react";
 import { toast } from "sonner";
-import { carSchema, defaultCarValues, CarFormValues } from "@/schemas/carshema";
+import { carSchema, defaultCarValues, CarFormValues } from "@/schemas/carSchema";
 import { CarType } from "@/types/car";
 import { carApi, buildCarFormData } from "@/api/carapi";
 

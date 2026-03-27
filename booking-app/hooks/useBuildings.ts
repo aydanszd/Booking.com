@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import api from '@/api/building';
+import { buildingApi as api } from '@/api/building';
 import { Building } from '@/types/building';
 import { toast } from 'sonner';
 
