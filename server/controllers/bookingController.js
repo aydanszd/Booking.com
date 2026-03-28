@@ -182,6 +182,26 @@ exports.updateBookingStatus = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+exports.confirmBooking = async (req, res, next) => {
+    try {
+        const { status, paidAmount, paymentIntentId } = req.body;
+
+        const booking = await Booking.findOne({
+            _id: req.params.id,
+            user: req.user._id,
+        });
+        if (!booking) return res.status(404).json({ message: 'Rezervasiya tapılmadı' });
+        if (booking.status === 'confirmed') return res.json(booking);
+
+        booking.status = status || 'confirmed';
+        if (paidAmount) booking.paidAmount = paidAmount;
+        if (paymentIntentId) booking.notes = `paymentIntentId:${paymentIntentId}`;
+        await booking.save();
+
+        res.json(booking);
+    } catch (err) { next(err); }
+};
+
 exports.getAllBookings = async (req, res, next) => {
     try {
         const { status, type, page = 1, limit = 20 } = req.query;

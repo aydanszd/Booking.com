@@ -6,9 +6,9 @@ import { ChevronRight, Loader2, Car, Building2, Plane, Lock, Shield, CheckCircle
 import { toast } from 'sonner'
 import bookingApi from '@/api/booking'
 import { useTranslations } from 'next-intl'
-import PersonalInfoSection from './_components/PersonalInfoSection'
-import PaymentSection from './_components/PaymentSection'
-import OrderSummary from './_components/OrderSummary'
+import PersonalInfoSection from '@/components/checkout/PersonalInfoSection'
+import PaymentSection from '@/components/checkout/PaymentSection'
+import OrderSummary from '@/components/checkout/OrderSummary'
 
 const BASE = 'http://localhost:5000'
 

@@ -6,7 +6,7 @@ import { Loader2, Search, Building2, Car, Plane, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import BookingCard from './_components/BookingCard'
+import BookingCard from '@/components/myBookings/BookingCard'
 
 export default function MyBookings() {
     const t = useTranslations('myBookings')

@@ -1,22 +1,5 @@
-import { z } from 'zod';
-
-export const buildingSchema = z.object({
-    title: z.string().min(1, 'Başlıq tələb olunur').max(100, 'Maksimum 100 hərf'),
-    type: z.enum(['hotel', 'apartment', 'villa', 'hostel', 'resort']),
-    brand: z.string().optional(),
-    city: z.string().min(1, 'Şəhər tələb olunur'),
-    country: z.string().min(1, 'Ölkə tələb olunur'),
-    address: z.string().optional(),
-    pricePerNight: z.number().positive('Qiymət 0-dan böyük olmalıdır'),
-    minNights: z.number().min(1, 'Minimum 1 gecə').optional(),
-    maxGuests: z.number().min(1, 'Minimum 1 qonaq').optional(),
-    amenities: z.string().optional(),
-    travelGroups: z.array(z.string()).optional(),
-    bedrooms: z.number().min(0, 'Mənfi ola bilməz').optional(),
-    bathrooms: z.number().min(0, 'Mənfi ola bilməz').optional(),
-});
-
-export type BuildingSchema = z.infer<typeof buildingSchema>;
+export { buildingSchema } from '@/schemas/buildingSchema';
+export type { BuildingFormValues as BuildingSchema } from '@/schemas/buildingSchema';
 
 export interface Building {
     _id: string;
