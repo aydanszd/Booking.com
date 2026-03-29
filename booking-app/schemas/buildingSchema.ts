@@ -52,6 +52,8 @@ export const buildingSchema = z.object({
 
     amenities: z.string().optional(),
 
+    about: z.string().optional(),
+
     travelGroups: z.array(z.string()).optional(),
 
     images: z.array(z.string()).optional(),
@@ -72,6 +74,7 @@ export const defaultBuildingValues: BuildingFormValues = {
     bedrooms: 0,
     bathrooms: 0,
     amenities: '',
+    about: '',
     travelGroups: [],
     images: [],
 }

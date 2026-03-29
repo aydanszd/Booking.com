@@ -35,6 +35,7 @@ const buildingSchema = new mongoose.Schema({
     rating: { type: Number, default: 0, min: 0, max: 10 },
     images: [String],
     amenities: [String],
+    about: { type: String, default: '' },
     rooms: roomSchema,
     travelGroups: [{ type: String, enum: ['solo', 'couple', 'family', 'group', 'business'] }],
     reviews: [reviewSchema],

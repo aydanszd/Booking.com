@@ -73,6 +73,9 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                         values.amenities.split(',').map(a => a.trim()).filter(Boolean)
                     ));
                 }
+                if (values.about) {
+                    fd.append('about', values.about);
+                }
                 if (values.travelGroups?.length) {
                     fd.append('travelGroups', JSON.stringify(values.travelGroups));
                 }
@@ -113,6 +116,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     minNights: editItem.minNights || 1,
                     maxGuests: editItem.maxGuests || 10,
                     amenities: (editItem.amenities || []).join(', '),
+                    about: editItem.about || '',
                     travelGroups: editItem.travelGroups || [],
                     bedrooms: editItem.rooms?.bedrooms || 0,
                     bathrooms: editItem.rooms?.bathrooms || 0,
@@ -278,6 +282,19 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     <Field label="Amenities (vergüllə ayır)">
                         <input name="amenities" value={values.amenities} onChange={handleChange} onBlur={handleBlur}
                             placeholder="WiFi, Pool, Gym, Parking" className={inputCls()} />
+                    </Field>
+
+                    {/* About */}
+                    <Field label="About">
+                        <textarea
+                            name="about"
+                            value={values.about || ''}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            rows={4}
+                            placeholder="Bu bina haqqında məlumat yazın..."
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#006ce4] transition-colors resize-none"
+                        />
                     </Field>
 
                     {/* Travel Groups */}

@@ -13,6 +13,7 @@ export interface Building {
     isAvailable: boolean;
     images: string[];
     amenities?: string[];
+    about?: string;
     travelGroups?: string[];
     minNights?: number;
     maxGuests?: number;
@@ -53,6 +54,7 @@ export const INITIAL_SCHEMA: BuildingSchema = {
     minNights: 1,
     maxGuests: 10,
     amenities: '',
+    about: '',
     travelGroups: [],
     bedrooms: 0,
     bathrooms: 0,
