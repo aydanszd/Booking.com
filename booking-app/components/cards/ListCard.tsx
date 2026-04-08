@@ -21,9 +21,9 @@ export function ListCard({ building }: Props) {
         : "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&q=80";
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden min-h-[200px] sm:h-52">
             {/* Image */}
-            <div className="relative w-full sm:w-48 md:w-56 shrink-0 h-52 sm:h-auto">
+            <div className="relative w-full sm:w-48 md:w-56 shrink-0 h-52 sm:h-full">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
                 <button
                     type="button"

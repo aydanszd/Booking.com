@@ -60,7 +60,7 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
     const next = () => setIndex((i) => Math.min(i + 1, maxIndex));
 
     return (
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-10">
+        <section className="py-8 sm:py-10 px-4 sm:px-6 max-w-6xl mx-auto font-sans">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {t("browseByType", { city })}
             </h2>

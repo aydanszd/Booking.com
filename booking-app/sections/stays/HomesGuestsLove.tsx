@@ -108,7 +108,7 @@ export default function TripsSimilarSection({ baseCity = "Baku" }: { baseCity?: 
     const smallCards = currentDestinations.filter((d) => !d.large);
 
     return (
-        <section className="py-10 px-6 max-w-6xl mx-auto font-sans -mt-10">
+        <section className="py-8 sm:py-10 px-4 sm:px-6 max-w-6xl mx-auto font-sans">
             <div className="mb-5">
                 <h2 className="text-2xl font-bold text-gray-900">
                     {t("tripsSimilar", { city: baseCity })}
@@ -146,7 +146,7 @@ export default function TripsSimilarSection({ baseCity = "Baku" }: { baseCity?: 
                         <DestCard key={i} dest={dest} tall />
                     ))}
                 </div>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {smallCards.map((dest, i) => (
                         <DestCard key={i} dest={dest} />
                     ))}

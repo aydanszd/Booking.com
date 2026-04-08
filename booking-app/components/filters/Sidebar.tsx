@@ -130,10 +130,10 @@ export function Sidebar({ filters, onChange, onReset, allBuildings, open, onClos
                             <div className="absolute w-full h-1.5 bg-gray-200 rounded-full" />
                             <div
                                 className="absolute h-1.5 bg-[#006ce4] rounded-full pointer-events-none"
-                                style={{ left: 0, right: `${100 - (filters.maxPrice / 2000) * 100}%` }}
+                                style={{ left: 0, right: `${100 - (filters.maxPrice / 10000) * 100}%` }}
                             />
                             <input
-                                type="range" min={0} max={2000} step={10} value={filters.maxPrice}
+                                type="range" min={0} max={10000} step={50} value={filters.maxPrice}
                                 onChange={e => onChange({ maxPrice: Number(e.target.value), minPrice: 0 })}
                                 className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none

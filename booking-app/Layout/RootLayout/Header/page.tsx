@@ -288,67 +288,67 @@ export default function Header() {
 
     return (
         <div className="font-sans">
-            <div className="bg-[#003b94] px-6 pt-3">
+            <div className="bg-[#003b94] px-3 sm:px-6 pt-3">
                 <div className="max-w-6xl mx-auto">
-                    <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center justify-between mb-3 sm:mb-5">
                         <Link href="/">
                             <img
                                 src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
                                 alt="Booking.com"
-                                className="h-16 object-contain cursor-pointer"
+                                className="h-10 sm:h-16 object-contain cursor-pointer"
                             />
                         </Link>
 
-                        <div className="flex items-center gap-3 text-white text-sm font-medium">
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
+                        <div className="flex items-center gap-1 sm:gap-3 text-white text-sm font-medium">
+                            <button className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
                             <LanguageSwitcher />
-                            <button className="hover:bg-white/10 px-3 py-3 rounded transition-colors flex items-center justify-center">
+                            <button className="hidden sm:flex hover:bg-white/10 px-3 py-3 rounded transition-colors items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{t("listProperty")}</Link>
+                            <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{t("listProperty")}</Link>
                             {isLoggedIn ? (
                                 <>
-                                    <Link href="/my-bookings" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block font-semibold text-amber-400">{t("myBookings")}</Link>
+                                    <Link href="/my-bookings" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] font-semibold text-amber-400">{t("myBookings")}</Link>
                                     <button
                                         onClick={() => { localStorage.removeItem("token"); setIsLoggedIn(false); window.location.reload(); }}
-                                        className="bg-white text-red-600 border border-red-200 rounded px-3 py-2 cursor-pointer font-semibold hover:bg-red-50 transition-colors block leading-none"
+                                        className="bg-white text-red-600 border border-red-200 rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-red-50 transition-colors block leading-none text-xs sm:text-sm"
                                     >
                                         {t("signOut")}
                                     </button>
                                 </>
                             ) : (
                                 <>
-                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{t("register")}</Link>
-                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{t("signIn")}</Link>
+                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer transition-colors block leading-none text-xs sm:text-sm">{t("register")}</Link>
+                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none text-xs sm:text-sm">{t("signIn")}</Link>
                                 </>
                             )}
                         </div>
                     </div>
-                    <div className="flex gap-1 -mt-4.5">
+                    <div className="flex gap-1 -mt-2 sm:-mt-4.5 overflow-x-auto scrollbar-hide pb-1">
                         {NAV_ITEM_KEYS.map(({ icon: Icon, key, href }) => (
                             <Link
                                 key={key}
                                 href={href}
                                 onClick={() => setActiveNav(key)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === key
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 sm:py-3 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === key
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
-                                <Icon size={16} />
+                                <Icon size={14} />
                                 {tNav(key)}
                             </Link>
                         ))}
                     </div>
                 </div>
             </div>
-            <div className="bg-[#003b94] px-6 pb-10">
-                <div className="max-w-6xl mx-auto translate-y-25">
+            <div className="bg-[#003b94] px-3 sm:px-6 pb-6 sm:pb-10">
+                <div className="max-w-6xl mx-auto sm:translate-y-25">
 
-                    <h1 className="text-white text-5xl font-bold mb-2">{t("title")}</h1>
-                    <p className="text-white/90 text-2xl mb-7">{t("subtitle")}</p>
-                    <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
-                        <div ref={locationRef} className="relative flex-1 min-w-50">
+                    <h1 className="text-white text-2xl sm:text-5xl font-bold mb-1 sm:mb-2">{t("title")}</h1>
+                    <p className="text-white/90 text-sm sm:text-2xl mb-4 sm:mb-7">{t("subtitle")}</p>
+                    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
+                        <div ref={locationRef} className="relative w-full sm:flex-1 sm:min-w-50">
                             <div
                                 onClick={() => { setShowLocation(v => !v); setShowDate(false); setShowGuests(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -388,7 +388,7 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <div ref={dateRef} className="relative flex-1 min-w-50">
+                        <div ref={dateRef} className="relative w-full sm:flex-1 sm:min-w-50">
                             <div
                                 onClick={() => { setShowDate(v => !v); setShowLocation(false); setShowGuests(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -490,7 +490,7 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
-                        <div ref={guestRef} className="relative flex-1 min-w-50">
+                        <div ref={guestRef} className="relative w-full sm:flex-1 sm:min-w-50">
                             <div
                                 onClick={() => { setShowGuests(v => !v); setShowLocation(false); setShowDate(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -561,13 +561,13 @@ export default function Header() {
                                 
                                 window.location.href = `${target}?${params.toString()}`;
                             }}
-                            className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0"
+                            className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center justify-center gap-2 min-h-13 transition-colors w-full sm:w-auto sm:shrink-0"
                         >
                             <Search size={18} />
                             {t("searchBtn")}
                         </button>
                     </div>
-                    <label className="flex items-center gap-2 mt-3.5 text-black text-sm cursor-pointer select-none">
+                    <label className="flex items-center gap-2 mt-3.5 text-white sm:text-black text-sm cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={entireHome}

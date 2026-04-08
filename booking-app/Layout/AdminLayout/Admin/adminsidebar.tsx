@@ -3,8 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    LayoutDashboard, Building2, Hotel, Car, Plane,
-    MessageSquare, ShoppingBag, Settings, Users,
+    LayoutDashboard, Building2, Car, Plane,
+    Settings, Users,
     Menu, Bell, Search, ChevronLeft, LogOut, Calendar, CreditCard, Star, Languages,
 } from "lucide-react";
 
@@ -14,7 +14,6 @@ const navGroups = [
         items: [
             { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
             { href: "/admin/buildings", label: "Buildings",  icon: Building2, badge: 3 },
-            { href: "/admin/hotels",    label: "Hotels",     icon: Hotel },
             { href: "/admin/cars",      label: "Cars",       icon: Car, badge: 12 },
             { href: "/admin/flights",   label: "Flights",    icon: Plane },
         ],
@@ -22,8 +21,6 @@ const navGroups = [
     {
         label: "Management",
         items: [
-            { href: "/admin/messages", label: "Messages", icon: MessageSquare, badge: 7 },
-            { href: "/admin/orders",   label: "Orders",   icon: ShoppingBag },
             { href: "/admin/bookings", label: "Bookings", icon: Calendar },
             { href: "/admin/payments", label: "Payments", icon: CreditCard },
             { href: "/admin/reviews",  label: "Reviews",  icon: Star },
@@ -42,11 +39,8 @@ const navGroups = [
 const pageMeta = {
     "/admin/dashboard": { title: "Dashboard",  subtitle: "Welcome back! Here's today's overview." },
     "/admin/buildings":  { title: "Buildings",  subtitle: "Manage all registered properties." },
-    "/admin/hotels":     { title: "Hotels",     subtitle: "Browse and manage hotel listings." },
     "/admin/cars":       { title: "Cars",       subtitle: "Fleet and rental management." },
     "/admin/flights":    { title: "Flights",    subtitle: "Flight schedules and bookings." },
-    "/admin/messages":   { title: "Messages",   subtitle: "Customer communications." },
-    "/admin/orders":     { title: "Orders",     subtitle: "Track and manage all orders." },
     "/admin/bookings":   { title: "Bookings",   subtitle: "System wide reservations." },
     "/admin/payments":   { title: "Payments",   subtitle: "Reservation payment tracking." },
     "/admin/reviews":    { title: "Reviews",    subtitle: "Guest reviews and admin replies." },

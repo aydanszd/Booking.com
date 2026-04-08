@@ -1,6 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { X, Loader2, ImagePlus } from 'lucide-react';
+
+const AMENITY_LIST = [
+    'WiFi', 'Pool', 'Gym', 'Parking', 'Air Conditioning', 'Heating',
+    'Kitchen', 'Washer', 'Dryer', 'TV', 'Balcony', 'Garden',
+    'BBQ', 'Hot Tub', 'Fireplace', 'Elevator', 'Security', 'Pet Friendly',
+];
 import { Building, buildingSchema, BuildingSchema, INITIAL_SCHEMA } from '@/types/building';
 import api, { IMG } from '@/api/building';
 import { toast } from 'sonner';
@@ -43,6 +49,8 @@ const zodValidate = (values: BuildingSchema) => {
 export default function BuildingModal({ open, editItem, onClose, onSuccess }: Props) {
     const [images, setImages] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
+    const [urlInput, setUrlInput] = useState('');
+    const [urlImages, setUrlImages] = useState<string[]>([]);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const formik = useFormik<BuildingSchema>({
@@ -80,6 +88,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     fd.append('travelGroups', JSON.stringify(values.travelGroups));
                 }
                 images.forEach(img => fd.append('images', img));
+                if (urlImages.length) fd.append('imageUrls', JSON.stringify(urlImages));
 
                 if (editItem) {
                     await api.updateBuilding(editItem._id, fd);
@@ -128,6 +137,8 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
             setPreviews([]);
         }
         setImages([]);
+        setUrlImages([]);
+        setUrlInput('');
     }, [open, editItem]);
 
     if (!open) return null;
@@ -176,18 +187,20 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     {/* Images */}
                     <Field label="Images (max 10)">
                         <div className="space-y-2">
-                            {previews.length > 0 && (
+                            {(previews.length > 0 || urlImages.length > 0) && (
                                 <div className="flex flex-wrap gap-2">
                                     {previews.map((p, i) => (
                                         <div key={i} className="relative group">
-                                            <img
-                                                src={p.startsWith('/uploads') ? IMG(p) : p}
-                                                className="w-16 h-16 rounded-lg object-cover" alt=""
-                                            />
+                                            <img src={p.startsWith('/uploads') ? IMG(p) : p} className="w-16 h-16 rounded-lg object-cover" alt="" />
                                             <button type="button" onClick={() => removePreview(i)}
-                                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">
-                                                ×
-                                            </button>
+                                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>
+                                        </div>
+                                    ))}
+                                    {urlImages.map((url, i) => (
+                                        <div key={'url-'+i} className="relative group">
+                                            <img src={url} className="w-16 h-16 rounded-lg object-cover" alt="" />
+                                            <button type="button" onClick={() => setUrlImages(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs hidden group-hover:flex items-center justify-center">×</button>
                                         </div>
                                     ))}
                                 </div>
@@ -195,9 +208,35 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                             <div onClick={() => fileRef.current?.click()}
                                 className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center gap-2 cursor-pointer hover:border-[#006ce4] transition-colors">
                                 <ImagePlus size={16} className="text-gray-400" />
-                                <span className="text-xs text-gray-400">Şəkil əlavə et (jpg, png, webp • max 5MB)</span>
+                                <span className="text-xs text-gray-400">Şəkil yüklə (jpg, png, webp • max 5MB)</span>
                             </div>
                             <input ref={fileRef} type="file" multiple accept="image/*" onChange={handleImages} className="hidden" />
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={urlInput}
+                                    onChange={e => setUrlInput(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            const url = urlInput.trim();
+                                            if (url) { setUrlImages(prev => [...prev, url]); setUrlInput(''); }
+                                        }
+                                    }}
+                                    placeholder="Şəkil linki yapışdır..."
+                                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-[#006ce4] transition-colors"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const url = urlInput.trim();
+                                        if (url) { setUrlImages(prev => [...prev, url]); setUrlInput(''); }
+                                    }}
+                                    className="text-xs bg-[#006ce4] text-white px-3 py-2 rounded-xl hover:bg-[#0057b8] transition-colors"
+                                >
+                                    Əlavə et
+                                </button>
+                            </div>
                         </div>
                     </Field>
 
@@ -279,9 +318,35 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     </div>
 
                     {/* Amenities */}
-                    <Field label="Amenities (vergüllə ayır)">
-                        <input name="amenities" value={values.amenities} onChange={handleChange} onBlur={handleBlur}
-                            placeholder="WiFi, Pool, Gym, Parking" className={inputCls()} />
+                    <Field label="Amenities">
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {AMENITY_LIST.map(amenity => {
+                                const selected = values.amenities
+                                    .split(',').map(a => a.trim()).filter(Boolean)
+                                    .includes(amenity);
+                                return (
+                                    <button
+                                        key={amenity}
+                                        type="button"
+                                        onClick={() => {
+                                            const current = values.amenities
+                                                .split(',').map(a => a.trim()).filter(Boolean);
+                                            const next = selected
+                                                ? current.filter(a => a !== amenity)
+                                                : [...current, amenity];
+                                            setFieldValue('amenities', next.join(', '));
+                                        }}
+                                        className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
+                                            selected
+                                                ? 'bg-[#006ce4] text-white border-[#006ce4]'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:border-[#006ce4] hover:text-[#006ce4]'
+                                        }`}
+                                    >
+                                        {amenity}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </Field>
 
                     {/* About */}

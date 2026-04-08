@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface PropertyCardProps {
@@ -118,13 +119,55 @@ const SAMPLE_PROPERTIES: PropertyCardProps[] = [
 
 export default function StillInterestedSection() {
     const t = useTranslations("stays");
+    const [index, setIndex] = useState(0);
+    const maxIndex = SAMPLE_PROPERTIES.length - 1;
+
+    const slide = (dir: number) => {
+        setIndex(prev => Math.max(0, Math.min(prev + dir, maxIndex)));
+    };
 
     return (
-        <section className="py-10 px-6 max-w-7xl mx-auto items-start -translate-x-30 text-[26px] font-sans">
+        <section className="py-8 sm:py-10 px-4 sm:px-6 max-w-7xl mx-auto sm:-translate-x-30 font-sans">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {t("stillInterested")}
             </h2>
-            <div className="flex gap-5 flex-wrap">
+
+            {/* Mobile: slider with prev/next */}
+            <div className="sm:hidden">
+                <div className="overflow-hidden">
+                    <div
+                        className="flex gap-5 transition-transform duration-300 ease-in-out"
+                        style={{ transform: `translateX(-${index * (288 + 20)}px)` }}
+                    >
+                        {SAMPLE_PROPERTIES.map((prop, i) => (
+                            <div key={i} className="shrink-0">
+                                <PropertyCard {...prop} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-4 mt-4">
+                    <button
+                        onClick={() => slide(-1)}
+                        disabled={index === 0}
+                        className="w-9 h-9 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                        <ChevronLeft size={18} className="text-gray-700" />
+                    </button>
+                    <span className="text-sm text-gray-500">{index + 1} / {SAMPLE_PROPERTIES.length}</span>
+                    <button
+                        onClick={() => slide(1)}
+                        disabled={index >= maxIndex}
+                        className="w-9 h-9 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                        <ChevronRight size={18} className="text-gray-700" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Desktop: original wrap layout */}
+            <div className="hidden sm:flex gap-5 flex-wrap">
                 {SAMPLE_PROPERTIES.map((prop, i) => (
                     <PropertyCard key={i} {...prop} />
                 ))}

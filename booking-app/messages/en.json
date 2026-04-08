@@ -321,12 +321,6 @@
     "unlimitedMileage": "Unlimited mileage",
     "fullyComprehensive": "Full coverage (extra charge)",
     "youngDriverFee": "Young driver fee (21–{age} years)",
-    "fuel": "Fuel",
-    "seats2": "Seats",
-    "adults": "Adults",
-    "gearbox": "Gearbox",
-    "ac": "AC",
-    "included": "Included",
     "fuelPolicyLabel": "Fuel policy"
   },
   "hotel": {

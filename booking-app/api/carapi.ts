@@ -55,7 +55,7 @@ export const carApi = {
     },
 };
 
-export const buildCarFormData = (values: Omit<CarType, "_id" | "rating">, files: File[]): FormData => {
+export const buildCarFormData = (values: Omit<CarType, "_id" | "rating">, files: File[], urlImages: string[] = []): FormData => {
     const fd = new FormData();
     const { images, ...rest } = values;
 
@@ -70,5 +70,6 @@ export const buildCarFormData = (values: Omit<CarType, "_id" | "rating">, files:
     });
 
     files.forEach((f) => fd.append("images", f));
+    if (urlImages.length) fd.append("imageUrls", JSON.stringify(urlImages));
     return fd;
 };

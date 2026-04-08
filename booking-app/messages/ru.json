@@ -321,12 +321,6 @@
     "unlimitedMileage": "Неограниченный пробег",
     "fullyComprehensive": "КАСКО (доп. плата)",
     "youngDriverFee": "Сбор за молодого водителя (21–{age} лет)",
-    "fuel": "Топливо",
-    "seats2": "Места",
-    "adults": "Взрослые",
-    "gearbox": "Коробка передач",
-    "ac": "Кондиционер",
-    "included": "Включено",
     "fuelPolicyLabel": "Политика по топливу"
   },
   "hotel": {

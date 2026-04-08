@@ -32,6 +32,7 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   const isAdmin = pathname.startsWith("/admin");
+  const isAuthPage = /\/(signin|register|forgot-password|reset-password)(\/|$)/.test(pathname);
 
   const locale = await getLocale();
   const messages = await getMessages();
@@ -44,9 +45,9 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <GoogleLogger />
-          {!isAdmin && <HeaderSelector />}
+          {!isAdmin && !isAuthPage && <HeaderSelector />}
           {children}
-          {!isAdmin && <FooterSelector />}
+          {!isAdmin && !isAuthPage && <FooterSelector />}
           <Toaster position="top-right" richColors />
         </NextIntlClientProvider>
       </body>

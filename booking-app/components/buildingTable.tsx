@@ -100,8 +100,7 @@ export default function BuildingTable({ buildings, loading, onEdit, onDelete }: 
 
                             {/* Status */}
                             <td className="px-4 py-3">
-                                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${b.isAvailable ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
-                                    }`}>
+                                <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${b.isAvailable ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'}`}>
                                     {b.isAvailable ? 'Available' : 'Unavailable'}
                                 </span>
                             </td>
@@ -109,18 +108,10 @@ export default function BuildingTable({ buildings, loading, onEdit, onDelete }: 
                             {/* Actions */}
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-1">
-                                    <button
-                                        onClick={() => onEdit(b)}
-                                        className="w-7 h-7 rounded-lg hover:bg-blue-50 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"
-                                        title="Edit"
-                                    >
+                                    <button onClick={() => onEdit(b)} className="w-7 h-7 rounded-lg hover:bg-blue-50 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors" title="Edit">
                                         <Pencil size={14} />
                                     </button>
-                                    <button
-                                        onClick={() => onDelete(b._id)}
-                                        className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
-                                        title="Delete"
-                                    >
+                                    <button onClick={() => onDelete(b._id)} className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors" title="Delete">
                                         <Trash2 size={14} />
                                     </button>
                                 </div>

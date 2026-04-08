@@ -18,6 +18,8 @@ interface CarFormModalProps {
 export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormModalProps) {
     const [files, setFiles] = useState<File[]>([]);
     const [featInput, setFeatInput] = useState("");
+    const [urlInput, setUrlInput] = useState("");
+    const [urlImages, setUrlImages] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const formik = useFormik<CarFormValues>({
@@ -40,7 +42,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
         validationSchema: toFormikValidationSchema(carSchema),
         onSubmit: async (values) => {
             try {
-                const fd = buildCarFormData(values, files);
+                const fd = buildCarFormData(values, files, urlImages);
                 if (mode === "edit" && car?._id) {
                     await carApi.update(car._id, fd);
                     toast.success("Maşın yeniləndi");
@@ -312,32 +314,62 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                                     />
                                 </label>
 
-                                {files.length > 0 && (
+                                {(files.length > 0 || urlImages.length > 0 || (mode === "edit" && formik.values.images.length > 0 && files.length === 0)) && (
                                     <div className="flex gap-2 mt-2 flex-wrap">
                                         {files.map((f, i) => (
                                             <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
                                                 <img src={URL.createObjectURL(f)} className="w-full h-full object-cover" alt="" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFiles((fs) => fs.filter((_, idx) => idx !== i))}
-                                                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full flex items-center justify-center"
-                                                >
+                                                <button type="button" onClick={() => setFiles((fs) => fs.filter((_, idx) => idx !== i))}
+                                                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full flex items-center justify-center">
                                                     <X size={8} className="text-white" />
                                                 </button>
                                             </div>
                                         ))}
+                                        {urlImages.map((url, i) => (
+                                            <div key={'url-'+i} className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
+                                                <img src={url} className="w-full h-full object-cover" alt="" />
+                                                <button type="button" onClick={() => setUrlImages(prev => prev.filter((_, idx) => idx !== i))}
+                                                    className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/50 rounded-full flex items-center justify-center">
+                                                    <X size={8} className="text-white" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {mode === "edit" && formik.values.images.length > 0 && files.length === 0 && urlImages.length === 0 && (
+                                            formik.values.images.map((img, i) => (
+                                                <div key={i} className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
+                                                    <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="" />
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                 )}
 
-                                {mode === "edit" && formik.values.images.length > 0 && files.length === 0 && (
-                                    <div className="flex gap-2 mt-2 flex-wrap">
-                                        {formik.values.images.map((img, i) => (
-                                            <div key={i} className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
-                                                <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                <div className="flex gap-2 mt-2">
+                                    <input
+                                        type="text"
+                                        value={urlInput}
+                                        onChange={e => setUrlInput(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                const url = urlInput.trim();
+                                                if (url) { setUrlImages(prev => [...prev, url]); setUrlInput(''); }
+                                            }
+                                        }}
+                                        placeholder="Şəkil linki yapışdır..."
+                                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:border-[#006ce4] transition-colors"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const url = urlInput.trim();
+                                            if (url) { setUrlImages(prev => [...prev, url]); setUrlInput(''); }
+                                        }}
+                                        className="text-xs bg-[#006ce4] text-white px-3 py-2 rounded-xl hover:bg-[#0057b8] transition-colors"
+                                    >
+                                        Əlavə et
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

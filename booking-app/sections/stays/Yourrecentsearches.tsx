@@ -24,7 +24,7 @@ export default function RecentSearches() {
     const t = useTranslations("stays");
 
     return (
-        <section className="max-w-7xl  mt-25 ml-95">
+        <section className="max-w-7xl px-4 sm:px-0 mt-12 sm:mt-25 sm:ml-95">
             <h2 className="text-[26px] font-bold text-gray-900 mb-3">{t("recentSearches")}</h2>
 
             <div className="flex flex-wrap gap-3">

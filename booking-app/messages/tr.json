@@ -234,7 +234,7 @@
     "bookingFailed": "Rezervasyon başarısız",
     "seats2": "Koltuklar",
     "adults": "Yetişkinler",
-    "gearbox": "Şanzıman",
+    "gearbox": "Vites",
     "fuel": "Yakıt",
     "ac": "Klima",
     "included": "Dahil",
@@ -321,12 +321,6 @@
     "unlimitedMileage": "Sınırsız kilometre",
     "fullyComprehensive": "Kasko (ek ücret)",
     "youngDriverFee": "Genç sürücü ücreti (21–{age} yaş)",
-    "fuel": "Yakıt",
-    "seats2": "Koltuklar",
-    "adults": "Yetişkinler",
-    "gearbox": "Vites",
-    "ac": "Klima",
-    "included": "Dahil",
     "fuelPolicyLabel": "Yakıt politikası"
   },
   "hotel": {

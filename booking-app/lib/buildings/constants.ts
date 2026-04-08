@@ -6,7 +6,7 @@ export const DEFAULT_FILTERS: Filters = {
     city: "",
     country: "",
     minPrice: 0,
-    maxPrice: 2000,
+    maxPrice: 10000,
     bedrooms: 0,
     bathrooms: 0,
     amenities: [],

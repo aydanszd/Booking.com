@@ -52,7 +52,7 @@ export default function FirsatlarSection() {
     ];
 
     return (
-        <section className="py-10 px-6 max-w-6xl items-start ml-92.5 font-sans -mt-7.5">
+        <section className="py-8 sm:py-10 px-4 sm:px-6 max-w-6xl mx-auto sm:mx-0 sm:ml-92.5 font-sans sm:-mt-7.5">
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">{t("offers")}</h2>
                 <p className="text-sm text-gray-500 mt-1">{t("offersSubtitle")}</p>

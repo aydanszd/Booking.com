@@ -56,7 +56,7 @@ export default function ResultsArea({ loading, error, viewMode, items, onReset }
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {items.map(b => <GridCard key={b._id} building={b} />)}
         </div>
     )

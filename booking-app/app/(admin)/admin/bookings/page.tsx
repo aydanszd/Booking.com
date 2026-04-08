@@ -64,37 +64,21 @@ export default function AdminBookings() {
     })
 
     if (loading) return (
-        <div className="flex h-screen items-center justify-center bg-gray-50">
-            <Loader2 className="animate-spin text-blue-600" size={40} />
+        <div className="h-96 flex items-center justify-center">
+            <Loader2 className="animate-spin text-[#006ce4]" size={32} />
         </div>
     )
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
-
-            {/* Header */}
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-10">
-                <div>
-                    <h1 className="text-4xl font-black text-gray-900 tracking-tighter mb-2">
-                        Bookings Management
-                    </h1>
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
-                        Monitor and manage all system reservations
-                    </p>
-                </div>
-                <BookingToolbar
-                    filterType={filterType}
-                    onFilterChange={setFilterType}
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    onRefresh={fetchAllBookings}
-                />
-            </div>
-
-            {/* Stats */}
+        <div className="space-y-5">
             <BookingStatsBar bookings={bookings} />
-
-            {/* Table */}
+            <BookingToolbar
+                filterType={filterType}
+                onFilterChange={setFilterType}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onRefresh={fetchAllBookings}
+            />
             <BookingTable
                 bookings={filtered}
                 editingId={editingId}

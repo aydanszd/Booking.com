@@ -89,7 +89,7 @@ export default function SearchResults() {
         ...(filters.brand ? [{ label: `Brand: ${filters.brand}`, onRemove: () => handleChange({ brand: "" }) }] : []),
         ...(filters.city ? [{ label: `City: ${filters.city}`, onRemove: () => handleChange({ city: "" }) }] : []),
         ...(filters.country ? [{ label: `Country: ${filters.country}`, onRemove: () => handleChange({ country: "" }) }] : []),
-        ...(filters.minPrice > 0 || filters.maxPrice < 2000 ? [{ label: `$${filters.minPrice}–$${filters.maxPrice}`, onRemove: () => handleChange({ minPrice: 0, maxPrice: 2000 }) }] : []),
+        ...(filters.minPrice > 0 || filters.maxPrice < 10000 ? [{ label: `$${filters.minPrice}–$${filters.maxPrice}`, onRemove: () => handleChange({ minPrice: 0, maxPrice: 10000 }) }] : []),
         ...(filters.bedrooms > 0 ? [{ label: `${filters.bedrooms}+ bed`, onRemove: () => handleChange({ bedrooms: 0 }) }] : []),
         ...(filters.bathrooms > 0 ? [{ label: `${filters.bathrooms}+ bath`, onRemove: () => handleChange({ bathrooms: 0 }) }] : []),
         ...filters.amenities.map(a => ({ label: a, onRemove: () => handleChange({ amenities: filters.amenities.filter(x => x !== a) }) })),

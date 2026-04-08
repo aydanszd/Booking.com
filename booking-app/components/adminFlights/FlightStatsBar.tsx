@@ -9,24 +9,9 @@ export default function FlightStatsBar({
     total: number
 }) {
     const stats = [
-        {
-            label: 'Ümumi Uçuşlar',
-            val: total,
-            icon: <Plane size={18} className="text-blue-500" />,
-            bg: 'bg-blue-50',
-        },
-        {
-            label: 'Mövcud',
-            val: flights.filter(f => f.totalSeats - f.bookedSeats > 0).length,
-            icon: <Plane size={18} className="text-emerald-500" />,
-            bg: 'bg-emerald-50',
-        },
-        {
-            label: 'Dolu',
-            val: flights.filter(f => f.totalSeats - f.bookedSeats === 0).length,
-            icon: <Clock size={18} className="text-orange-500" />,
-            bg: 'bg-orange-50',
-        },
+        { label: 'Ümumi Uçuşlar', val: total, icon: <Plane size={18} className="text-blue-500" />, bg: 'bg-blue-50' },
+        { label: 'Mövcud', val: flights.filter(f => f.totalSeats - f.bookedSeats > 0).length, icon: <Plane size={18} className="text-emerald-500" />, bg: 'bg-emerald-50' },
+        { label: 'Dolu', val: flights.filter(f => f.totalSeats - f.bookedSeats === 0).length, icon: <Clock size={18} className="text-orange-500" />, bg: 'bg-orange-50' },
     ]
 
     return (

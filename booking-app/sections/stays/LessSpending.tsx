@@ -27,7 +27,7 @@ export default function BookingSections() {
             <div className="max-w-6xl mx-auto px-4 py-6 -mt-5">
                 <h2 className="text-xl font-bold text-gray-900 mb-3">{t("travelMore")}</h2>
 
-                <div className="border border-gray-200 rounded-lg p-6 flex items-center justify-between">
+                <div className="border border-gray-200 rounded-lg p-4 sm:p-6 flex items-center justify-between">
                     <div>
                         <p className="font-bold text-gray-900 text-base mb-1">{t("signInSave")}</p>
                         <p className="text-sm text-gray-600 mb-4">{t("signInSaveDesc")}</p>
@@ -70,7 +70,7 @@ export default function BookingSections() {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-4 gap-x-4 gap-y-2 mb-5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 mb-5">
                     {domesticCities.map((city) => (
                         <a key={city} href="#" className="text-sm text-gray-800 hover:underline">{city}</a>
                     ))}

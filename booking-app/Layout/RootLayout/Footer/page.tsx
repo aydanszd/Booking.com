@@ -40,7 +40,7 @@ export default function Footer() {
     return (
         <div className="bg-gray-100 border-t border-gray-200 mt-10">
             <div className="max-w-6xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-5 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
                     {footerColumns.map((col) => (
                         <div key={col.title}>
                             <h3 className="text-sm font-bold text-gray-900 mb-3">{col.title}</h3>

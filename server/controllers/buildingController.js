@@ -41,13 +41,17 @@ exports.getBuilding = async (req, res) => {
 // POST /api/buildings
 exports.createBuilding = async (req, res) => {
     try {
-        const images = req.files?.map(f => `/uploads/${f.filename}`) || [];
+        const uploadedImages = req.files?.map(f => `/uploads/${f.filename}`) || [];
         const body = { ...req.body };
 
         if (typeof body.location === 'string') body.location = JSON.parse(body.location);
         if (typeof body.rooms === 'string') body.rooms = JSON.parse(body.rooms);
         if (typeof body.amenities === 'string') body.amenities = JSON.parse(body.amenities);
         if (typeof body.travelGroups === 'string') body.travelGroups = JSON.parse(body.travelGroups);
+
+        const urlImages = body.imageUrls ? JSON.parse(body.imageUrls) : [];
+        delete body.imageUrls;
+        const images = [...uploadedImages, ...urlImages];
 
         const building = await Building.create({ ...body, images });
         res.status(201).json(building);
@@ -58,14 +62,18 @@ exports.createBuilding = async (req, res) => {
 
 exports.updateBuilding = async (req, res) => {
     try {
-        const images = req.files?.map(f => `/uploads/${f.filename}`);
+        const uploadedImages = req.files?.map(f => `/uploads/${f.filename}`) || [];
         const body = { ...req.body };
 
         if (typeof body.location === 'string') body.location = JSON.parse(body.location);
         if (typeof body.rooms === 'string') body.rooms = JSON.parse(body.rooms);
         if (typeof body.amenities === 'string') body.amenities = JSON.parse(body.amenities);
         if (typeof body.travelGroups === 'string') body.travelGroups = JSON.parse(body.travelGroups);
-        if (images?.length) body.images = images;
+
+        const urlImages = body.imageUrls ? JSON.parse(body.imageUrls) : [];
+        delete body.imageUrls;
+        const allNew = [...uploadedImages, ...urlImages];
+        if (allNew.length) body.images = allNew;
 
         const building = await Building.findByIdAndUpdate(req.params.id, body, { new: true });
         if (!building) return res.status(404).json({ message: 'Tapılmadı' });

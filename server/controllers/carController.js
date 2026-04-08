@@ -39,10 +39,13 @@ exports.getCar = async (req, res) => {
 
 exports.createCar = async (req, res) => {
     try {
-        const images = req.files?.map(f => `/uploads/${f.filename}`) || [];
+        const uploadedImages = req.files?.map(f => `/uploads/${f.filename}`) || [];
         const body = { ...req.body };
         if (typeof body.location === 'string') body.location = JSON.parse(body.location);
         if (typeof body.features === 'string') body.features = JSON.parse(body.features);
+        const urlImages = body.imageUrls ? JSON.parse(body.imageUrls) : [];
+        delete body.imageUrls;
+        const images = [...uploadedImages, ...urlImages];
 
         const car = await Car.create({ ...body, images });
         res.status(201).json(car);
@@ -53,11 +56,14 @@ exports.createCar = async (req, res) => {
 
 exports.updateCar = async (req, res) => {
     try {
-        const images = req.files?.map(f => `/uploads/${f.filename}`);
+        const uploadedImages = req.files?.map(f => `/uploads/${f.filename}`) || [];
         const body = { ...req.body };
         if (typeof body.location === 'string') body.location = JSON.parse(body.location);
         if (typeof body.features === 'string') body.features = JSON.parse(body.features);
-        if (images?.length) body.images = images;
+        const urlImages = body.imageUrls ? JSON.parse(body.imageUrls) : [];
+        delete body.imageUrls;
+        const allNew = [...uploadedImages, ...urlImages];
+        if (allNew.length) body.images = allNew;
 
         const car = await Car.findByIdAndUpdate(req.params.id, body, { new: true });
         if (!car) return res.status(404).json({ message: 'Tapılmadı' });
