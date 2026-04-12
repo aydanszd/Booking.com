@@ -75,8 +75,8 @@ export default function RoomAvailability({ building }: { building: any }) {
 
             {/* Date + Guests row */}
             <div className="border border-t-0 border-gray-200 rounded-b-lg bg-white p-4 mb-0">
-                <div className="flex flex-col lg:flex-row gap-3 mb-5">
-                    <div className="border border-gray-300 rounded-md p-3 w-full lg:w-72 shrink-0">
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-3 mb-5">
+                    <div className="border border-gray-300 rounded-md p-3 w-full lg:w-72 shrink-0 flex items-center">
                         <DateRangePicker
                             bookedRanges={bookedRanges}
                             startDate={checkIn}
@@ -87,7 +87,7 @@ export default function RoomAvailability({ building }: { building: any }) {
                             endLabel={t("checkOut")}
                         />
                     </div>
-                    <div className="flex items-center gap-2 border border-[#febb02] rounded-md px-4 py-3 bg-white h-fit">
+                    <div className="flex items-center gap-2 border border-[#febb02] rounded-md px-4 py-3 bg-white">
                         <Users size={16} className="text-gray-500 shrink-0" />
                         <div>
                             <p className="text-[10px] text-gray-400 uppercase font-bold leading-none">{t("guests")}</p>

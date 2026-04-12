@@ -147,12 +147,12 @@ export default function FlightsDates() {
     ];
 
     return (
-        <section className="bg-[#eef2f7] w-full py-10 px-6">
+        <section className="bg-[#eef2f7] w-full py-10 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto flex items-center gap-8">
 
                 {/* ── Left ── */}
                 <div className="flex-1 min-w-0 relative">
-                    <h1 className="text-[40px] font-bold text-[#1a1a2e] leading-snug mb-5">
+                    <h1 className="text-2xl sm:text-[40px] font-bold text-[#1a1a2e] leading-snug mb-5">
                         {t("searchHundreds")}
                     </h1>
 
@@ -163,107 +163,113 @@ export default function FlightsDates() {
                         </button>
                     </div>
 
-                    {/* Search bar */}
-                    <div className="bg-white rounded-lg border border-gray-200 h-15 shadow-lg flex items-center overflow-visible">
+                    {/* Search bar — desktop: tek sıra, mobile: alt-alta */}
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-lg overflow-visible flex flex-col sm:flex-row sm:items-center sm:h-15">
 
-                        {/* From */}
-                        <div className="flex items-center gap-2 px-3 py-3 flex-1 min-w-0 border-r border-gray-200">
-                            {from ? (
-                                <span className="flex items-center gap-1 text-sm text-black font-medium bg-gray-100 border rounded px-2 py-0.5 whitespace-nowrap">
-                                    {from}
-                                    <button onClick={() => setFrom("")} className="text-black hover:text-gray-600">
-                                        <X size={12} />
-                                    </button>
-                                </span>
-                            ) : (
-                                <input
-                                    autoFocus
-                                    className="text-sm text-black outline-none w-full"
-                                    placeholder={t("fromPlaceholder")}
-                                    onBlur={(e) => e.target.value && setFrom(e.target.value)}
-                                />
-                            )}
-                        </div>
+                        {/* From + Swap + To — birinci sıra (mobile'da) */}
+                        <div className="flex items-center sm:contents">
+                            {/* From */}
+                            <div className="flex items-center gap-2 px-3 py-3 flex-1 min-w-0 border-b sm:border-b-0 sm:border-r border-gray-200">
+                                {from ? (
+                                    <span className="flex items-center gap-1 text-sm text-black font-medium bg-gray-100 border rounded px-2 py-0.5 whitespace-nowrap">
+                                        {from}
+                                        <button onClick={() => setFrom("")} className="text-black hover:text-gray-600">
+                                            <X size={12} />
+                                        </button>
+                                    </span>
+                                ) : (
+                                    <input
+                                        autoFocus
+                                        className="text-sm text-black outline-none w-full"
+                                        placeholder={t("fromPlaceholder")}
+                                        onBlur={(e) => e.target.value && setFrom(e.target.value)}
+                                    />
+                                )}
+                            </div>
 
-                        {/* Swap */}
-                        <button className="px-2 text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-                            <ArrowLeftRight size={15} />
-                        </button>
-
-                        {/* To */}
-                        <div className="flex items-center px-3 py-3 flex-1 min-w-0 border-r border-gray-200">
-                            <input
-                                className="text-sm text-gray-400 outline-none w-full"
-                                placeholder={t("toPlaceholder")}
-                                value={to}
-                                onChange={(e) => setTo(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Departure date */}
-                        <button
-                            onClick={() => setShowCalendar(!showCalendar)}
-                            className={`flex items-center gap-1 px-4 py-3 border-r border-gray-200 shrink-0 transition-colors
-                ${dateActive ? "border border-blue-500 rounded-sm bg-white shadow-md z-10 -mx-px" : "hover:bg-gray-50"}`}
-                        >
-                            <span className="text-sm text-gray-700">{label1}</span>
-                        </button>
-
-                        {/* Return date */}
-                        <div className="flex items-center gap-1 px-4 py-3 border-r border-gray-200 shrink-0 cursor-pointer hover:bg-gray-50">
-                            <span className="text-sm text-gray-700">{label2}</span>
-                        </div>
-
-                        {/* Passengers */}
-                        <div className="relative" ref={guestRef}>
-                            <button
-                                onClick={() => setShowGuests(!showGuests)}
-                                className="flex items-center gap-1.5 px-4 py-3 border-r border-gray-200 shrink-0 hover:bg-gray-50 transition-colors"
-                            >
-                                <Users size={15} className="text-gray-400" />
-                                <span className="text-sm text-gray-700 whitespace-nowrap">
-                                    {t("adultsChildrenLabel", { adults, children })}
-                                </span>
-                                <ChevronDown size={13} className="text-gray-400" />
+                            {/* Swap */}
+                            <button className="px-2 text-gray-400 hover:text-gray-600 transition-colors shrink-0 border-b sm:border-b-0 border-gray-200 py-3">
+                                <ArrowLeftRight size={15} />
                             </button>
 
-                            {showGuests && (
-                                <div className="absolute top-full right-0 mt-1 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-64 p-5">
-                                    {[
-                                        { labelKey: "adultsLabel", subKey: "ageAdults", val: adults, set: setAdults, min: 1 },
-                                        { labelKey: "childrenLabel", subKey: "ageChildren", val: children, set: setChildren, min: 0 },
-                                    ].map(({ labelKey, subKey, val, set, min }) => (
-                                        <div key={labelKey} className="flex items-center justify-between mb-5 last:mb-0">
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-800">{t(labelKey as any)}</p>
-                                                <p className="text-xs text-gray-400">{t(subKey as any)}</p>
+                            {/* To */}
+                            <div className="flex items-center px-3 py-3 flex-1 min-w-0 border-b sm:border-b-0 sm:border-r border-gray-200">
+                                <input
+                                    className="text-sm text-gray-400 outline-none w-full"
+                                    placeholder={t("toPlaceholder")}
+                                    value={to}
+                                    onChange={(e) => setTo(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Dates + Passengers — ikinci sıra (mobile'da) */}
+                        <div className="flex items-center sm:contents">
+                            {/* Departure date */}
+                            <button
+                                onClick={() => setShowCalendar(!showCalendar)}
+                                className={`flex items-center gap-1 px-4 py-3 border-r border-gray-200 shrink-0 transition-colors flex-1 sm:flex-none justify-center sm:justify-start
+                    ${dateActive ? "border border-blue-500 rounded-sm bg-white shadow-md z-10 -mx-px" : "hover:bg-gray-50"}`}
+                            >
+                                <span className="text-sm text-gray-700">{label1}</span>
+                            </button>
+
+                            {/* Return date */}
+                            <div className="flex items-center gap-1 px-4 py-3 border-r border-gray-200 shrink-0 cursor-pointer hover:bg-gray-50 flex-1 sm:flex-none justify-center sm:justify-start">
+                                <span className="text-sm text-gray-700">{label2}</span>
+                            </div>
+
+                            {/* Passengers */}
+                            <div className="relative flex-1 sm:flex-none" ref={guestRef}>
+                                <button
+                                    onClick={() => setShowGuests(!showGuests)}
+                                    className="flex items-center gap-1.5 px-4 py-3 border-r border-gray-200 shrink-0 hover:bg-gray-50 transition-colors w-full justify-center sm:justify-start"
+                                >
+                                    <Users size={15} className="text-gray-400" />
+                                    <span className="text-sm text-gray-700 whitespace-nowrap">
+                                        {t("adultsChildrenLabel", { adults, children })}
+                                    </span>
+                                    <ChevronDown size={13} className="text-gray-400" />
+                                </button>
+
+                                {showGuests && (
+                                    <div className="absolute top-full right-0 mt-1 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 w-64 p-5">
+                                        {[
+                                            { labelKey: "adultsLabel", subKey: "ageAdults", val: adults, set: setAdults, min: 1 },
+                                            { labelKey: "childrenLabel", subKey: "ageChildren", val: children, set: setChildren, min: 0 },
+                                        ].map(({ labelKey, subKey, val, set, min }) => (
+                                            <div key={labelKey} className="flex items-center justify-between mb-5 last:mb-0">
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-800">{t(labelKey as any)}</p>
+                                                    <p className="text-xs text-gray-400">{t(subKey as any)}</p>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => set(Math.max(min, val - 1))}
+                                                        disabled={val <= min}
+                                                        className="w-7 h-7 rounded-full border border-blue-400 text-blue-500 flex items-center justify-center hover:bg-blue-50 disabled:opacity-30 disabled:cursor-default transition-colors"
+                                                    >
+                                                        <Minus size={13} />
+                                                    </button>
+                                                    <span className="w-4 text-center text-sm font-semibold text-gray-800">{val}</span>
+                                                    <button
+                                                        onClick={() => set(val + 1)}
+                                                        className="w-7 h-7 rounded-full border border-blue-400 text-blue-500 flex items-center justify-center hover:bg-blue-50 transition-colors"
+                                                    >
+                                                        <Plus size={13} />
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    onClick={() => set(Math.max(min, val - 1))}
-                                                    disabled={val <= min}
-                                                    className="w-7 h-7 rounded-full border border-blue-400 text-blue-500 flex items-center justify-center hover:bg-blue-50 disabled:opacity-30 disabled:cursor-default transition-colors"
-                                                >
-                                                    <Minus size={13} />
-                                                </button>
-                                                <span className="w-4 text-center text-sm font-semibold text-gray-800">{val}</span>
-                                                <button
-                                                    onClick={() => set(val + 1)}
-                                                    className="w-7 h-7 rounded-full border border-blue-400 text-blue-500 flex items-center justify-center hover:bg-blue-50 transition-colors"
-                                                >
-                                                    <Plus size={13} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <button
-                                        onClick={() => setShowGuests(false)}
-                                        className="mt-5 w-full bg-[#0071c2] hover:bg-[#005fa3] text-white font-bold py-2.5 rounded text-sm transition-colors"
-                                    >
-                                        {t("done")}
-                                    </button>
-                                </div>
-                            )}
+                                        ))}
+                                        <button
+                                            onClick={() => setShowGuests(false)}
+                                            className="mt-5 w-full bg-[#0071c2] hover:bg-[#005fa3] text-white font-bold py-2.5 rounded text-sm transition-colors"
+                                        >
+                                            {t("done")}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Search */}
@@ -278,7 +284,7 @@ export default function FlightsDates() {
                                 if (selected[0]) params.set("date", selected[0].toISOString().split("T")[0]);
                                 router.push(`/flightdetail?${params.toString()}`);
                             }}
-                            className="bg-[#0071c2] hover:bg-[#005fa3] text-white text-sm rounded-[20px] font-bold px-6 py-3 transition-colors shrink-0"
+                            className="bg-[#0071c2] hover:bg-[#005fa3] text-white text-sm rounded-b-xl sm:rounded-[20px] font-bold px-6 py-3 transition-colors shrink-0 w-full sm:w-auto"
                         >
                             {t("searchBtn")}
                         </button>

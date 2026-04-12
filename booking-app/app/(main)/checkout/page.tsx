@@ -10,7 +10,7 @@ import PersonalInfoSection from '@/components/checkout/PersonalInfoSection'
 import PaymentSection from '@/components/checkout/PaymentSection'
 import OrderSummary from '@/components/checkout/OrderSummary'
 
-const BASE = 'http://localhost:5000'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 function CheckoutInner() {
     const t = useTranslations('checkout')

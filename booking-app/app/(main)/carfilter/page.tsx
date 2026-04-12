@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { carFilterApi } from '@/api/carFilterApi'
 import { applyFilters, CAR_CATEGORIES } from '@/components/carFilter/constants'
@@ -18,10 +18,12 @@ import GridCard from '@/components/carFilter/GridCard'
 import EmptyState from '@/components/carFilter/EmptyState'
 import CarPagination from '@/components/carFilter/CarPagination'
 
-const LIMIT = 20
+const LIMIT = 7
 
 export default function CarRentalPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const cityParam = searchParams.get('city') || ''
 
     const [allCars, setAllCars] = useState<CarType[]>([])
     const [loading, setLoading] = useState(true)
@@ -47,14 +49,19 @@ export default function CarRentalPage() {
     const fetchCars = useCallback(async () => {
         setLoading(true); setError(null)
         try {
-            const res = await carFilterApi.getAll({ page, limit: LIMIT, category: activeCategory ?? undefined })
+            const res = await carFilterApi.getAll({
+                page,
+                limit: LIMIT,
+                category: activeCategory ?? undefined,
+                city: cityParam || undefined,
+            })
             setAllCars(res.cars); setTotal(res.total)
         } catch (e: any) {
             setError(e.message || 'Xəta baş verdi')
         } finally {
             setLoading(false)
         }
-    }, [page, activeCategory])
+    }, [page, activeCategory, cityParam])
 
     useEffect(() => { fetchCars() }, [fetchCars])
 
@@ -152,7 +159,7 @@ export default function CarRentalPage() {
                             </div>
                         )}
 
-                        {!loading && <CarPagination page={page} totalPages={totalPages} onPageChange={setPage} />}
+                        {!loading && <CarPagination page={page} totalPages={totalPages} totalCount={total} limit={LIMIT} onPageChange={setPage} />}
                     </main>
                 </div>
             </div>

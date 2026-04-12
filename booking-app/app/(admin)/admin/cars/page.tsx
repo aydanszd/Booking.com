@@ -175,7 +175,7 @@ export default function AdminCarsPage() {
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
                                                     <img
-                                                        src={car.images?.[0] ? `http://localhost:5000${car.images[0]}` : "/placeholder.jpg"}
+                                                        src={car.images?.[0] ? car.images[0] : "/placeholder.jpg"}
                                                         alt={car.title}
                                                         className="w-full h-full object-cover"
                                                     />

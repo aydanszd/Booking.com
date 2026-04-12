@@ -96,7 +96,7 @@ function LogoUploadField({
                 {localPreview ? (
                     <>
                         <img
-                            src={localPreview.startsWith("/uploads") ? `http://localhost:5000${localPreview}` : localPreview}
+                            src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
                             alt="logo preview"
                             className="h-16 w-auto max-w-35 object-contain rounded-lg"
                         />

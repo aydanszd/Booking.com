@@ -12,7 +12,7 @@ import PaymentForm from "@/components/flightCheckout/PaymentForm";
 import FlightSummaryCard from "@/components/flightCheckout/FlightSummaryCard";
 import CheckoutBreadcrumb from "@/components/flightCheckout/CheckoutBreadcrumb";
 
-const BASE = "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function FlightCheckoutInner() {
     const t = useTranslations("checkout");

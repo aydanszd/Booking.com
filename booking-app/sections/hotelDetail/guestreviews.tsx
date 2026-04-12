@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useTranslations } from "next-intl";
 
-const BASE = "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
     const [hovered, setHovered] = useState(0);

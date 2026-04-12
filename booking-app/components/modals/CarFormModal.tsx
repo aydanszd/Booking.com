@@ -15,6 +15,35 @@ interface CarFormModalProps {
     onSuccess: () => void;
 }
 
+function Field({
+    label,
+    name,
+    touched,
+    errors,
+    children,
+    colSpan2,
+}: {
+    label: string;
+    name: string;
+    touched: Record<string, any>;
+    errors: Record<string, any>;
+    children: React.ReactNode;
+    colSpan2?: boolean;
+}) {
+    const err = touched[name] && errors[name];
+    return (
+        <div className={colSpan2 ? "col-span-2" : ""}>
+            <label className="text-xs text-gray-500 font-medium mb-1 block">{label}</label>
+            {children}
+            {err && (
+                <p className="text-[11px] text-red-500 mt-1">
+                    {typeof err === "string" ? err : JSON.stringify(err)}
+                </p>
+            )}
+        </div>
+    );
+}
+
 export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormModalProps) {
     const [files, setFiles] = useState<File[]>([]);
     const [featInput, setFeatInput] = useState("");
@@ -72,32 +101,8 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
         );
     };
 
-    const Field = ({
-        label,
-        name,
-        children,
-        colSpan2,
-    }: {
-        label: string;
-        name: string;
-        children: React.ReactNode;
-        colSpan2?: boolean;
-    }) => {
-        const touched = formik.touched as Record<string, any>;
-        const errors = formik.errors as Record<string, any>;
-        const err = touched[name] && errors[name];
-        return (
-            <div className={colSpan2 ? "col-span-2" : ""}>
-                <label className="text-xs text-gray-500 font-medium mb-1 block">{label}</label>
-                {children}
-                {err && (
-                    <p className="text-[11px] text-red-500 mt-1">
-                        {typeof err === "string" ? err : JSON.stringify(err)}
-                    </p>
-                )}
-            </div>
-        );
-    };
+    const touched = formik.touched as Record<string, any>;
+    const errors = formik.errors as Record<string, any>;
 
     const inputClass =
         "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#006ce4] transition-colors";
@@ -138,7 +143,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                     <div className="px-6 py-5 space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             {/* Title */}
-                            <Field label="Başlıq *" name="title" colSpan2>
+                            <Field label="Başlıq *" name="title" touched={touched} errors={errors} colSpan2>
                                 <input
                                     {...formik.getFieldProps("title")}
                                     placeholder="BMW 5 Series 2024"
@@ -147,7 +152,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Brand */}
-                            <Field label="Marka" name="brand">
+                            <Field label="Marka" name="brand" touched={touched} errors={errors}>
                                 <input
                                     {...formik.getFieldProps("brand")}
                                     placeholder="BMW"
@@ -156,7 +161,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Model */}
-                            <Field label="Model" name="model">
+                            <Field label="Model" name="model" touched={touched} errors={errors}>
                                 <input
                                     {...formik.getFieldProps("model")}
                                     placeholder="5 Series"
@@ -165,7 +170,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Category */}
-                            <Field label="Kateqoriya" name="category">
+                            <Field label="Kateqoriya" name="category" touched={touched} errors={errors}>
                                 <select {...formik.getFieldProps("category")} className={`${inputClass} bg-white`}>
                                     {["economy", "compact", "suv", "luxury", "van", "electric"].map((c) => (
                                         <option key={c} value={c}>
@@ -176,7 +181,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Transmission */}
-                            <Field label="Ötürücü" name="transmission">
+                            <Field label="Ötürücü" name="transmission" touched={touched} errors={errors}>
                                 <select {...formik.getFieldProps("transmission")} className={`${inputClass} bg-white`}>
                                     <option value="automatic">Avtomat</option>
                                     <option value="manual">Mexanik</option>
@@ -184,7 +189,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Seats */}
-                            <Field label="Oturacaq sayı" name="seats">
+                            <Field label="Oturacaq sayı" name="seats" touched={touched} errors={errors}>
                                 <input
                                     type="number"
                                     {...formik.getFieldProps("seats")}
@@ -194,7 +199,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Mileage */}
-                            <Field label="Millaj (km)" name="mileage">
+                            <Field label="Millaj (km)" name="mileage" touched={touched} errors={errors}>
                                 <input
                                     type="number"
                                     {...formik.getFieldProps("mileage")}
@@ -204,7 +209,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Price */}
-                            <Field label="Qiymət/Gün ($) *" name="pricePerDay">
+                            <Field label="Qiymət/Gün ($) *" name="pricePerDay" touched={touched} errors={errors}>
                                 <input
                                     type="number"
                                     {...formik.getFieldProps("pricePerDay")}
@@ -214,7 +219,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* City */}
-                            <Field label="Şəhər" name="location.city">
+                            <Field label="Şəhər" name="location.city" touched={touched} errors={errors}>
                                 <input
                                     {...formik.getFieldProps("location.city")}
                                     placeholder="Bakı"
@@ -226,7 +231,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                             </Field>
 
                             {/* Country */}
-                            <Field label="Ölkə" name="location.country">
+                            <Field label="Ölkə" name="location.country" touched={touched} errors={errors}>
                                 <input
                                     {...formik.getFieldProps("location.country")}
                                     placeholder="Azərbaycan"
@@ -337,7 +342,7 @@ export default function CarFormModal({ mode, car, onClose, onSuccess }: CarFormM
                                         {mode === "edit" && formik.values.images.length > 0 && files.length === 0 && urlImages.length === 0 && (
                                             formik.values.images.map((img, i) => (
                                                 <div key={i} className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
-                                                    <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="" />
+                                                    <img src={img.startsWith('http') ? img : img} className="w-full h-full object-cover" alt="" />
                                                 </div>
                                             ))
                                         )}

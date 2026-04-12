@@ -5,15 +5,15 @@ import { Users, Settings2, Gauge, MapPin, CheckCircle2, ChevronRight, Star, Car 
 import type { CarType } from '@/types/car'
 import { scoreLabel } from './constants'
 
-const BASE = 'http://localhost:5000'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ListCard({ car, onNavigate }: { car: CarType; onNavigate: (id: string) => void }) {
     const [imgError, setImgError] = useState(false)
     const imgSrc = car.images?.[0] ? (car.images[0].startsWith('http') ? car.images[0] : `${BASE}${car.images[0]}`) : null
 
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden">
-            <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 h-52 sm:h-auto cursor-pointer" onClick={() => onNavigate(car._id!)}>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden min-h-[200px] sm:h-52">
+            <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 h-52 sm:h-full cursor-pointer" onClick={() => onNavigate(car._id!)}>
                 {imgSrc && !imgError ? (
                     <img src={imgSrc} alt={car.title} onError={() => setImgError(true)} className="w-full h-full object-cover" />
                 ) : (

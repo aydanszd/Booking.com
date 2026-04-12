@@ -138,7 +138,7 @@ export default function DateRangePicker({
                     type="button"
                     onClick={() => triggerClick("start")}
                     className={`
-                        flex flex-col gap-0.5 px-4 py-3 rounded-2xl border-2 text-left w-full
+                        flex flex-col gap-0.5 px-6 py-1.5 rounded-2xl border-2 text-left w-full
                         transition-all duration-200
                         ${open && selecting==="start"
                             ? "border-blue-500 bg-blue-50 shadow-md shadow-blue-100"
@@ -158,7 +158,7 @@ export default function DateRangePicker({
                     type="button"
                     onClick={() => triggerClick("end")}
                     className={`
-                        flex flex-col gap-0.5 px-4 py-3 rounded-2xl border-2 text-left w-full
+                        flex flex-col gap-0.5 px-6 py-1.5 rounded-2xl border-2 text-left w-full
                         transition-all duration-200
                         ${open && selecting==="end"
                             ? "border-blue-500 bg-blue-50 shadow-md shadow-blue-100"

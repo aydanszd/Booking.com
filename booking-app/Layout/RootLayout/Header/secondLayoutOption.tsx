@@ -50,13 +50,13 @@ export default function BookingNavbar() {
                 </div>
 
                 {/* Bottom row: nav tabs */}
-                <div className="flex gap-1 -mt-4.5 overflow-x-auto scrollbar-hide pb-3">
+                <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-3">
                     {NAV_ITEMS.map(({ icon: Icon, label, href }) => (
                         <Link
                             key={label}
                             href={href}
                             onClick={() => setActiveTab(label)}
-                            className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors whitespace-nowrap ${activeTab === label
+                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[30px] text-sm font-medium transition-colors whitespace-nowrap ${activeTab === label
                                 ? "border border-white bg-white/10 text-white"
                                 : "text-white hover:bg-white/10"
                             }`}

@@ -290,7 +290,7 @@ export default function CarRentalHeader() {
 
     return (
         <div className="font-sans">
-            <div className="bg-[#003b94] px-6 pt-3">
+            <div className="bg-[#003b94] px-4 sm:px-6 pt-3">
                 <div className="max-w-7xl mx-auto">
                     {/* Top bar */}
                     <div className="flex items-center justify-between mb-5">
@@ -298,30 +298,30 @@ export default function CarRentalHeader() {
                             <img
                                 src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
                                 alt="Booking.com"
-                                className="h-16 object-contain cursor-pointer"
+                                className="h-12 sm:h-16 object-contain cursor-pointer"
                             />
                         </Link>
-                        <div className="flex items-center gap-3 text-white text-sm font-medium">
+                        <div className="flex items-center gap-2 text-white text-sm font-medium">
                             <LanguageSwitcher />
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{tHeader("listProperty")}</Link>
-                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{tHeader("register")}</Link>
-                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{tHeader("signIn")}</Link>
+                            <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{tHeader("listProperty")}</Link>
+                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer transition-colors block leading-none text-xs sm:text-sm">{tHeader("register")}</Link>
+                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none text-xs sm:text-sm">{tHeader("signIn")}</Link>
                         </div>
                     </div>
 
                     {/* Nav tabs */}
-                    <div className="flex gap-1 -mt-4.5">
+                    <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
                         {NAV_ITEMS.map(({ icon: Icon, labelKey, href }) => (
                             <Link
                                 key={labelKey}
                                 href={href}
                                 onClick={() => setActiveNav(labelKey)}
-                                className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === labelKey
+                                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === labelKey
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}
                             >
-                                <Icon size={16} />
+                                <Icon size={15} />
                                 {tNav(labelKey)}
                             </Link>
                         ))}
@@ -329,16 +329,16 @@ export default function CarRentalHeader() {
                 </div>
             </div>
 
-            <div className="bg-[#003b94] px-6 pb-10">
-                <div className="max-w-6xl mx-auto translate-y-16">
-                    <h1 className="text-white text-5xl font-bold mb-2">{tHeader("carHireTitle")}</h1>
-                    <p className="text-white/90 text-2xl mb-7">{tHeader("carHireSubtitle")}</p>
+            <div className="bg-[#003b94] px-4 sm:px-6 pb-10">
+                <div className="max-w-6xl mx-auto sm:translate-y-16">
+                    <h1 className="text-white text-2xl sm:text-5xl font-bold mb-1 sm:mb-2">{tHeader("carHireTitle")}</h1>
+                    <p className="text-white/90 text-base sm:text-2xl mb-4 sm:mb-7">{tHeader("carHireSubtitle")}</p>
 
                     {/* Search bar */}
-                    <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
+                    <div className="flex flex-col sm:flex-wrap sm:flex-row gap-1 bg-[#febb02] p-1 rounded-lg">
 
                         {/* Pick-up location */}
-                        <div ref={locationRef} className="relative flex-1 min-w-50">
+                        <div ref={locationRef} className="relative flex-1 sm:min-w-50">
                             <div
                                 onClick={() => { setShowLocation(v => !v); setShowDropoffSuggestions(false); setShowDate(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -370,7 +370,7 @@ export default function CarRentalHeader() {
 
                         {/* Drop-off location */}
                         {differentDropoff && (
-                            <div ref={dropoffRef} className="relative flex-1 min-w-50">
+                            <div ref={dropoffRef} className="relative flex-1 sm:min-w-50">
                                 <div
                                     onClick={() => { setShowDropoffSuggestions(v => !v); setShowLocation(false); setShowDate(false); }}
                                     className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -402,7 +402,7 @@ export default function CarRentalHeader() {
                         )}
 
                         {/* Pick-up date */}
-                        <div ref={dateRef} className="relative flex-1 min-w-40">
+                        <div ref={dateRef} className="relative flex-1 sm:min-w-40">
                             <div
                                 onClick={() => { setShowDate(v => !v); setShowLocation(false); setShowDropoffSuggestions(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -504,7 +504,7 @@ export default function CarRentalHeader() {
                         </div>
 
                         {/* Pick-up time */}
-                        <div className="relative min-w-28">
+                        <div className="relative sm:min-w-28">
                             <div className="flex items-center gap-2 bg-white rounded h-13 px-3.5">
                                 <Clock size={18} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
@@ -521,7 +521,7 @@ export default function CarRentalHeader() {
                         </div>
 
                         {/* Drop-off date */}
-                        <div className="relative flex-1 min-w-40">
+                        <div className="relative flex-1 sm:min-w-40">
                             <div
                                 onClick={() => { setShowDate(true); setShowLocation(false); setShowDropoffSuggestions(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -537,7 +537,7 @@ export default function CarRentalHeader() {
                         </div>
 
                         {/* Drop-off time */}
-                        <div className="relative min-w-28">
+                        <div className="relative sm:min-w-28">
                             <div className="flex items-center gap-2 bg-white rounded h-13 px-3.5">
                                 <Clock size={18} className="text-gray-500 shrink-0" />
                                 <div className="flex flex-col justify-center">
@@ -554,7 +554,7 @@ export default function CarRentalHeader() {
                         </div>
 
                         {/* Search button */}
-                        <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
+                        <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center justify-center gap-2 min-h-13 transition-colors w-full sm:w-auto sm:shrink-0">
                             <Search size={18} />
                             {tHeader("searchBtn")}
                         </button>

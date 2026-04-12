@@ -47,7 +47,7 @@ interface FetchFlightsResponse {
     total: number;
 }
 
-const BASE = "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const API = `${BASE}/api/flights`;
 
 const flightApi = {
@@ -110,7 +110,7 @@ function AirlineLogo({ src, name, size = "md" }: { src?: string; name: string; s
     const fontSize = size === "lg" ? "text-base" : size === "sm" ? "text-[9px]" : "text-xs";
     const { bg, text } = getAirlineColor(name);
     const initials = name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase() || name.slice(0, 2).toUpperCase();
-    const imageUrl = src?.startsWith("/uploads") ? `http://localhost:5000${src}` : src;
+    const imageUrl = src?.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${src}` : src;
     return (
         <div className={`${sz} rounded-xl flex items-center justify-center shrink-0 shadow-sm overflow-hidden`}
             style={{ background: imgOk === true ? "white" : bg, border: "1px solid #e5e7eb" }}>

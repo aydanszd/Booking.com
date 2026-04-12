@@ -12,7 +12,7 @@ function fmtDate(d: string) {
 function toImgUrl(path: string | undefined, fallback: string): string {
     if (!path) return fallback
     if (path.startsWith('http')) return path
-    return `http://localhost:5000${path}`
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${path}`
 }
 
 export default function BookingCard({
@@ -47,7 +47,7 @@ export default function BookingCard({
             ),
             link: booking.building?._id ? `/hoteldetail/${booking.building._id}` : null,
             period: (
-                <div className="grid grid-cols-2 gap-6 py-6 border-y-2 border-dashed border-gray-100">
+                <div className="grid grid-cols-2 gap-3 py-2 border-y border-dashed border-gray-100">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-blue-500">
                             <Calendar size={13} />
@@ -82,7 +82,7 @@ export default function BookingCard({
             ),
             link: booking.car?._id ? `/cardetail/${booking.car._id}` : null,
             period: (
-                <div className="grid grid-cols-2 gap-6 py-6 border-y-2 border-dashed border-gray-100">
+                <div className="grid grid-cols-2 gap-3 py-2 border-y border-dashed border-gray-100">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-violet-500">
                             <Calendar size={13} />
@@ -112,7 +112,7 @@ export default function BookingCard({
             ),
             link: null,
             period: (
-                <div className="py-6 border-y-2 border-dashed border-gray-100 space-y-3">
+                <div className="py-6 border-y border-dashed border-gray-100 space-y-3">
                     {booking.flight && (
                         <div className="flex items-center justify-between">
                             <div className="text-center">
@@ -153,9 +153,9 @@ export default function BookingCard({
     const cfg = typeConfig[type] || typeConfig.building
 
     return (
-        <div className="bg-white rounded-4xl overflow-hidden shadow-xl shadow-gray-200/60 border border-gray-50 flex flex-col md:flex-row group transition-all hover:-translate-y-1">
+        <div className="bg-white rounded-4xl overflow-hidden shadow-xl shadow-gray-200/60 border border-gray-50 flex flex-col md:flex-row md:h-52 group transition-all hover:-translate-y-1">
             {/* Image */}
-            <div className="w-full md:w-64 h-52 md:h-auto relative overflow-hidden shrink-0">
+            <div className="w-full md:w-56 h-52 md:h-full relative overflow-hidden shrink-0">
                 <img
                     src={cfg.image}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -187,10 +187,10 @@ export default function BookingCard({
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-8 flex flex-col justify-between">
+            <div className="flex-1 p-5 flex flex-col justify-between min-w-0 overflow-hidden">
                 <div>
                     <div className="flex items-start justify-between gap-3 mb-2">
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">
+                        <h2 className="text-lg font-black text-gray-900 tracking-tight group-hover:text-blue-600 transition-colors">
                             {cfg.title}
                         </h2>
                         {cfg.link && (
@@ -200,7 +200,7 @@ export default function BookingCard({
                         )}
                     </div>
                     {cfg.subtitle && (
-                        <div className="flex items-center gap-1.5 mb-6">
+                        <div className="flex items-center gap-1.5 mb-2">
                             <MapPin size={14} className="text-blue-500 shrink-0" />
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{cfg.subtitle}</span>
                         </div>
@@ -208,9 +208,9 @@ export default function BookingCard({
                     {cfg.period}
                 </div>
 
-                <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-3">
-                        <p className="text-3xl font-black text-gray-900">${booking.totalPrice}</p>
+                        <p className="text-xl font-black text-gray-900">${booking.totalPrice}</p>
                         <span className="text-[10px] font-black text-gray-300 uppercase underline decoration-blue-600 decoration-2 underline-offset-4">
                             {t('verifiedPayment')}
                         </span>

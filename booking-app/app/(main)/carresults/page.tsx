@@ -7,7 +7,7 @@ import { Loader2, Car, Users, Disc, Fuel, Check, MapPin, Calendar, ArrowLeft } f
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-const BASE = "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function imgSrc(path: string | undefined) {
     if (!path) return "/placeholder.jpg";

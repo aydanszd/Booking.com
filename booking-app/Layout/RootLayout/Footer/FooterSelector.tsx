@@ -5,7 +5,8 @@ import DefaultFooter from "./page";
 import FlightsFooter from "./FlightsFooter";
 
 export default function FooterSelector() {
-    const pathname = usePathname() || "";
+    const raw = usePathname() || "";
+    const pathname = raw.replace(/^\/(en|tr|ru)(\/|$)/, "/").replace(/\/$/, "") || "/";
     const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
     const isSignin = pathname === "/signin" || pathname.startsWith("/signin/");
     const isRegister = pathname === "/register" || pathname.startsWith("/register/");

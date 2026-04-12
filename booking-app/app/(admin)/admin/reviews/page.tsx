@@ -8,7 +8,7 @@ import ReviewFilterTabs from '@/components/adminReviews/ReviewFilterTabs'
 import ReviewCard from '@/components/adminReviews/ReviewCard'
 import type { ReviewItem, FilterType } from '@/types/review'
 
-const BASE = 'http://localhost:5000'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function AdminReviewsPage() {
     const [reviews, setReviews] = useState<ReviewItem[]>([])

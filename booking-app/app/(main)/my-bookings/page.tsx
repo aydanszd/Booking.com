@@ -65,8 +65,8 @@ export default function MyBookings() {
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-16 pb-20">
-            <div className="max-w-5xl mx-auto px-6">
+        <div className="min-h-screen bg-gray-50 pt-24 pb-20" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+            <div className="max-w-6xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-10">
                     <div>
                         <div className="flex items-center gap-3 mb-3">
@@ -75,7 +75,7 @@ export default function MyBookings() {
                             </Link>
                             <span className="text-xs font-black text-blue-600 uppercase tracking-widest">{t('yourAccount')}</span>
                         </div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tighter">{t('title')}</h1>
+                        <h1 className="text-4xl font-semibold text-gray-900">{t('title')}</h1>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex gap-1 bg-white border border-gray-200 rounded-2xl p-1">

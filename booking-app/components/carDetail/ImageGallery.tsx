@@ -11,7 +11,7 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import Counter from 'yet-another-react-lightbox/plugins/counter'
 import 'yet-another-react-lightbox/plugins/counter.css'
 
-const BASE = 'http://localhost:5000'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ImageGallery({ images, title }: { images: string[]; title: string }) {
     const t = useTranslations('cars')

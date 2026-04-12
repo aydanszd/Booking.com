@@ -7,7 +7,8 @@ import CarRentalHeader from "./CarRender";
 import AttractionsHeader from "./attractions"
 
 export default function HeaderSelector() {
-  const pathname = usePathname() || "";
+  const raw = usePathname() || "";
+  const pathname = raw.replace(/^\/(en|tr|ru)(\/|$)/, "/").replace(/\/$/, "") || "/";
   const isFlights = pathname === "/flights" || pathname.startsWith("/flights/");
   const isFlightsDetail = pathname === "/flightsdetail" || pathname.startsWith("/flightsdetail/");
   const isCarRental = pathname === "/carrender" || pathname.startsWith("/carrender/");

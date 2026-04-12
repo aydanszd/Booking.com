@@ -5,7 +5,7 @@ import { Users, Settings2, MapPin, ChevronRight, Star, Car } from 'lucide-react'
 import type { CarType } from '@/types/car'
 import { scoreLabel } from './constants'
 
-const BASE = 'http://localhost:5000'
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate: (id: string) => void }) {
     const [imgError, setImgError] = useState(false)
@@ -13,7 +13,7 @@ export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full">
-            <div className="relative h-44 flex-shrink-0 cursor-pointer" onClick={() => onNavigate(car._id!)}>
+            <div className="relative h-52 flex-shrink-0 cursor-pointer" onClick={() => onNavigate(car._id!)}>
                 {imgSrc && !imgError ? (
                     <img src={imgSrc} alt={car.title} onError={() => setImgError(true)} className="w-full h-full object-cover" />
                 ) : (
