@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 interface Destination {
@@ -158,7 +159,7 @@ export default function TripsSimilarSection({ baseCity = "Baku" }: { baseCity?: 
 
 function DestCard({ dest, tall = false }: { dest: Destination; tall?: boolean }) {
     return (
-        <div className={`relative overflow-hidden rounded-xl cursor-pointer group ${tall ? "h-68" : "h-68"}`}>
+        <Link href={`/filter?city=${encodeURIComponent(dest.city)}`} className={`relative overflow-hidden rounded-xl cursor-pointer group block ${tall ? "h-68" : "h-68"}`}>
             <img
                 src={dest.image}
                 alt={dest.city}
@@ -170,6 +171,6 @@ function DestCard({ dest, tall = false }: { dest: Destination; tall?: boolean })
                     {dest.city} {dest.flag}
                 </p>
             </div>
-        </div>
+        </Link>
     );
 }

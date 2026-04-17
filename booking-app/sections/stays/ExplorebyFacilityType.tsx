@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface PropertyType {
@@ -53,6 +54,7 @@ const VISIBLE = 4;
 
 export default function BrowseByPropertyType({ city = "Milan" }: { city?: string }) {
     const t = useTranslations("stays");
+    const router = useRouter();
     const [index, setIndex] = useState(0);
     const maxIndex = PROPERTY_TYPES.length - VISIBLE;
 
@@ -86,7 +88,7 @@ export default function BrowseByPropertyType({ city = "Milan" }: { city?: string
                             <div
                                 key={i}
                                 className="shrink-0 w-64 cursor-pointer group"
-                                onClick={() => console.log("Navigate to:", prop.type)}
+                                onClick={() => router.push(`/filter?type=${encodeURIComponent(prop.type.toLowerCase())}`)}
                             >
                                 <div className="w-full h-54 rounded-xl overflow-hidden mb-3">
                                     <img

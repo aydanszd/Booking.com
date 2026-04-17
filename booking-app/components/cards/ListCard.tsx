@@ -1,20 +1,17 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { Heart, MapPin, ChevronRight, Leaf, Info, Star } from "lucide-react";
+import { MapPin, ChevronRight, Leaf, Info, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Building } from "@/types/buildingFilter";
 import { capitalize, scoreLabel } from "@/lib/buildings/utils";
 import { imgUrl } from "@/lib/buildings/api";
 import { ScoreBadge } from "./ScoreBadge";
-
 interface Props {
     building: Building;
 }
 
 export function ListCard({ building }: Props) {
     const searchParams = useSearchParams();
-    const [saved, setSaved] = useState(false);
 
     const imageUrl = building.images?.[0]
         ? imgUrl(building.images[0])
@@ -25,18 +22,7 @@ export function ListCard({ building }: Props) {
             {/* Image */}
             <div className="relative w-full sm:w-48 md:w-56 shrink-0 h-52 sm:h-full">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
-                <button
-                    type="button"
-                    onClick={() => setSaved(!saved)}
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow"
-                >
-                    <Heart
-                        size={16}
-                        fill={saved ? "#cc0000" : "none"}
-                        className={saved ? "text-red-500" : "text-gray-600"}
-                    />
-                </button>
-                {!building.isAvailable && (
+{!building.isAvailable && (
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                             Unavailable

@@ -1,11 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Plane, ChevronRight, Luggage, Loader2 } from "lucide-react";
+import { Plane, ChevronRight, Luggage, Loader2, Heart } from "lucide-react";
 import { FlightType } from "@/types/flight";
 import { flightApi } from "@/api/flight";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useWishlist } from "@/context/WishlistContext";
 
 const CABIN_LABELS: Record<string, string> = {
     economy: "Economy",
@@ -38,6 +39,7 @@ function AirlineLogo({ logoUrl, airline }: { logoUrl?: string; airline: string }
 function FlightCard({ flight }: { flight: FlightType }) {
     const t = useTranslations("flights");
     const router = useRouter();
+    const { toggle, has } = useWishlist();
     const avail = flight.totalSeats - flight.bookedSeats;
     const stopCount = flight.stops?.length ?? 0;
 
@@ -68,7 +70,27 @@ function FlightCard({ flight }: { flight: FlightType }) {
     };
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center relative">
+            <button
+                type="button"
+                onClick={() => toggle({
+                    id: flight._id!,
+                    type: "flight",
+                    title: `${flight.airline} · ${flight.origin?.city} → ${flight.destination?.city}`,
+                    image: flight.logoUrl,
+                    price: flight.price,
+                    priceLabel: "per person",
+                    location: `${flight.origin?.city} → ${flight.destination?.city}`,
+                    href: `/flights`,
+                })}
+                className="absolute top-3 right-3 bg-gray-50 hover:bg-gray-100 rounded-full p-1.5 transition-colors"
+            >
+                <Heart
+                    size={15}
+                    fill={has(flight._id!) ? "#cc0000" : "none"}
+                    className={has(flight._id!) ? "text-red-500" : "text-gray-400"}
+                />
+            </button>
             {/* Airline */}
             <div className="flex items-center gap-3 sm:w-44 shrink-0">
                 <AirlineLogo logoUrl={flight.logoUrl} airline={flight.airline} />

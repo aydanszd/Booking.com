@@ -1,17 +1,13 @@
 "use client";
-import { useState } from "react";
-import { Heart, MapPin, ChevronRight, Leaf, Star } from "lucide-react";
+import { MapPin, ChevronRight, Leaf, Star } from "lucide-react";
 import { Building } from "@/types/buildingFilter";
 import { capitalize, scoreLabel } from "@/lib/buildings/utils";
 import { imgUrl } from "@/lib/buildings/api";
-
 interface Props {
     building: Building;
 }
 
 export function GridCard({ building }: Props) {
-    const [saved, setSaved] = useState(false);
-
     const imageUrl = building.images?.[0]
         ? imgUrl(building.images[0])
         : "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&q=80";
@@ -20,18 +16,7 @@ export function GridCard({ building }: Props) {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full">
             <div className="relative h-44 shrink-0">
                 <img src={imageUrl} alt={building.title} className="w-full h-full object-cover" />
-                <button
-                    type="button"
-                    onClick={() => setSaved(!saved)}
-                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow"
-                >
-                    <Heart
-                        size={15}
-                        fill={saved ? "#cc0000" : "none"}
-                        className={saved ? "text-red-500" : "text-gray-600"}
-                    />
-                </button>
-                <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-amber-700 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+<span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-amber-700 border border-amber-200 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                     {capitalize(building.type)}
                 </span>
                 {!building.isAvailable && (

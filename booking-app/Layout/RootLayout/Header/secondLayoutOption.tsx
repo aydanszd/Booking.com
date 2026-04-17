@@ -1,21 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-    Bed, Plane, Car, Ticket, CarTaxiFront,
+    Bed, BedDouble, Plane, Car, Ticket, CarTaxiFront,
 } from "lucide-react";
 
 const NAV_ITEMS = [
     { icon: Bed, label: "Stays", href: "/" },
+    { icon: BedDouble, label: "Buildings", href: "/filter" },
     { icon: Plane, label: "Flights", href: "/flights" },
     { icon: Car, label: "Car rental", href: "/carrender" },
     { icon: Ticket, label: "Attractions", href: "/attractions" },
-    { icon: CarTaxiFront, label: "Airport taxis", href: "/_airporttaxis" },
 ];
 
 export default function BookingNavbar() {
-    const [activeTab, setActiveTab] = useState("Flights");
+    const pathname = usePathname();
+    const activeTab = useMemo(() => {
+        const p = pathname.replace(/^\/(en|tr|ru)(\/|$)/, "/").replace(/\/$/, "") || "/";
+        const match = NAV_ITEMS.slice().reverse().find(({ href }) => href !== "/" && p.startsWith(href));
+        if (match) return match.label;
+        return p === "/" ? "Stays" : "";
+    }, [pathname]);
 
     return (
         <nav className="bg-[#003b95] w-full shadow-md">
@@ -55,7 +62,6 @@ export default function BookingNavbar() {
                         <Link
                             key={label}
                             href={href}
-                            onClick={() => setActiveTab(label)}
                             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[30px] text-sm font-medium transition-colors whitespace-nowrap ${activeTab === label
                                 ? "border border-white bg-white/10 text-white"
                                 : "text-white hover:bg-white/10"

@@ -1,14 +1,16 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import {
     Bed, Plane, Car, Ticket, CarTaxiFront,
     MapPin, Calendar, Users, Search,
-    X, ChevronDown, Plus, Minus, ChevronLeft, ChevronRight, BedDouble,
+    X, ChevronDown, Plus, Minus, ChevronLeft, ChevronRight, BedDouble, Heart,
 } from "lucide-react";
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useWishlist } from "@/context/WishlistContext";
 
 const NAV_ITEM_KEYS = [
     { icon: Bed, key: "stays", href: "/" },
@@ -16,7 +18,6 @@ const NAV_ITEM_KEYS = [
     { icon: Plane, key: "flights", href: "/flights" },
     { icon: Car, key: "carRental", href: "/carrender" },
     { icon: Ticket, key: "attractions", href: "/attractions" },
-    { icon: CarTaxiFront, key: "airportTaxis", href: "/_airporttaxis" },
 ] as const;
 
 const SUGGESTIONS = [
@@ -218,7 +219,14 @@ export default function Header() {
     const t = useTranslations("header");
     const tNav = useTranslations("nav");
     const tGuests = useTranslations("guests");
-    const [activeNav, setActiveNav] = useState<string>("stays");
+    const { count: wishlistCount } = useWishlist();
+    const pathname = usePathname();
+    const activeNav = useMemo(() => {
+        const p = pathname.replace(/^\/(en|tr|ru)/, "");
+        if (p === "" || p === "/") return "stays";
+        const match = NAV_ITEM_KEYS.slice().reverse().find(({ href }) => href !== "/" && p.startsWith(href));
+        return match ? match.key : "stays";
+    }, [pathname]);
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
     const [showGuests, setShowGuests] = useState<boolean>(false);
@@ -302,6 +310,14 @@ export default function Header() {
                         <div className="flex items-center gap-1 sm:gap-3 text-white text-sm font-medium">
                             <button className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
                             <LanguageSwitcher />
+                            <Link href="/wishlist" className="relative hover:bg-white/10 px-2 py-2 rounded transition-colors flex items-center justify-center">
+                                <Heart size={20} className="text-white" />
+                                {wishlistCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center leading-none">
+                                        {wishlistCount > 9 ? "9+" : wishlistCount}
+                                    </span>
+                                )}
+                            </Link>
                             <button className="hidden sm:flex hover:bg-white/10 px-3 py-3 rounded transition-colors items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
@@ -329,7 +345,6 @@ export default function Header() {
                             <Link
                                 key={key}
                                 href={href}
-                                onClick={() => setActiveNav(key)}
                                 className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 sm:py-3 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === key
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"

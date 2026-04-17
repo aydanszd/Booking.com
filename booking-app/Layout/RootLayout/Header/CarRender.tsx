@@ -1,9 +1,9 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-    Bed, Plane, Car, Ticket, CarTaxiFront,
+    Bed, BedDouble, Plane, Car, Ticket, CarTaxiFront,
     MapPin, Calendar, Search,
     X, ChevronDown, ChevronLeft, ChevronRight, Clock,
 } from "lucide-react";
@@ -201,19 +201,24 @@ function CalendarMonth({ year, month, checkIn, checkOut, hoveredDate, onDayClick
 const initRight = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 1);
 const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`);
 
+const NAV_ITEMS = [
+    { icon: Bed, labelKey: "stays" as const, href: "/" },
+    { icon: BedDouble, labelKey: "buildings" as const, href: "/filter" },
+    { icon: Plane, labelKey: "flights" as const, href: "/flights" },
+    { icon: Car, labelKey: "carRental" as const, href: "/carrender" },
+    { icon: Ticket, labelKey: "attractions" as const, href: "/attractions" },
+];
+
 export default function CarRentalHeader() {
     const tNav = useTranslations("nav");
     const tHeader = useTranslations("header");
     const router = useRouter();
-    const [activeNav, setActiveNav] = useState<string>("carRental");
-
-    const NAV_ITEMS = [
-        { icon: Bed, labelKey: "stays" as const, href: "/" },
-        { icon: Plane, labelKey: "flights" as const, href: "/flights" },
-        { icon: Car, labelKey: "carRental" as const, href: "/carrender" },
-        { icon: Ticket, labelKey: "attractions" as const, href: "/attractions" },
-        { icon: CarTaxiFront, labelKey: "airportTaxis" as const, href: "/_airporttaxis" },
-    ];
+    const pathname = usePathname();
+    const activeNav = useMemo(() => {
+        const p = pathname.replace(/^\/(en|tr|ru)(\/|$)/, "/").replace(/\/$/, "") || "/";
+        const match = NAV_ITEMS.slice().reverse().find(({ href }) => href !== "/" && p.startsWith(href));
+        return match ? match.labelKey : "stays";
+    }, [pathname]);
     const [showLocation, setShowLocation] = useState<boolean>(false);
     const [showDate, setShowDate] = useState<boolean>(false);
     const [pickupLocation, setPickupLocation] = useState<string>("");
@@ -315,8 +320,7 @@ export default function CarRentalHeader() {
                             <Link
                                 key={labelKey}
                                 href={href}
-                                onClick={() => setActiveNav(labelKey)}
-                                className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === labelKey
+                                    className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === labelKey
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
                                     }`}

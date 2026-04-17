@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo } from "react"; // useState used for lightboxOpen, lightboxIndex
 import { useTranslations } from "next-intl";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -14,6 +14,7 @@ import {
     MonitorSmartphone, CheckCircle2
 } from "lucide-react";
 import { IMG } from "@/api/building";
+import { useWishlist } from "@/context/WishlistContext";
 
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
@@ -30,7 +31,8 @@ const AMENITY_ICONS: Record<string, React.ReactNode> = {
 
 export default function HotelImage({ building }: { building: any }) {
     const t = useTranslations("hotel");
-    const [saved, setSaved] = useState(false);
+    const { toggle, has } = useWishlist();
+    const saved = has(building._id);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -106,7 +108,17 @@ export default function HotelImage({ building }: { building: any }) {
                 {/* Right: Actions + Rating */}
                 <div className="flex items-start gap-3 shrink-0">
                     <button
-                        onClick={() => setSaved(!saved)}
+                        onClick={() => toggle({
+                            id: building._id,
+                            type: "building",
+                            title: building.title,
+                            image: building.images?.[0] ? IMG(building.images[0]) : undefined,
+                            price: building.pricePerNight,
+                            priceLabel: "per night",
+                            location: [building.location.city, building.location.country].filter(Boolean).join(", "),
+                            rating: building.rating,
+                            href: `/hoteldetail/${building._id}`,
+                        })}
                         className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-semibold transition-colors ${
                             saved
                                 ? "border-red-400 text-red-500 bg-red-50"

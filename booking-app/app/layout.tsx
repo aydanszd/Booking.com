@@ -8,6 +8,7 @@ import GoogleLogger from "@/components/GoogleLogger";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getLocale } from "next-intl/server";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,11 +45,13 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <NextIntlClientProvider messages={messages}>
-          <GoogleLogger />
-          {!isAdmin && !isAuthPage && <HeaderSelector />}
-          {children}
-          {!isAdmin && !isAuthPage && <FooterSelector />}
-          <Toaster position="top-right" richColors />
+          <WishlistProvider>
+            <GoogleLogger />
+            {!isAdmin && !isAuthPage && <HeaderSelector />}
+            {children}
+            {!isAdmin && !isAuthPage && <FooterSelector />}
+            <Toaster position="top-right" richColors />
+          </WishlistProvider>
         </NextIntlClientProvider>
       </body>
     </html>

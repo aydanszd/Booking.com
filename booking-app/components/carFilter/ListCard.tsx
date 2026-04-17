@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Settings2, Gauge, MapPin, CheckCircle2, ChevronRight, Star, Car } from 'lucide-react'
+import { Users, Settings2, Gauge, MapPin, CheckCircle2, ChevronRight, Star, Car, Heart } from 'lucide-react'
 import type { CarType } from '@/types/car'
 import { scoreLabel } from './constants'
+import { useWishlist } from '@/context/WishlistContext'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ListCard({ car, onNavigate }: { car: CarType; onNavigate: (id: string) => void }) {
     const [imgError, setImgError] = useState(false)
     const imgSrc = car.images?.[0] ? (car.images[0].startsWith('http') ? car.images[0] : `${BASE}${car.images[0]}`) : null
+    const { toggle, has } = useWishlist()
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden min-h-[200px] sm:h-52">
@@ -24,6 +26,13 @@ export default function ListCard({ car, onNavigate }: { car: CarType; onNavigate
                 <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${car.isAvailable ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
                     {car.isAvailable ? 'Mövcud' : 'İcarədə'}
                 </span>
+                <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); toggle({ id: car._id!, type: 'car', title: car.title, image: imgSrc || undefined, price: car.pricePerDay, priceLabel: 'per day', location: car.location?.city, rating: car.rating, href: `/cardetail/${car._id}` }) }}
+                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow"
+                >
+                    <Heart size={15} fill={has(car._id!) ? '#cc0000' : 'none'} className={has(car._id!) ? 'text-red-500' : 'text-gray-600'} />
+                </button>
             </div>
 
             <div className="flex-1 p-4 flex flex-col sm:flex-row gap-3 justify-between min-w-0">

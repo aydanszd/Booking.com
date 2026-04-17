@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 interface Deal {
@@ -30,8 +31,6 @@ const VISIBLE = 4;
 
 function DealCard({ deal }: { deal: Deal }) {
     const t = useTranslations("stays");
-    const [saved, setSaved] = useState(false);
-
     const SCORE_LABELS: Record<string, string> = {
         "Good": t("scoreGood"),
         "Very Good": t("scoreVeryGood"),
@@ -52,18 +51,12 @@ function DealCard({ deal }: { deal: Deal }) {
 
     const dealTagColor = deal.dealTag === "Limited-time Deal" ? "bg-green-600" : "bg-green-500";
 
+    const city = deal.location.split(",")[0].trim();
+
     return (
-        <div className="shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg transition-shadow duration-300 cursor-pointer group flex flex-col">
+        <Link href={`/filter?city=${encodeURIComponent(city)}`} className="shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-lg transition-shadow duration-300 cursor-pointer group flex flex-col">
             <div className="relative h-52 shrink-0 overflow-hidden">
                 <img src={deal.image} alt={deal.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <button
-                    onClick={(e) => { e.stopPropagation(); setSaved((v) => !v); }}
-                    className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow hover:scale-110 transition-transform"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={saved ? "#e00b27" : "none"} stroke={saved ? "#e00b27" : "#6b7280"} strokeWidth={2} className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                </button>
             </div>
             <div className="p-3 flex flex-col flex-1">
                 <div className="h-5 mb-1.5 flex items-center">
@@ -105,7 +98,7 @@ function DealCard({ deal }: { deal: Deal }) {
                     <p className="text-base font-bold text-gray-900">US${deal.discountedPrice}</p>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 
