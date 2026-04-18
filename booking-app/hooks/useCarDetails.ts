@@ -6,7 +6,7 @@ import axios from 'axios'
 import { toast } from 'sonner'
 import type { CarDetailType } from '@/components/carDetail/types'
 
-const API = 'http://localhost:5000/api/cars'
+const API = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/cars`
 
 export function useCarDetails(t: (key: string, opts?: any) => string) {
     const router = useRouter()

@@ -6,12 +6,14 @@ import { Building } from "@/types/buildingFilter";
 import { capitalize, scoreLabel } from "@/lib/buildings/utils";
 import { imgUrl } from "@/lib/buildings/api";
 import { ScoreBadge } from "./ScoreBadge";
+import { useCurrency } from "@/context/CurrencyContext";
 interface Props {
     building: Building;
 }
 
 export function ListCard({ building }: Props) {
     const searchParams = useSearchParams();
+    const { format } = useCurrency();
 
     const imageUrl = building.images?.[0]
         ? imgUrl(building.images[0])
@@ -129,7 +131,7 @@ export function ListCard({ building }: Props) {
                                 <p className="text-xs text-gray-400">min {building.minNights} nights</p>
                             )}
                             <p className="text-xl font-bold text-gray-900 flex items-center gap-1">
-                                ${building.pricePerNight}
+                                {format(building.pricePerNight)}
                                 <Info size={13} className="text-gray-400" />
                             </p>
                             <p className="text-xs text-gray-500">per night</p>

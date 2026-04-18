@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getLocale } from "next-intl/server";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <NextIntlClientProvider messages={messages}>
+          <CurrencyProvider>
           <WishlistProvider>
             <GoogleLogger />
             {!isAdmin && !isAuthPage && <HeaderSelector />}
@@ -52,6 +54,7 @@ export default async function RootLayout({
             {!isAdmin && !isAuthPage && <FooterSelector />}
             <Toaster position="top-right" richColors />
           </WishlistProvider>
+          </CurrencyProvider>
         </NextIntlClientProvider>
       </body>
     </html>

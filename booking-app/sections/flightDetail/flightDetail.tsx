@@ -140,7 +140,7 @@ function LegRow({ flight }: { flight: FlightType }) {
                     {formatTime(flight.departureTime)} – {formatTime(flight.arrivalTime)}
                 </span>
                 <span className="hidden sm:inline text-xs text-gray-400 ml-2">
-                    {flight.origin.code} — {flight.destination.code}
+                    {flight.origin?.code} — {flight.destination?.code}
                 </span>
             </div>
             <div className="flex items-center gap-2 shrink-0 text-xs text-gray-500">
@@ -209,8 +209,8 @@ function LegDetail({ flight, label }: { flight: FlightType; label?: string }) {
                         <div>
                             <p className="text-xl font-bold text-gray-900 tabular-nums leading-tight">{formatTime(flight.departureTime)}</p>
                             <p className="text-sm text-gray-600 mt-0.5">
-                                {flight.origin.airport || flight.origin.city}{" "}
-                                <span className="text-gray-400">({flight.origin.code})</span>
+                                {flight.origin?.airport || flight.origin?.city}{" "}
+                                <span className="text-gray-400">({flight.origin?.code})</span>
                             </p>
                         </div>
                         {flight.stops?.map((s, i) => {
@@ -228,8 +228,8 @@ function LegDetail({ flight, label }: { flight: FlightType; label?: string }) {
                         <div>
                             <p className="text-xl font-bold text-gray-900 tabular-nums leading-tight">{formatTime(flight.arrivalTime)}</p>
                             <p className="text-sm text-gray-600 mt-0.5">
-                                {flight.destination.airport || flight.destination.city}{" "}
-                                <span className="text-gray-400">({flight.destination.code})</span>
+                                {flight.destination?.airport || flight.destination?.city}{" "}
+                                <span className="text-gray-400">({flight.destination?.code})</span>
                             </p>
                         </div>
                     </div>
@@ -707,8 +707,8 @@ export default function FlightResults() {
 
             if (allAirlines.length === 0 && data.flights.length > 0) {
                 setAllAirlines([...new Set(data.flights.map((f) => f.airline))].filter(Boolean));
-                setAllOrigins([...new Set(data.flights.map((f) => f.origin.code))].filter(Boolean));
-                setAllDests([...new Set(data.flights.map((f) => f.destination.code))].filter(Boolean));
+                setAllOrigins([...new Set(data.flights.map((f) => f.origin?.code))].filter(Boolean));
+                setAllDests([...new Set(data.flights.map((f) => f.destination?.code))].filter(Boolean));
             }
         } catch (e: any) {
             setError(e.message || t("searchingError"));

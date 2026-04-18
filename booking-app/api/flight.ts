@@ -1,6 +1,6 @@
 import { FlightType } from "@/types/flight";
 
-const BASE = "http://localhost:5000";
+const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API = `${BASE}/api/flights`;
 
 export type FetchFlightsParams = {

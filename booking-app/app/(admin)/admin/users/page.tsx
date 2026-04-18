@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import UserStatsBar from '@/components/adminUsers/UserStatsBar'
 import UserTable from '@/components/adminUsers/UserTable'
 import type { AdminUser } from '@/types/user'
+import { useAdminNotifications } from '@/context/AdminNotificationsContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -15,6 +16,8 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [updating, setUpdating] = useState<string | null>(null)
+    const { markSeen } = useAdminNotifications();
+    useEffect(() => { markSeen('users') }, []);
 
     const fetchUsers = async () => {
         try {

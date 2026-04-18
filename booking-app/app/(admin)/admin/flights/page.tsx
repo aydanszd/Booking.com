@@ -39,7 +39,7 @@ export default function FlightsPage() {
     useEffect(() => { fetchFlights() }, [page, filterCabin])
 
     const filtered = flights.filter(f =>
-        `${f.airline} ${f.flightNumber} ${f.origin.city} ${f.destination.city} ${f.origin.code} ${f.destination.code}`
+        `${f.airline} ${f.flightNumber} ${f.origin?.city} ${f.destination?.city} ${f.origin?.code} ${f.destination?.code}`
             .toLowerCase()
             .includes(search.toLowerCase())
     )

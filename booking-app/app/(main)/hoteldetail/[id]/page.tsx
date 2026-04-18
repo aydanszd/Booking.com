@@ -34,8 +34,8 @@ export default function HotelDetail() {
     if (!building) return <div className="p-10 text-center">{t("notFound")}</div>;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-4 min-h-screen">
-            <div className="bg-white px-6 py-2 mb-4 mt-15">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 min-h-screen">
+            <div className="bg-white px-3 sm:px-6 py-2 mb-4 mt-15">
                 <HotelImage building={building} />
             </div>
             <Availability building={building} />

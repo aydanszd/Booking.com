@@ -96,90 +96,107 @@ export default function RoomAvailability({ building }: { building: any }) {
                     </div>
                 </div>
 
-                {/* Room table */}
-                <div className="border border-gray-200 rounded-md overflow-hidden">
-                    <table className="w-full text-left text-sm">
-                        <thead>
-                            <tr className="bg-[#003580] text-white text-xs uppercase tracking-wide">
-                                <th className="px-4 py-3 font-bold">{t("roomType")}</th>
-                                <th className="px-4 py-3 font-bold text-center">{t("numGuests")}</th>
-                                <th className="px-4 py-3 font-bold">{t("pricePerNight")}</th>
-                                <th className="px-4 py-3 font-bold">{t("choices")}</th>
-                                <th className="px-4 py-3 font-bold">{t("selectRooms")}</th>
-                                <th className="px-4 py-3 font-bold">{t("reserve")}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[{ name: building.title + " " + t("standard"), guests: building.maxGuests || 2, price: building.pricePerNight }]
-                                .map((row, i) => (
-                                    <tr key={i} className="hover:bg-gray-50 transition-colors border-t border-gray-100">
-                                        <td className="px-4 py-4">
-                                            <p className="text-[#006ce4] font-bold hover:underline cursor-pointer mb-1.5">{row.name}</p>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">
-                                                    <Maximize2 size={9} /> 25m²
-                                                </span>
-                                                <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">
-                                                    <Wind size={9} /> AC
-                                                </span>
-                                                {building.amenities?.slice(0, 2).map((a: string) => (
-                                                    <span key={a} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{a}</span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex justify-center gap-0.5 flex-wrap">
-                                                {Array.from({ length: Math.min(row.guests, 4) }).map((_, i) => (
-                                                    <Users key={i} size={13} className="text-gray-500" />
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <p className="text-lg font-bold text-gray-900">${row.price}</p>
-                                            <p className="text-xs text-gray-400">{t("pricePerNight").toLowerCase()}</p>
-                                            {checkIn && checkOut && (
-                                                <p className="text-xs font-bold text-[#008009] mt-0.5">
-                                                    ${building.pricePerNight * qty * Math.max(1,
-                                                        Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                                                    )} total
+                {/* Room — Mobile card */}
+                {(() => {
+                    const row = { name: building.title + " " + t("standard"), guests: building.maxGuests || 2, price: building.pricePerNight };
+                    const nights = checkIn && checkOut ? Math.max(1, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))) : null;
+                    return (
+                        <>
+                            {/* Mobile card */}
+                            <div className="sm:hidden border border-gray-200 rounded-md p-4 space-y-3">
+                                <p className="text-[#006ce4] font-bold">{row.name}</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1"><Maximize2 size={9} /> 25m²</span>
+                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1"><Wind size={9} /> AC</span>
+                                    {building.amenities?.slice(0, 2).map((a: string) => (
+                                        <span key={a} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{a}</span>
+                                    ))}
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-lg font-bold text-gray-900">${row.price}</p>
+                                        <p className="text-xs text-gray-400">{t("pricePerNight").toLowerCase()}</p>
+                                        {nights && <p className="text-xs font-bold text-[#008009] mt-0.5">${building.pricePerNight * qty * nights} total</p>}
+                                    </div>
+                                    <div className="flex items-center gap-1 text-gray-500 text-xs">
+                                        {Array.from({ length: Math.min(row.guests, 4) }).map((_, i) => <Users key={i} size={13} />)}
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-[#008009] text-xs font-semibold"><CheckCircle2 size={13} /> {t("freeCancellation")}</div>
+                                    <div className="flex items-center gap-1.5 text-gray-500 text-xs"><CreditCard size={13} /> {t("noPrepayment")}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <select value={qty} onChange={e => setQty(Number(e.target.value))} className="border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#006ce4]">
+                                        {[1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
+                                    </select>
+                                    <button onClick={handleBooking} className="flex-1 bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-md text-sm transition-colors">
+                                        {t("illReserve")}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Desktop table */}
+                            <div className="hidden sm:block border border-gray-200 rounded-md overflow-hidden">
+                                <table className="w-full text-left text-sm">
+                                    <thead>
+                                        <tr className="bg-[#003580] text-white text-xs uppercase tracking-wide">
+                                            <th className="px-4 py-3 font-bold">{t("roomType")}</th>
+                                            <th className="px-4 py-3 font-bold text-center">{t("numGuests")}</th>
+                                            <th className="px-4 py-3 font-bold">{t("pricePerNight")}</th>
+                                            <th className="px-4 py-3 font-bold">{t("choices")}</th>
+                                            <th className="px-4 py-3 font-bold">{t("selectRooms")}</th>
+                                            <th className="px-4 py-3 font-bold">{t("reserve")}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="hover:bg-gray-50 transition-colors border-t border-gray-100">
+                                            <td className="px-4 py-4">
+                                                <p className="text-[#006ce4] font-bold hover:underline cursor-pointer mb-1.5">{row.name}</p>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1"><Maximize2 size={9} /> 25m²</span>
+                                                    <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1"><Wind size={9} /> AC</span>
+                                                    {building.amenities?.slice(0, 2).map((a: string) => (
+                                                        <span key={a} className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{a}</span>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex justify-center gap-0.5 flex-wrap">
+                                                    {Array.from({ length: Math.min(row.guests, 4) }).map((_, i) => <Users key={i} size={13} className="text-gray-500" />)}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <p className="text-lg font-bold text-gray-900">${row.price}</p>
+                                                <p className="text-xs text-gray-400">{t("pricePerNight").toLowerCase()}</p>
+                                                {nights && <p className="text-xs font-bold text-[#008009] mt-0.5">${building.pricePerNight * qty * nights} total</p>}
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-1.5 text-[#008009] text-xs font-semibold"><CheckCircle2 size={13} /> {t("freeCancellation")}</div>
+                                                    <div className="flex items-center gap-1.5 text-gray-500 text-xs"><CreditCard size={13} /> {t("noPrepayment")}</div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <select value={qty} onChange={e => setQty(Number(e.target.value))} className="border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#006ce4]">
+                                                    {[1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
+                                                </select>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <button onClick={handleBooking} className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-md text-sm transition-colors">
+                                                    {t("illReserve")}
+                                                </button>
+                                                <p className="text-[9px] text-gray-400 mt-1 text-center flex items-center justify-center gap-1">
+                                                    <AlertCircle size={9} /> {t("confirmImmediate")}
                                                 </p>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-1.5 text-[#008009] text-xs font-semibold">
-                                                    <CheckCircle2 size={13} /> {t("freeCancellation")}
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                                                    <CreditCard size={13} /> {t("noPrepayment")}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <select
-                                                value={qty}
-                                                onChange={e => setQty(Number(e.target.value))}
-                                                className="border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#006ce4]"
-                                            >
-                                                {[1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <button
-                                                onClick={handleBooking}
-                                                className="w-full bg-[#006ce4] hover:bg-[#0055b3] text-white font-bold py-2.5 rounded-md text-sm transition-colors"
-                                            >
-                                                {t("illReserve")}
-                                            </button>
-                                            <p className="text-[9px] text-gray-400 mt-1 text-center flex items-center justify-center gap-1">
-                                                <AlertCircle size={9} /> {t("confirmImmediate")}
-                                            </p>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    );
+                })()}
             </div>
         </div>
     );

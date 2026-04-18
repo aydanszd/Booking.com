@@ -37,7 +37,14 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://192.168.1.72:3000'],
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://192.168.1.72:3000',
+        'http://192.168.100.41:3000',
+        'https://booking-app-blush-alpha.vercel.app',
+        /\.vercel\.app$/,
+    ],
     credentials: true,
 }));
 

@@ -4,6 +4,7 @@ import { X, Loader2, MapPin, Shield, ThumbsUp, Info } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import DateRangePicker from '@/components/DateRangePicker'
 import type { CarDetailType } from './types'
+import { useCurrency } from '@/context/CurrencyContext'
 
 export default function MobileBookingSheet({
     open, onClose, car,
@@ -22,6 +23,7 @@ export default function MobileBookingSheet({
     bookingLoading: boolean
 }) {
     const t = useTranslations('cars')
+    const { format } = useCurrency()
     const days = (pickUp && dropOff)
         ? Math.max(1, Math.ceil((new Date(dropOff).getTime() - new Date(pickUp).getTime()) / 86400000))
         : 0
@@ -46,7 +48,7 @@ export default function MobileBookingSheet({
                                 {days > 0 ? t('daysTotal', { count: days }) : t('selectDates')}
                             </p>
                             <p className="text-white text-3xl font-bold leading-none" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                                {days > 0 ? `US$${car.pricePerDay * days}` : `US$${car.pricePerDay}`}
+                                {days > 0 ? format(car.pricePerDay * days) : format(car.pricePerDay)}
                             </p>
                             <p className="text-white/40 text-xs mt-1">
                                 {days > 0 ? `${t('taxesIncluded')}${car.winterFee ? ` · ${t('winterFeeInPrice')}` : ''}` : t('dailyPrice')}
@@ -90,8 +92,8 @@ export default function MobileBookingSheet({
                         {days > 0 && (
                             <div className="space-y-1.5 text-xs">
                                 <div className="flex justify-between text-gray-500">
-                                    <span>US${car.pricePerDay} × {t('days', { count: days })}</span>
-                                    <span>US${car.pricePerDay * days}</span>
+                                    <span>{format(car.pricePerDay)} × {t('days', { count: days })}</span>
+                                    <span>{format(car.pricePerDay * days)}</span>
                                 </div>
                                 {car.winterFee && (
                                     <div className="flex justify-between text-gray-500">
@@ -105,7 +107,7 @@ export default function MobileBookingSheet({
                                 </div>
                                 <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold text-gray-800 text-sm">
                                     <span>{t('total')}</span>
-                                    <span>US${car.pricePerDay * days}</span>
+                                    <span>{format(car.pricePerDay * days)}</span>
                                 </div>
                             </div>
                         )}

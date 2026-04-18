@@ -1,7 +1,10 @@
+'use client'
+
 import { Users, Settings2, Gauge, MapPin, Fuel, Wind, Car } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import SpecBadge from './SpecBadge'
 import type { CarDetailType } from './types'
+import { useCurrency } from '@/context/CurrencyContext'
 
 interface Props {
     car: CarDetailType
@@ -10,6 +13,7 @@ interface Props {
 
 export default function CarHeaderSection({ car, scoreLabel }: Props) {
     const t = useTranslations('cars')
+    const { format } = useCurrency()
 
     return (
         <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.07)] border border-gray-100">
@@ -39,7 +43,7 @@ export default function CarHeaderSection({ car, scoreLabel }: Props) {
                 <div className="text-right shrink-0">
                     <p className="text-xs text-gray-400">{t('dailyPrice')}</p>
                     <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-none mt-0.5" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                        US${car.pricePerDay}
+                        {format(car.pricePerDay)}
                     </p>
                     {car.rating !== undefined && (
                         <div className="flex items-center justify-end gap-1.5 mt-1">

@@ -282,7 +282,7 @@ export default function FlightsDates() {
                                 params.set("adults", String(adults));
                                 params.set("children", String(children));
                                 if (selected[0]) params.set("date", selected[0].toISOString().split("T")[0]);
-                                router.push(`/flightdetail?${params.toString()}`);
+                                router.push(`/flightsdetail?${params.toString()}`);
                             }}
                             className="bg-[#0071c2] hover:bg-[#005fa3] text-white text-sm rounded-b-xl sm:rounded-[20px] font-bold px-6 py-3 transition-colors shrink-0 w-full sm:w-auto"
                         >

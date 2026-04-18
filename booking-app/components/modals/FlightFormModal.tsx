@@ -42,19 +42,22 @@ function Field({ label, error, colSpan2, children }: FieldProps) {
     );
 }
 
-// ─── Logo Upload Field (birinci koddan) ────────────────────────────────────
+// ─── Logo Upload Field ────────────────────────────────────────────────────
 function LogoUploadField({
     preview,
     onChange,
+    onUrlChange,
 }: {
     preview: string;
     onChange: (file: File | null) => void;
+    onUrlChange: (url: string) => void;
 }) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [dragging, setDragging] = useState(false);
     const [localPreview, setLocalPreview] = useState(preview);
+    const [tab, setTab] = useState<"file" | "url">("file");
+    const [urlInput, setUrlInput] = useState("");
 
-    // Modal fərqli uçuşla yenidən açıldıqda sinxronlaşdır
     useEffect(() => { setLocalPreview(preview); }, [preview]);
 
     const handleFile = (file: File) => {
@@ -64,75 +67,122 @@ function LogoUploadField({
         }
         const url = URL.createObjectURL(file);
         setLocalPreview(url);
+        setUrlInput("");
         onChange(file);
     };
 
     const clear = (e: React.MouseEvent) => {
         e.stopPropagation();
         setLocalPreview("");
+        setUrlInput("");
         onChange(null);
+        onUrlChange("");
         if (inputRef.current) inputRef.current.value = "";
+    };
+
+    const applyUrl = () => {
+        const trimmed = urlInput.trim();
+        if (!trimmed) return;
+        setLocalPreview(trimmed);
+        onChange(null);
+        onUrlChange(trimmed);
     };
 
     return (
         <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-500">Aviaşirkət Loqosu</label>
-            <div
-                onClick={() => !localPreview && inputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                    e.preventDefault();
-                    setDragging(false);
-                    const file = e.dataTransfer.files[0];
-                    if (file) handleFile(file);
-                }}
-                className={`
-                    relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed h-24
-                    transition-all cursor-pointer select-none
-                    ${dragging ? "border-[#006ce4] bg-blue-50" : "border-gray-200 hover:border-[#006ce4] bg-gray-50"}
-                `}
-            >
-                {localPreview ? (
-                    <>
-                        <img
-                            src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
-                            alt="logo preview"
-                            className="h-16 w-auto max-w-35 object-contain rounded-lg"
+
+            {/* Tab switcher */}
+            <div className="flex gap-1 mb-2">
+                {(["file", "url"] as const).map(t => (
+                    <button
+                        key={t}
+                        type="button"
+                        onClick={() => setTab(t)}
+                        className={`text-[11px] px-3 py-1 rounded-lg font-medium transition-colors ${tab === t ? "bg-[#006ce4] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}
+                    >
+                        {t === "file" ? "Fayl yüklə" : "URL daxil et"}
+                    </button>
+                ))}
+            </div>
+
+            {tab === "url" ? (
+                <div className="space-y-2">
+                    <div className="flex gap-2">
+                        <input
+                            type="url"
+                            value={urlInput}
+                            onChange={(e) => setUrlInput(e.target.value)}
+                            placeholder="https://example.com/logo.png"
+                            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#006ce4] transition-colors"
+                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyUrl())}
                         />
                         <button
                             type="button"
-                            onClick={clear}
-                            className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 hover:bg-red-200 transition-colors"
+                            onClick={applyUrl}
+                            className="px-3 py-2 bg-[#006ce4] text-white rounded-xl text-xs font-medium hover:bg-[#0057b8] transition-colors"
                         >
-                            <X size={10} />
+                            Tətbiq et
                         </button>
-                        <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                            className="absolute bottom-1.5 right-1.5 text-[10px] text-gray-400 hover:text-[#006ce4] transition-colors"
-                        >
-                            Dəyiş
-                        </button>
-                    </>
-                ) : (
-                    <div className="flex flex-col items-center gap-1 text-gray-400">
-                        <ImagePlus size={22} />
-                        <span className="text-[11px]">Şəkil yüklə və ya buraya sürükle</span>
-                        <span className="text-[10px] text-gray-300">PNG, JPG, WEBP (maks 5MB)</span>
                     </div>
-                )}
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
+                    {localPreview && (
+                        <div className="relative inline-flex">
+                            <img
+                                src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
+                                alt="logo preview"
+                                className="h-14 w-auto max-w-40 object-contain rounded-lg border border-gray-100"
+                            />
+                            <button type="button" onClick={clear}
+                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 hover:bg-red-200 transition-colors">
+                                <X size={10} />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div
+                    onClick={() => !localPreview && inputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                    onDragLeave={() => setDragging(false)}
+                    onDrop={(e) => {
+                        e.preventDefault();
+                        setDragging(false);
+                        const file = e.dataTransfer.files[0];
                         if (file) handleFile(file);
                     }}
-                />
-            </div>
+                    className={`
+                        relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed h-24
+                        transition-all cursor-pointer select-none
+                        ${dragging ? "border-[#006ce4] bg-blue-50" : "border-gray-200 hover:border-[#006ce4] bg-gray-50"}
+                    `}
+                >
+                    {localPreview ? (
+                        <>
+                            <img
+                                src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
+                                alt="logo preview"
+                                className="h-16 w-auto max-w-35 object-contain rounded-lg"
+                            />
+                            <button type="button" onClick={clear}
+                                className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 hover:bg-red-200 transition-colors">
+                                <X size={10} />
+                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+                                className="absolute bottom-1.5 right-1.5 text-[10px] text-gray-400 hover:text-[#006ce4] transition-colors">
+                                Dəyiş
+                            </button>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center gap-1 text-gray-400">
+                            <ImagePlus size={22} />
+                            <span className="text-[11px]">Şəkil yüklə və ya buraya sürükle</span>
+                            <span className="text-[10px] text-gray-300">PNG, JPG, WEBP (maks 5MB)</span>
+                        </div>
+                    )}
+                    <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }} />
+                </div>
+            )}
         </div>
     );
 }
@@ -308,7 +358,12 @@ export default function FlightFormModal({ mode, flight, onClose, onSuccess }: Fl
                                                 setLogoPreview("");
                                             } else {
                                                 setLogoFile(file);
+                                                setLogoPreview("");
                                             }
+                                        }}
+                                        onUrlChange={(url) => {
+                                            setLogoPreview(url);
+                                            setLogoFile(null);
                                         }}
                                     />
                                 </div>

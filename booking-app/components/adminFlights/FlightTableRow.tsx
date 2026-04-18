@@ -29,12 +29,12 @@ export default function FlightTableRow({
             {/* Route */}
             <td className="px-4 py-3">
                 <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                    <span className="font-semibold">{flight.origin.code}</span>
+                    <span className="font-semibold">{flight.origin?.code ?? '—'}</span>
                     <Plane size={10} className="text-gray-400" />
-                    <span className="font-semibold">{flight.destination.code}</span>
+                    <span className="font-semibold">{flight.destination?.code ?? '—'}</span>
                 </div>
                 <p className="text-[11px] text-gray-400 mt-0.5">
-                    {flight.origin.city} → {flight.destination.city}
+                    {flight.origin?.city ?? '—'} → {flight.destination?.city ?? '—'}
                 </p>
             </td>
 

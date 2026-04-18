@@ -10,8 +10,11 @@ import type { SortKey } from '@/utils/paymentUtils'
 import PaymentStatsBar from '@/components/adminPayments/PaymentStatsBar'
 import PaymentToolbar from '@/components/adminPayments/PaymentToolbar'
 import PaymentTable from '@/components/adminPayments/PaymentTable'
+import { useAdminNotifications } from '@/context/AdminNotificationsContext'
 
 export default function AdminPayments() {
+    const { markSeen } = useAdminNotifications();
+    useEffect(() => { markSeen('payments') }, []);
     const [bookings, setBookings] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')

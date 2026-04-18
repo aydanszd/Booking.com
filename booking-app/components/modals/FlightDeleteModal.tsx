@@ -46,7 +46,7 @@ export default function FlightDeleteModal({ flight, onClose, onSuccess }: Flight
                 <h2 className="font-bold text-gray-800 text-base mb-1">Uçuşu Sil</h2>
                 <p className="text-sm text-gray-400 mb-6">
                     <span className="text-gray-700 font-medium">
-                        {flight.airline} {flight.flightNumber} — {flight.origin.code} → {flight.destination.code}
+                        {flight.airline} {flight.flightNumber} — {flight.origin?.code} → {flight.destination?.code}
                     </span>{" "}
                     silinəcək. Bu əməliyyat geri alına bilməz.
                 </p>

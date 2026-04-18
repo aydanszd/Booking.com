@@ -3,11 +3,13 @@ import { MapPin, ChevronRight, Leaf, Star } from "lucide-react";
 import { Building } from "@/types/buildingFilter";
 import { capitalize, scoreLabel } from "@/lib/buildings/utils";
 import { imgUrl } from "@/lib/buildings/api";
+import { useCurrency } from "@/context/CurrencyContext";
 interface Props {
     building: Building;
 }
 
 export function GridCard({ building }: Props) {
+    const { format } = useCurrency();
     const imageUrl = building.images?.[0]
         ? imgUrl(building.images[0])
         : "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&q=80";
@@ -94,7 +96,7 @@ export function GridCard({ building }: Props) {
                         {building.minNights && building.minNights > 1 && (
                             <p className="text-[10px] text-gray-400">min {building.minNights} nights</p>
                         )}
-                        <p className="text-base font-bold text-gray-900 leading-none">${building.pricePerNight}</p>
+                        <p className="text-base font-bold text-gray-900 leading-none">{format(building.pricePerNight)}</p>
                         <p className="text-[10px] text-gray-400 mt-0.5">per night</p>
                     </div>
                     <button

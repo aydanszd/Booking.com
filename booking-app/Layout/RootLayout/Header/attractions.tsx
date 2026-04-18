@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-    Bed, BedDouble, Plane, Car, Ticket, CarTaxiFront,
+    Bed, BedDouble, Plane, Car, Ticket,
     MapPin, Calendar, Search,
     X, ChevronLeft, ChevronRight, ChevronDown,
 } from "lucide-react";
@@ -282,35 +282,37 @@ export default function AttractionsHeader() {
 
     return (
         <div className="font-sans relative z-10">
-            <div className="bg-[#003b94] px-6 pt-3">
+            <div className="bg-[#003b94] px-3 sm:px-6 pt-3">
                 <div className="max-w-6xl mx-auto">
-                    <div className="flex items-center justify-between mb-5">
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between mb-3 sm:mb-5">
                         <Link href="/">
                             <img
                                 src="https://miro.medium.com/1*vKT1xQFxhP2hJuRB8_sn1g.png"
                                 alt="Booking.com"
-                                className="h-16 object-contain cursor-pointer"
+                                className="h-10 sm:h-16 object-contain cursor-pointer"
                             />
                         </Link>
-                        <div className="flex items-center gap-3 text-white text-sm font-medium">
+                        <div className="flex items-center gap-1 sm:gap-3 text-white text-sm font-medium">
                             <LanguageSwitcher />
-                            <Link href="/admin/dashboard" className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] block">{tHeader("listProperty")}</Link>
-                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-3 py-1.75 cursor-pointer transition-colors block leading-none">{tHeader("register")}</Link>
-                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none">{tHeader("signIn")}</Link>
+                            <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{tHeader("listProperty")}</Link>
+                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer transition-colors block leading-none text-xs sm:text-sm">{tHeader("register")}</Link>
+                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none text-xs sm:text-sm">{tHeader("signIn")}</Link>
                         </div>
                     </div>
 
-                    <div className="flex gap-1 -mt-4.5">
+                    {/* Nav */}
+                    <div className="flex gap-1 -mt-2 sm:-mt-4.5 overflow-x-auto scrollbar-hide pb-1">
                         {NAV_ITEMS.map(({ icon: Icon, labelKey, href }) => (
                             <Link
                                 key={labelKey}
                                 href={href}
-                                    className={`flex items-center gap-1.5 px-4 py-3 rounded-[30px] text-sm font-medium transition-colors ${activeNav === labelKey
+                                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-4 py-2 sm:py-3 rounded-[30px] text-xs sm:text-sm font-medium transition-colors whitespace-nowrap shrink-0 ${activeNav === labelKey
                                     ? "border border-white bg-white/10 text-white"
                                     : "text-white hover:bg-white/10"
-                                    }`}
+                                }`}
                             >
-                                <Icon size={16} />
+                                <Icon size={14} />
                                 {tNav(labelKey)}
                             </Link>
                         ))}
@@ -318,17 +320,18 @@ export default function AttractionsHeader() {
                 </div>
             </div>
 
-            <div className="bg-[#003b94] px-6 pb-10">
-                <div className="max-w-6xl mx-auto translate-y-15">
-                    <h1 className="text-white text-5xl font-bold mb-2">
+            <div className="bg-[#003b94] px-3 sm:px-6 pb-6 sm:pb-10">
+                <div className="max-w-6xl mx-auto sm:translate-y-15">
+                    <h1 className="text-white text-2xl sm:text-5xl font-bold mb-1 sm:mb-2">
                         {tHeader("attractionsTitle")}
                     </h1>
-                    <p className="text-white/90 text-2xl mb-7">
+                    <p className="text-white/90 text-sm sm:text-2xl mb-4 sm:mb-7">
                         {tHeader("attractionsSubtitle")}
                     </p>
 
-                    <div className="flex flex-wrap gap-1 bg-[#febb02] p-1 rounded-lg">
-                        <div ref={locationRef} className="relative flex-1 min-w-50">
+                    <div className="flex flex-col sm:flex-row gap-1 bg-[#febb02] p-1 rounded-lg">
+                        {/* Location */}
+                        <div ref={locationRef} className="relative w-full sm:flex-1">
                             <div
                                 onClick={() => { setShowLocation(v => !v); setShowDate(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
@@ -342,11 +345,8 @@ export default function AttractionsHeader() {
                                     onClick={(e) => e.stopPropagation()}
                                 />
                                 {destination && (
-                                    <X
-                                        size={15}
-                                        className="text-gray-400 cursor-pointer hover:text-gray-600 shrink-0"
-                                        onClick={(e) => { e.stopPropagation(); setDestination(""); }}
-                                    />
+                                    <X size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 shrink-0"
+                                        onClick={(e) => { e.stopPropagation(); setDestination(""); }} />
                                 )}
                             </div>
                             {showLocation && (
@@ -354,73 +354,58 @@ export default function AttractionsHeader() {
                                     {SUGGESTIONS
                                         .filter(s => s.toLowerCase().includes(destination.toLowerCase()))
                                         .map(s => (
-                                            <div
-                                                key={s}
-                                                onClick={() => { setDestination(s); setShowLocation(false); }}
-                                                className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors"
-                                            >
-                                                <MapPin size={14} className="text-gray-400" />
-                                                {s}
+                                            <div key={s} onClick={() => { setDestination(s); setShowLocation(false); }}
+                                                className="flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors">
+                                                <MapPin size={14} className="text-gray-400" />{s}
                                             </div>
-                                        ))
-                                    }
+                                        ))}
                                 </div>
                             )}
                         </div>
 
-                        <div ref={dateRef} className="relative flex-1 min-w-50">
+                        {/* Date */}
+                        <div ref={dateRef} className="relative w-full sm:flex-1">
                             <div
                                 onClick={() => { setShowDate(v => !v); setShowLocation(false); }}
                                 className="flex items-center gap-2.5 bg-white rounded h-13 px-3.5 cursor-pointer"
                             >
                                 <Calendar size={22} className="text-gray-500 shrink-0" />
-                                <span className="text-sm text-gray-800 whitespace-nowrap">{dateLabel}</span>
+                                <span className="text-sm text-gray-800 whitespace-nowrap truncate">{dateLabel}</span>
                             </div>
                             {showDate && (
-                                <div className="absolute top-[calc(100%+4px)] left-0 z-9999 bg-white rounded-xl shadow-2xl min-w-150">
-                                    <div className="flex items-center gap-4 px-5 pt-5 pb-3">
-                                        <button
-                                            onClick={prevMonth}
-                                            disabled={isAtStart}
-                                            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
+                                <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-white rounded-xl shadow-2xl w-[calc(100vw-1.5rem)] sm:min-w-150 sm:w-auto overflow-hidden">
+                                    <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-5 pt-4 sm:pt-5 pb-3">
+                                        <button onClick={prevMonth} disabled={isAtStart}
+                                            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0">
                                             <ChevronLeft size={18} className="text-gray-600" />
                                         </button>
-                                        <div
-                                            className="flex gap-8 flex-1 justify-center"
-                                            onMouseLeave={() => setHoveredDate(null)}
-                                        >
+                                        <div className="flex gap-4 sm:gap-8 flex-1 justify-center overflow-hidden" onMouseLeave={() => setHoveredDate(null)}>
                                             <CalendarMonth
                                                 year={leftYear} month={leftMonth}
                                                 checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
                                                 onDayClick={handleDayClick} onDayHover={setHoveredDate}
                                                 onMonthChange={setLeftMonth} onYearChange={setLeftYear}
                                             />
-                                            <CalendarMonth
-                                                year={rightYear} month={rightMonth}
-                                                checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
-                                                onDayClick={handleDayClick} onDayHover={setHoveredDate}
-                                                onMonthChange={setRightMonth} onYearChange={setRightYear}
-                                            />
+                                            <div className="hidden sm:block">
+                                                <CalendarMonth
+                                                    year={rightYear} month={rightMonth}
+                                                    checkIn={checkIn} checkOut={checkOut} hoveredDate={hoveredDate}
+                                                    onDayClick={handleDayClick} onDayHover={setHoveredDate}
+                                                    onMonthChange={setRightMonth} onYearChange={setRightYear}
+                                                />
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={nextMonth}
-                                            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-                                        >
+                                        <button onClick={nextMonth} className="p-1.5 rounded-full hover:bg-gray-100 transition-colors shrink-0">
                                             <ChevronRight size={18} className="text-gray-600" />
                                         </button>
                                     </div>
-                                    <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-100">
-                                        <button
-                                            onClick={() => { setCheckIn(null); setCheckOut(null); }}
-                                            className="text-sm text-[#0071c2] underline hover:no-underline"
-                                        >
+                                    <div className="flex items-center justify-end gap-3 px-4 py-3 border-t border-gray-100">
+                                        <button onClick={() => { setCheckIn(null); setCheckOut(null); }}
+                                            className="text-sm text-[#0071c2] underline hover:no-underline">
                                             {tHeader("clearDates")}
                                         </button>
-                                        <button
-                                            onClick={() => setShowDate(false)}
-                                            className="bg-[#0071c2] hover:bg-[#005ea6] text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors"
-                                        >
+                                        <button onClick={() => setShowDate(false)}
+                                            className="bg-[#0071c2] hover:bg-[#005ea6] text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors">
                                             {tHeader("apply")}
                                         </button>
                                     </div>
@@ -428,7 +413,7 @@ export default function AttractionsHeader() {
                             )}
                         </div>
 
-                        <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center gap-2 min-h-13 transition-colors shrink-0">
+                        <button onClick={handleSearch} className="bg-[#006ce4] hover:bg-[#005ea6] text-white font-bold text-base px-6 rounded-lg flex items-center justify-center gap-2 min-h-13 transition-colors w-full sm:w-auto sm:shrink-0">
                             <Search size={18} />
                             {tHeader("searchBtn")}
                         </button>

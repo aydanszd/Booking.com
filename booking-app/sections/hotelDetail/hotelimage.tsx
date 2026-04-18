@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { IMG } from "@/api/building";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
@@ -32,6 +33,7 @@ const AMENITY_ICONS: Record<string, React.ReactNode> = {
 export default function HotelImage({ building }: { building: any }) {
     const t = useTranslations("hotel");
     const { toggle, has } = useWishlist();
+    const { format } = useCurrency();
     const saved = has(building._id);
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -93,7 +95,7 @@ export default function HotelImage({ building }: { building: any }) {
                             {building.type}
                         </span>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-1.5">{building.title}</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mb-1.5">{building.title}</h1>
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm text-[#006ce4] hover:underline cursor-pointer flex items-center gap-1">
                             <MapPin size={13} />
@@ -145,54 +147,47 @@ export default function HotelImage({ building }: { building: any }) {
 
             {/* Photo Gallery */}
             <div className="relative mb-6">
-                <div className="grid grid-cols-4 grid-rows-2 gap-1 h-[400px] rounded-lg overflow-hidden">
-                    {/* Main large image */}
+                {/* Mobile: single image */}
+                <div className="sm:hidden relative h-56 rounded-lg overflow-hidden">
+                    <button onClick={() => openLightbox(0)} className="w-full h-full">
+                        <img src={slides[0]?.src} className="w-full h-full object-cover" alt="Main" />
+                    </button>
                     <button
                         onClick={() => openLightbox(0)}
-                        className="col-span-2 row-span-2 relative overflow-hidden group"
+                        className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-white text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-md shadow border border-gray-300"
                     >
-                        <img
-                            src={slides[0]?.src}
-                            className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300"
-                            alt="Main"
-                        />
+                        <Camera size={12} />
+                        {t("photos")} ({slides.length})
                     </button>
+                </div>
 
-                    {/* Secondary images */}
+                {/* Desktop: grid */}
+                <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-1 h-[400px] rounded-lg overflow-hidden">
+                    <button onClick={() => openLightbox(0)} className="col-span-2 row-span-2 relative overflow-hidden group">
+                        <img src={slides[0]?.src} className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300" alt="Main" />
+                    </button>
                     {slides.slice(1, 5).map((slide: any, i: number) => (
-                        <button
-                            key={i}
-                            onClick={() => openLightbox(i + 1)}
-                            className="col-span-1 row-span-1 relative overflow-hidden group"
-                        >
-                            <img
-                                src={slide.src}
-                                className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300"
-                                alt={`Photo ${i + 2}`}
-                            />
+                        <button key={i} onClick={() => openLightbox(i + 1)} className="col-span-1 row-span-1 relative overflow-hidden group">
+                            <img src={slide.src} className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300" alt={`Photo ${i + 2}`} />
                         </button>
                     ))}
-
-                    {/* Fill empty slots with placeholder if fewer than 5 images */}
                     {Array.from({ length: Math.max(0, 4 - (slides.length - 1)) }).map((_, i) => (
                         <div key={`empty-${i}`} className="col-span-1 row-span-1 bg-gray-100" />
                     ))}
+                    <button
+                        onClick={() => openLightbox(0)}
+                        className="absolute bottom-3 right-3 flex items-center gap-2 bg-white text-gray-800 text-sm font-semibold px-4 py-2 rounded-md shadow hover:bg-gray-50 transition-colors border border-gray-300"
+                    >
+                        <Camera size={14} />
+                        {t("photos")} ({slides.length})
+                    </button>
                 </div>
-
-                {/* Show all photos button */}
-                <button
-                    onClick={() => openLightbox(0)}
-                    className="absolute bottom-3 right-3 flex items-center gap-2 bg-white text-gray-800 text-sm font-semibold px-4 py-2 rounded-md shadow hover:bg-gray-50 transition-colors border border-gray-300"
-                >
-                    <Camera size={14} />
-                    {t("photos")} ({slides.length})
-                </button>
             </div>
 
             {/* Two-column layout: Facilities + Sidebar */}
-            <div className="flex gap-5 items-start">
+            <div className="flex flex-col sm:flex-row gap-5 items-start">
                 {/* Left: Facilities */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 w-full">
                     <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
                         <div className="bg-[#f2f6fa] px-5 py-3 border-b border-gray-200">
                             <h2 className="text-base font-bold text-gray-900">{t("popularFacilities")}</h2>
@@ -223,7 +218,7 @@ export default function HotelImage({ building }: { building: any }) {
                 </div>
 
                 {/* Right: Booking sidebar */}
-                <div className="w-72 shrink-0 sticky top-16">
+                <div className="w-full sm:w-72 shrink-0 sm:sticky sm:top-16">
                     <div className="border border-gray-200 rounded-lg bg-white p-4">
                         {/* Rating row */}
                         {(building.rating ?? 0) > 0 && (
@@ -242,7 +237,7 @@ export default function HotelImage({ building }: { building: any }) {
                         <div className="mb-4">
                             <p className="text-xs text-gray-500 mb-0.5">{t("pricePerNight")}:</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-gray-900">${building.pricePerNight}</span>
+                                <span className="text-2xl font-bold text-gray-900">{format(building.pricePerNight)}</span>
                             </div>
                             <p className="text-xs text-[#008009] font-semibold mt-1">
                                 ✓ {t("freeCancellation")}

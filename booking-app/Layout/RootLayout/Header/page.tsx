@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const NAV_ITEM_KEYS = [
     { icon: Bed, key: "stays", href: "/" },
@@ -220,6 +221,9 @@ export default function Header() {
     const tNav = useTranslations("nav");
     const tGuests = useTranslations("guests");
     const { count: wishlistCount } = useWishlist();
+    const { currencies, selected, setCurrency } = useCurrency();
+    const [showCurrency, setShowCurrency] = useState<boolean>(false);
+    const currencyRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
     const activeNav = useMemo(() => {
         const p = pathname.replace(/^\/(en|tr|ru)/, "");
@@ -252,6 +256,7 @@ export default function Header() {
             if (locationRef.current && !locationRef.current.contains(e.target as Node)) setShowLocation(false);
             if (dateRef.current && !dateRef.current.contains(e.target as Node)) setShowDate(false);
             if (guestRef.current && !guestRef.current.contains(e.target as Node)) setShowGuests(false);
+            if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) setShowCurrency(false);
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
@@ -308,7 +313,29 @@ export default function Header() {
                         </Link>
 
                         <div className="flex items-center gap-1 sm:gap-3 text-white text-sm font-medium">
-                            <button className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">USD</button>
+                            <div ref={currencyRef} className="relative hidden sm:block">
+                                <button
+                                    onClick={() => setShowCurrency(v => !v)}
+                                    className="hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] flex items-center gap-1"
+                                >
+                                    {selected.code}
+                                    <ChevronDown size={13} />
+                                </button>
+                                {showCurrency && (
+                                    <div className="absolute top-full right-0 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 min-w-36 mt-1 max-h-64 overflow-y-auto">
+                                        {currencies.map(c => (
+                                            <button
+                                                key={c.code}
+                                                onClick={() => { setCurrency(c.code); setShowCurrency(false); }}
+                                                className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${c.code === selected.code ? "bg-[#003b94] text-white font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
+                                            >
+                                                <span className="w-5 text-center font-bold">{c.symbol}</span>
+                                                <span>{c.code}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <LanguageSwitcher />
                             <Link href="/wishlist" className="relative hover:bg-white/10 px-2 py-2 rounded transition-colors flex items-center justify-center">
                                 <Heart size={20} className="text-white" />

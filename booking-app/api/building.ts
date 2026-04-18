@@ -12,8 +12,9 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+const _BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export const IMG = (path: string) =>
-    path?.startsWith('http') ? path : `http://localhost:5000${path}`;
+    path?.startsWith('http') ? path : `${_BASE}${path}`;
 
 // Define helper methods to keep consistency with my recent edits
 const buildingApiMethods = {

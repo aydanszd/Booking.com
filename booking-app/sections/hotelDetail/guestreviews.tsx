@@ -10,7 +10,7 @@ const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
     const [hovered, setHovered] = useState(0);
     return (
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 sm:gap-1 flex-wrap">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
                 <button key={n} type="button"
                     onMouseEnter={() => setHovered(n)} onMouseLeave={() => setHovered(0)}
@@ -109,12 +109,12 @@ export default function Reviews({ building, onReviewAdded }: { building: any; on
                 {rating > 0 && (
                     <div className="p-5">
                         {/* Overall score */}
-                        <div className="flex items-start gap-5 mb-6">
-                            <div className="bg-[#003580] text-white text-3xl font-bold w-20 h-16 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl flex items-center justify-center shrink-0">
+                        <div className="flex items-start gap-4 mb-6">
+                            <div className="bg-[#003580] text-white text-2xl sm:text-3xl font-bold w-16 sm:w-20 h-14 sm:h-16 rounded-tl-2xl rounded-tr-2xl rounded-br-2xl flex items-center justify-center shrink-0">
                                 {rating.toFixed(1)}
                             </div>
                             <div>
-                                <p className="text-xl font-bold text-gray-900 mb-0.5">{getRatingLabel(rating)}</p>
+                                <p className="text-lg sm:text-xl font-bold text-gray-900 mb-0.5">{getRatingLabel(rating)}</p>
                                 <p className="text-sm text-gray-500">{reviews.length} {t("guestReviews").toLowerCase()}</p>
                             </div>
                         </div>

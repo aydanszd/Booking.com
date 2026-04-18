@@ -8,6 +8,7 @@ import BookingStatsBar from '@/components/adminBookings/BookingStatsBar'
 import BookingToolbar from '@/components/adminBookings/BookingToolbar'
 import BookingTable from '@/components/adminBookings/BookingTable'
 import { getPropertyName } from '@/components/adminBookings/utils'
+import { useAdminNotifications } from '@/context/AdminNotificationsContext'
 
 export default function AdminBookings() {
     const [bookings, setBookings] = useState<any[]>([])
@@ -16,6 +17,9 @@ export default function AdminBookings() {
     const [filterType, setFilterType] = useState('all')
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editStatus, setEditStatus] = useState('')
+
+    const { markSeen } = useAdminNotifications();
+    useEffect(() => { markSeen('bookings') }, []);
 
     const fetchAllBookings = async () => {
         try {

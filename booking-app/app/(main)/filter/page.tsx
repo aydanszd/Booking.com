@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-
 import { Filters } from "@/types/buildingFilter";
 import { DEFAULT_FILTERS } from "@/lib/buildings/constants";
 import { capitalize } from "@/lib/buildings/utils";
@@ -12,9 +11,7 @@ import FilterToolbar from "@/components/filter/FilterToolbar";
 import SortBar from "@/components/filter/SortBar";
 import ResultsArea from "@/components/filter/ResultsArea";
 import FilterPagination from "@/components/filter/FilterPagination";
-
 const LIMIT = 6;
-
 export default function SearchResults() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -33,7 +30,6 @@ export default function SearchResults() {
     useEffect(() => {
         const p = Number(searchParams.get("page")) || 1;
         setPage(p);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

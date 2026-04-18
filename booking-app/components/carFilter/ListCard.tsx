@@ -5,6 +5,7 @@ import { Users, Settings2, Gauge, MapPin, CheckCircle2, ChevronRight, Star, Car,
 import type { CarType } from '@/types/car'
 import { scoreLabel } from './constants'
 import { useWishlist } from '@/context/WishlistContext'
+import { useCurrency } from '@/context/CurrencyContext'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -12,6 +13,7 @@ export default function ListCard({ car, onNavigate }: { car: CarType; onNavigate
     const [imgError, setImgError] = useState(false)
     const imgSrc = car.images?.[0] ? (car.images[0].startsWith('http') ? car.images[0] : `${BASE}${car.images[0]}`) : null
     const { toggle, has } = useWishlist()
+    const { format } = useCurrency()
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row overflow-hidden min-h-[200px] sm:h-52">
@@ -80,7 +82,7 @@ export default function ListCard({ car, onNavigate }: { car: CarType; onNavigate
                     )}
                     <div className="text-right">
                         <p className="text-xs text-gray-400">Günlük</p>
-                        <p className="text-xl font-black text-gray-900">US${car.pricePerDay}</p>
+                        <p className="text-xl font-black text-gray-900">{format(car.pricePerDay)}</p>
                     </div>
                     <button
                         onClick={() => car.isAvailable && onNavigate(car._id!)}

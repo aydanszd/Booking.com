@@ -3,3 +3,5 @@ node_modules/
 logs/*.log
 debug_error.txt
 uploads/
+
+.vercel

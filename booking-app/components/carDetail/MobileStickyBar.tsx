@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useCurrency } from '@/context/CurrencyContext'
 
 export default function MobileStickyBar({
     price,
@@ -12,12 +13,13 @@ export default function MobileStickyBar({
     onBook: () => void
 }) {
     const t = useTranslations('cars')
+    const { format } = useCurrency()
     return (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
             <div className="flex-1">
                 <p className="text-xs text-gray-400 leading-none">{days > 0 ? t('daysTotal', { count: days }) : t('dailyPrice')}</p>
                 <p className="text-xl font-bold text-gray-900 leading-tight" style={{ fontFamily: "'DM Serif Display', serif" }}>
-                    US${days > 0 ? price * days : price}
+                    {format(days > 0 ? price * days : price)}
                 </p>
             </div>
             <button
