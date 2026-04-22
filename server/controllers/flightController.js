@@ -8,11 +8,18 @@ exports.getFlights = async (req, res) => {
         } = req.query;
         const filter = {};
 
+        // RegExp ilə case-insensitive axtarış — "baku", "Baku", "BAKU" hamısı tapılır.
+        // 'i' flag-ı böyük/kiçik hərfə baxmamağı təmin edir.
         if (origin) filter['origin.city'] = new RegExp(origin, 'i');
         if (destination) filter['destination.city'] = new RegExp(destination, 'i');
         if (airline) filter.airline = new RegExp(airline, 'i');
         if (cabin) filter.cabin = cabin;
+
+        // stops=0 — massivdə 0-cı element yoxdursa birbaşa uçuş deməkdir
         if (stops === '0') filter['stops.0'] = { $exists: false };
+
+        // $gte (greater than or equal) və $lte (less than or equal) —
+        // qiymət aralığı üçün MongoDB müqayisə operatorları
         if (minPrice || maxPrice) {
             filter.price = {};
             if (minPrice) filter.price.$gte = Number(minPrice);

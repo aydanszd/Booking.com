@@ -6,6 +6,8 @@ const Flight = require('../models/Flight');
 exports.getMyBookings = async (req, res, next) => {
     try {
         const bookings = await Booking.find({ user: req.user._id })
+            // populate — yalnız ID saxlamaq əvəzinə əlaqəli sənədin
+            // seçilmiş sahələrini birbaşa bu sorğuda gətirir (JOIN-in MongoDB qarşılığı)
             .populate('building', 'title images location pricePerNight rating')
             .populate('car', 'title images brand model pricePerDay location rating')
             .populate('flight', 'airline origin destination departureTime arrivalTime price logoUrl flightNumber')
@@ -16,6 +18,7 @@ exports.getMyBookings = async (req, res, next) => {
 
 exports.getBooking = async (req, res, next) => {
     try {
+        // user: req.user._id şərti — başqasının rezervasiyasına girişi bloklayır
         const booking = await Booking.findOne({ _id: req.params.id, user: req.user._id })
             .populate('building')
             .populate('car')
@@ -33,7 +36,13 @@ exports.createBooking = async (req, res, next) => {
             guests, passengers, totalPrice, contactInfo, notes,
         } = req.body;
 
-        // --- Building yoxlama ---
+        // ── Mövcudluq yoxlaması ──────────────────────────────────────────────
+        // Hər tip üçün ayrı yoxlama lazımdır çünki:
+        // - Building və Car tarix üst-üstə düşməsini yoxlayır (isDateAvailable)
+        // - Flight isə yer sayını yoxlayır (bookedSeats + yeni < totalSeats)
+        // Qeyd: burada race condition riski var — eyni anda 2 sorğu gəlsə
+        // hər ikisi "boşdur" görüb keçə bilər. Həll üçün MongoDB transaction lazımdır.
+
         if (type === 'building') {
             const building = await Building.findById(buildingId);
             if (!building) return res.status(404).json({ message: 'Otel tapılmadı' });
@@ -43,7 +52,6 @@ exports.createBooking = async (req, res, next) => {
             }
         }
 
-        // --- Car yoxlama ---
         if (type === 'car') {
             const car = await Car.findById(carId);
             if (!car) return res.status(404).json({ message: 'Avtomobil tapılmadı' });
@@ -53,7 +61,6 @@ exports.createBooking = async (req, res, next) => {
             }
         }
 
-        // --- Flight yoxlama ---
         if (type === 'flight') {
             const flight = await Flight.findById(flightId);
             if (!flight) return res.status(404).json({ message: 'Uçuş tapılmadı' });
@@ -62,9 +69,9 @@ exports.createBooking = async (req, res, next) => {
             }
         }
 
+        // Ümumi qiymətin 30%-i depozit kimi hesablanır
         const paidAmount = Math.ceil((totalPrice || 0) * 0.3);
 
-        // Rezervasiya yarat
         const booking = await Booking.create({
             user: req.user._id,
             type,
@@ -77,21 +84,23 @@ exports.createBooking = async (req, res, next) => {
             totalPrice, paidAmount, contactInfo, notes,
         });
 
-        // Building bookedDates yenilə
+        // ── Resurs vəziyyətini yenilə ────────────────────────────────────────
+        // Booking yaradıldıqdan sonra müvafiq resursun məlumatı yenilənir.
+        // $push — massivə yeni element əlavə edir (bookedDates)
+        // $inc  — rəqəmsal sahəni artırır (bookedSeats)
+
         if (type === 'building') {
             await Building.findByIdAndUpdate(buildingId, {
                 $push: { bookedDates: { checkIn, checkOut, bookingId: booking._id } },
             });
         }
 
-        // Car bookedDates yenilə
         if (type === 'car') {
             await Car.findByIdAndUpdate(carId, {
                 $push: { bookedDates: { pickUp, dropOff, bookingId: booking._id } },
             });
         }
 
-        // Flight bookedSeats yenilə
         if (type === 'flight') {
             await Flight.findByIdAndUpdate(flightId, {
                 $inc: { bookedSeats: passengers || 1 },
@@ -104,10 +113,13 @@ exports.createBooking = async (req, res, next) => {
 
 exports.cancelBooking = async (req, res, next) => {
     try {
+        // Admin istənilən rezervasiyanı ləğv edə bilər,
+        // adi user yalnız özününkünü — query şərtlə təmin edilir
         const isAdmin = req.user?.role === 'admin';
         const query = isAdmin
             ? { _id: req.params.id }
             : { _id: req.params.id, user: req.user._id };
+
         const booking = await Booking.findOne(query);
         if (!booking) return res.status(404).json({ message: 'Tapılmadı' });
         if (booking.status === 'cancelled') {
@@ -116,6 +128,12 @@ exports.cancelBooking = async (req, res, next) => {
 
         booking.status = 'cancelled';
         await booking.save();
+
+        // ── Tutulmuş tarixi/yeri geri qaytar ────────────────────────────────
+        // Ləğv olunanda resursun məlumatı da geri alınır ki,
+        // həmin tarix/yer yenidən başqasına görünsün.
+        // $pull — massivdən şərtə uyğun elementi silir
+        // $inc mənfi dəyərlə — bookedSeats-i azaldır
 
         if (booking.type === 'building' && booking.building) {
             await Building.findByIdAndUpdate(booking.building, {
@@ -150,7 +168,8 @@ exports.updateBookingStatus = async (req, res, next) => {
         const existing = await Booking.findById(req.params.id);
         if (!existing) return res.status(404).json({ message: 'Rezervasiya tapılmadı' });
 
-        // When cancelling, release the held dates/seats
+        // Status 'cancelled'-a keçirsə və əvvəlcədən cancelled deyilsə —
+        // tutulmuş tarixlər/yerlər geri qaytarılır (cancelBooking ilə eyni məntiq)
         if (status === 'cancelled' && existing.status !== 'cancelled') {
             if (existing.type === 'building' && existing.building) {
                 await Building.findByIdAndUpdate(existing.building, {
@@ -172,6 +191,7 @@ exports.updateBookingStatus = async (req, res, next) => {
         existing.status = status;
         await existing.save();
 
+        // Yenilənmiş booking-i populate ilə tam məlumatla qaytar
         const booking = await Booking.findById(existing._id)
             .populate('user', 'name email')
             .populate('building', 'title')
@@ -186,11 +206,13 @@ exports.confirmBooking = async (req, res, next) => {
     try {
         const { status, paidAmount, paymentIntentId } = req.body;
 
+        // user: req.user._id şərti — yalnız öz rezervasiyasını təsdiq edə bilər
         const booking = await Booking.findOne({
             _id: req.params.id,
             user: req.user._id,
         });
         if (!booking) return res.status(404).json({ message: 'Rezervasiya tapılmadı' });
+        // İdempotent davranış — artıq təsdiqlənibsə eyni cavabı qaytar
         if (booking.status === 'confirmed') return res.json(booking);
 
         booking.status = status || 'confirmed';
@@ -209,12 +231,14 @@ exports.getAllBookings = async (req, res, next) => {
         if (status) filter.status = status;
         if (type) filter.type = type;
 
+        // countDocuments filter ilə işləyir — pagination üçün ümumi say lazımdır
         const total = await Booking.countDocuments(filter);
         const bookings = await Booking.find(filter)
             .populate('user', 'name email')
             .populate('building', 'title')
             .populate('car', 'title brand')
             .populate('flight', 'airline flightNumber')
+            // skip — neçə sənəd atlansın (page 2 → 20 atla)
             .skip((page - 1) * limit)
             .limit(Number(limit))
             .sort({ createdAt: -1 });

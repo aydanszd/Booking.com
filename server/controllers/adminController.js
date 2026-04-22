@@ -15,11 +15,17 @@ exports.getAllUsers = async (req, res) => {
 // GET /api/admin/reviews
 exports.getAllReviews = async (req, res) => {
     try {
+        // Yalnız ən az 1 rəyi olan sənədləri gətir — boş massiv yoxlaması
+        // 'reviews.0' — massivdə 0-cı element mövcuddurmu?
+        // İkinci argument ('title reviews') — yalnız bu sahələri gətir (projection)
         const buildings = await Building.find({ 'reviews.0': { $exists: true } }, 'title reviews');
         const cars = await Car.find({ 'reviews.0': { $exists: true } }, 'title reviews');
 
         const reviews = [];
 
+        // Hər resursdakı rəylər ayrı sənədlər deyil, subdocument massividir.
+        // Ona görə 2 dövrə lazımdır: əvvəlcə resurslar, sonra hər resursun rəyləri.
+        // Nəticədə hamısı düz massivə yığılır (flatten).
         buildings.forEach(b => {
             b.reviews.forEach(r => {
                 reviews.push({
@@ -54,6 +60,7 @@ exports.getAllReviews = async (req, res) => {
             });
         });
 
+        // Müxtəlif mənbələrdən gələn rəylər tarixi sıraya düzülür
         reviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.json(reviews);
     } catch (err) {
@@ -65,10 +72,12 @@ exports.getAllReviews = async (req, res) => {
 exports.updateUserRole = async (req, res) => {
     try {
         const { role } = req.body;
+        // Yalnız icazəli rol dəyərləri qəbul edilir
         if (!['user', 'admin'].includes(role)) {
             return res.status(400).json({ message: "Yanlış rol" });
         }
 
+        // { new: true } — yenilənmiş sənədi qaytarır (əvvəlkini yox)
         const user = await User.findByIdAndUpdate(
             req.params.id,
             { role },
