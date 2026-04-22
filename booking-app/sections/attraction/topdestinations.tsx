@@ -1,5 +1,3 @@
-"use client";
-
 const DESTINATIONS = [
     {
         city: "Dubai",
@@ -51,7 +49,7 @@ export default function TopDestinations() {
                             alt={dest.city}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
                         <div className="absolute bottom-4 left-4">
                             <p className="text-white font-bold text-base leading-tight">{dest.city}</p>
                             <p className="text-white/80 text-xs mt-0.5">{dest.things}</p>

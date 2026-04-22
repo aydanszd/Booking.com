@@ -4,8 +4,7 @@ import { Star, Send, CornerDownRight, Loader2, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useTranslations } from "next-intl";
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { BASE } from "@/utils/imageUrl";
 
 function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
     const [hovered, setHovered] = useState(0);

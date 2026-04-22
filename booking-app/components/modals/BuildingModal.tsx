@@ -8,7 +8,7 @@ const AMENITY_LIST = [
     'BBQ', 'Hot Tub', 'Fireplace', 'Elevator', 'Security', 'Pet Friendly',
 ];
 import { Building, buildingSchema, BuildingSchema, INITIAL_SCHEMA } from '@/types/building';
-import api, { IMG } from '@/api/building';
+import api, { IMG, buildingApi } from '@/api/building';
 import { toast } from 'sonner';
 
 interface Props {
@@ -91,10 +91,10 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                 if (urlImages.length) fd.append('imageUrls', JSON.stringify(urlImages));
 
                 if (editItem) {
-                    await api.updateBuilding(editItem._id, fd);
+                    await buildingApi.updateBuilding(editItem._id, fd);
                     toast.success('Bina yeniləndi ✅');
                 } else {
-                    await api.createBuilding(fd);
+                    await buildingApi.createBuilding(fd);
                     toast.success('Bina əlavə edildi ✅');
                 }
                 onSuccess();
@@ -171,7 +171,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[92vh] flex flex-col">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
                     <h2 className="font-bold text-gray-800 text-base">
                         {editItem ? '✏️ Edit Building' : '+ Add Building'}
                     </h2>
@@ -321,7 +321,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                     <Field label="Amenities">
                         <div className="flex flex-wrap gap-2 mt-1">
                             {AMENITY_LIST.map(amenity => {
-                                const selected = values.amenities
+                                const selected = (values.amenities ?? '')
                                     .split(',').map(a => a.trim()).filter(Boolean)
                                     .includes(amenity);
                                 return (
@@ -329,7 +329,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                                         key={amenity}
                                         type="button"
                                         onClick={() => {
-                                            const current = values.amenities
+                                            const current = (values.amenities ?? '')
                                                 .split(',').map(a => a.trim()).filter(Boolean);
                                             const next = selected
                                                 ? current.filter(a => a !== amenity)
@@ -380,7 +380,7 @@ export default function BuildingModal({ open, editItem, onClose, onSuccess }: Pr
                 </div>
 
                 {/* Footer */}
-                <div className="flex gap-3 px-6 py-4 border-t border-gray-100 flex-shrink-0">
+                <div className="flex gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
                     <button type="button" onClick={onClose}
                         className="flex-1 border border-gray-200 rounded-xl py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                         Cancel

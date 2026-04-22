@@ -32,6 +32,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const googleAuthRoutes = require('./routes/googleAuthRoutes'); // ✅ YENİ
 const adminRoutes = require('./routes/adminRoutes');
+const destinationRoutes = require('./routes/destinationRoutes');
 
 const app = express();
 
@@ -76,7 +77,8 @@ app.use('/api/cars',      apiLimiter, carRoutes);
 app.use('/api/flights',   apiLimiter, flightRoutes);
 app.use('/api/bookings',  apiLimiter, bookingRoutes);
 app.use('/api/search',    apiLimiter, searchRoutes);
-app.use('/api/admin',     adminRoutes);
+app.use('/api/admin',        adminRoutes);
+app.use('/api/destinations', apiLimiter, destinationRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'API işləyir ✅' }));
 

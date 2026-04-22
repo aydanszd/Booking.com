@@ -193,28 +193,28 @@ export default function FlightFormModal({ mode, flight, onClose, onSuccess }: Fl
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState(flight?.logoUrl || "");
 
+    const flightInitial = (flight ? {
+        airline: flight.airline,
+        alliance: flight.alliance ?? "",
+        flightNumber: flight.flightNumber ?? "",
+        aircraft: flight.aircraft ?? "",
+        cabin: flight.cabin as FlightFormValues['cabin'],
+        origin: { ...flight.origin },
+        destination: { ...flight.destination },
+        departureTime: flight.departureTime?.slice(0, 16) ?? "",
+        arrivalTime: flight.arrivalTime?.slice(0, 16) ?? "",
+        duration: flight.duration,
+        stops: flight.stops ?? [],
+        price: flight.price,
+        baggagePerPax: flight.baggagePerPax ?? "",
+        flightQuality: flight.flightQuality,
+        bookingSites: flight.bookingSites ?? [],
+        totalSeats: flight.totalSeats,
+        bookedSeats: flight.bookedSeats,
+    } : defaultFlightValues) as FlightFormValues
+
     const formik = useFormik<FlightFormValues>({
-        initialValues: flight
-            ? {
-                airline: flight.airline,
-                alliance: flight.alliance ?? "",
-                flightNumber: flight.flightNumber ?? "",
-                aircraft: flight.aircraft ?? "",
-                cabin: flight.cabin,
-                origin: { ...flight.origin },
-                destination: { ...flight.destination },
-                departureTime: flight.departureTime?.slice(0, 16) ?? "",
-                arrivalTime: flight.arrivalTime?.slice(0, 16) ?? "",
-                duration: flight.duration,
-                stops: flight.stops ?? [],
-                price: flight.price,
-                baggagePerPax: flight.baggagePerPax ?? "",
-                flightQuality: flight.flightQuality,
-                bookingSites: flight.bookingSites ?? [],
-                totalSeats: flight.totalSeats,
-                bookedSeats: flight.bookedSeats,
-            }
-            : defaultFlightValues,
+        initialValues: flightInitial,
         validationSchema: toFormikValidationSchema(flightSchema),
         onSubmit: async (values) => {
             try {

@@ -620,5 +620,14 @@
     "careers": "Kariyer",
     "investorRelations": "Yatırımcı ilişkileri",
     "corporateContact": "Kurumsal iletişim"
+  },
+  "destinations": {
+    "home": "Ana Sayfa",
+    "attractions": "Gezilecek Yerler",
+    "back": "Geri",
+    "about": "Hakkında",
+    "clickToZoom": "Büyütmek için tıkla",
+    "notFound": "Destinasyon bulunamadı",
+    "goBack": "Geri dön"
   }
 }

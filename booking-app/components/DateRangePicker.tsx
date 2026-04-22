@@ -50,7 +50,7 @@ export default function DateRangePicker({
     const [open, setOpen]       = useState(false);
     const [visible, setVisible] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
-    const timerRef = useRef<ReturnType<typeof setTimeout>>();
+    const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     const openCal = useCallback(() => {
         clearTimeout(timerRef.current);

@@ -162,7 +162,7 @@ export default function HotelImage({ building }: { building: any }) {
                 </div>
 
                 {/* Desktop: grid */}
-                <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-1 h-[400px] rounded-lg overflow-hidden">
+                <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-1 h-100 rounded-lg overflow-hidden">
                     <button onClick={() => openLightbox(0)} className="col-span-2 row-span-2 relative overflow-hidden group">
                         <img src={slides[0]?.src} className="w-full h-full object-cover group-hover:brightness-90 transition-all duration-300" alt="Main" />
                     </button>

@@ -3,6 +3,7 @@
 import { Calendar, MapPin, Trash2, ExternalLink, Building2, Car, Plane, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { BASE } from '@/utils/imageUrl'
 
 function fmtDate(d: string) {
     if (!d) return '—'
@@ -12,7 +13,7 @@ function fmtDate(d: string) {
 function toImgUrl(path: string | undefined, fallback: string): string {
     if (!path) return fallback
     if (path.startsWith('http')) return path
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${path}`
+    return `${BASE}${path}`
 }
 
 export default function BookingCard({

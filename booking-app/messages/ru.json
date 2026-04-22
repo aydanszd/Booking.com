@@ -620,5 +620,14 @@
     "careers": "Вакансии",
     "investorRelations": "Отношения с инвесторами",
     "corporateContact": "Корпоративные контакты"
+  },
+  "destinations": {
+    "home": "Главная",
+    "attractions": "Достопримечательности",
+    "back": "Назад",
+    "about": "О месте",
+    "clickToZoom": "Нажмите для увеличения",
+    "notFound": "Направление не найдено",
+    "goBack": "Вернуться"
   }
 }

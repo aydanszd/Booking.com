@@ -6,8 +6,7 @@ import type { CarType } from '@/types/car'
 import { scoreLabel } from './constants'
 import { useWishlist } from '@/context/WishlistContext'
 import { useCurrency } from '@/context/CurrencyContext'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+import { BASE } from '@/utils/imageUrl'
 
 export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate: (id: string) => void }) {
     const [imgError, setImgError] = useState(false)
@@ -17,7 +16,7 @@ export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate
 
     return (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden h-full">
-            <div className="relative h-52 flex-shrink-0 cursor-pointer" onClick={() => onNavigate(car._id!)}>
+            <div className="relative h-52 shrink-0 cursor-pointer" onClick={() => onNavigate(car._id!)}>
                 {imgSrc && !imgError ? (
                     <img src={imgSrc} alt={car.title} onError={() => setImgError(true)} className="w-full h-full object-cover" />
                 ) : (
@@ -58,7 +57,7 @@ export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate
                 </div>
                 {car.location && (
                     <p className="text-xs text-gray-500 flex items-center gap-0.5">
-                        <MapPin size={10} className="text-gray-400 flex-shrink-0" />
+                        <MapPin size={10} className="text-gray-400 shrink-0" />
                         <span className="truncate">{car.location.city}, {car.location.country}</span>
                     </p>
                 )}
@@ -70,7 +69,7 @@ export default function GridCard({ car, onNavigate }: { car: CarType; onNavigate
                     <button
                         onClick={() => car.isAvailable && onNavigate(car._id!)}
                         disabled={!car.isAvailable}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-0.5 whitespace-nowrap flex-shrink-0 ${car.isAvailable ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-0.5 whitespace-nowrap shrink-0 ${car.isAvailable ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                     >
                         {car.isAvailable ? <>Gör <ChevronRight size={11} /></> : 'N/A'}
                     </button>

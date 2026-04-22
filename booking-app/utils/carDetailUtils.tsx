@@ -1,6 +1,5 @@
 import { Loader2 } from 'lucide-react'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+import { BASE } from '@/utils/imageUrl'
 
 export function imgSrc(path: string | undefined): string {
     if (!path) return ''

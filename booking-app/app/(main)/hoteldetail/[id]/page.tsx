@@ -5,7 +5,7 @@ import HotelImage from "@/sections/hotelDetail/hotelimage";
 import Availability from "@/sections/hotelDetail/roomavailability";
 import Rules from "@/sections/hotelDetail/hotelrule";
 import Reviews from "@/sections/hotelDetail/guestreviews";
-import api from "@/api/building";
+import { buildingApi } from "@/api/building";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -18,7 +18,7 @@ export default function HotelDetail() {
 
     const fetchBuilding = () => {
         if (!id) return;
-        api.getBuilding(id)
+        buildingApi.getBuilding(id)
             .then(res => setBuilding(res.data))
             .catch(err => console.error(err))
             .finally(() => setLoading(false));

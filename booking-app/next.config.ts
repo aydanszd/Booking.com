@@ -3,7 +3,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
-const nextConfig: NextConfig = {
+// eslint is valid in Next.js but type definition lags behind
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const nextConfig: NextConfig & { eslint?: any } = {
   typescript: {
     ignoreBuildErrors: true,
   },

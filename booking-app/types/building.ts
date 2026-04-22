@@ -1,5 +1,7 @@
 export { buildingSchema } from '@/schemas/buildingSchema';
-export type { BuildingFormValues as BuildingSchema } from '@/schemas/buildingSchema';
+import type { BuildingFormValues } from '@/schemas/buildingSchema';
+export type BuildingSchema = BuildingFormValues;
+export type { BuildingFormValues } from '@/schemas/buildingSchema';
 
 export interface Building {
     _id: string;

@@ -6,6 +6,7 @@ import HomeGuideSection from "@/sections/stays/HomesGuestsLove";
 import DealsForWeekendSection from "@/sections/stays/DealsForTheWeekend";
 import UniqPropertiesSection from "@/sections/stays/UniqueProperties";
 import LessSpendingSection from "@/sections/stays/LessSpending";
+import ExploreDestinations from "@/sections/stays/ExploreDestinations";
 export default function Page() {
   return (
     <>
@@ -14,10 +15,10 @@ export default function Page() {
       <OptionsSection />
       <ExplorebyFacilityType />
       <HomeGuideSection />
-      <DealsForWeekendSection /> 
+      <DealsForWeekendSection />
       <UniqPropertiesSection />
+      <ExploreDestinations />
       <LessSpendingSection />
-      
     </>
   );
 }

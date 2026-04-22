@@ -7,7 +7,7 @@ export const buildingSchema = z.object({
         .max(100, 'Başlıq çox uzundur'),
 
     type: z.enum(['hotel', 'apartment', 'villa', 'hostel', 'resort'], {
-        errorMap: () => ({ message: 'Düzgün tip seçin' }),
+        error: 'Düzgün tip seçin',
     }),
 
     brand: z.string().optional(),
@@ -23,29 +23,29 @@ export const buildingSchema = z.object({
     address: z.string().optional(),
 
     pricePerNight: z
-        .number({ invalid_type_error: 'Qiymət rəqəm olmalıdır' })
+        .number({ error: 'Qiymət rəqəm olmalıdır' })
         .positive('Qiymət 0-dan böyük olmalıdır'),
 
     minNights: z
-        .number({ invalid_type_error: 'Rəqəm olmalıdır' })
+        .number({ error: 'Rəqəm olmalıdır' })
         .int()
         .min(1, 'Minimum 1 gecə')
         .optional(),
 
     maxGuests: z
-        .number({ invalid_type_error: 'Rəqəm olmalıdır' })
+        .number({ error: 'Rəqəm olmalıdır' })
         .int()
         .min(1, 'Minimum 1 qonaq')
         .optional(),
 
     bedrooms: z
-        .number({ invalid_type_error: 'Rəqəm olmalıdır' })
+        .number({ error: 'Rəqəm olmalıdır' })
         .int()
         .min(0, 'Mənfi ola bilməz')
         .optional(),
 
     bathrooms: z
-        .number({ invalid_type_error: 'Rəqəm olmalıdır' })
+        .number({ error: 'Rəqəm olmalıdır' })
         .int()
         .min(0, 'Mənfi ola bilməz')
         .optional(),

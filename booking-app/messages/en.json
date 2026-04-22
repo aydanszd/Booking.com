@@ -620,5 +620,14 @@
     "careers": "Careers",
     "investorRelations": "Investor relations",
     "corporateContact": "Corporate contact"
+  },
+  "destinations": {
+    "home": "Home",
+    "attractions": "Attractions",
+    "back": "Back",
+    "about": "About",
+    "clickToZoom": "Click to zoom",
+    "notFound": "Destination not found",
+    "goBack": "Go back"
   }
 }

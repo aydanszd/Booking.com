@@ -15,25 +15,25 @@ export const carSchema = z.object({
         .min(1, "Model mütləqdir"),
 
     category: z.enum(["economy", "compact", "suv", "luxury", "van", "electric"], {
-        errorMap: () => ({ message: "Düzgün kateqoriya seçin" }),
+        error: "Düzgün kateqoriya seçin",
     }),
 
     transmission: z.enum(["automatic", "manual"], {
-        errorMap: () => ({ message: "Düzgün ötürücü seçin" }),
+        error: "Düzgün ötürücü seçin",
     }),
 
     seats: z
-        .number({ invalid_type_error: "Oturacaq sayı rəqəm olmalıdır" })
+        .number({ error: "Oturacaq sayı rəqəm olmalıdır" })
         .int("Tam rəqəm daxil edin")
         .min(1, "Minimum 1 oturacaq")
         .max(20, "Maksimum 20 oturacaq"),
 
     mileage: z
-        .number({ invalid_type_error: "Millaj rəqəm olmalıdır" })
+        .number({ error: "Millaj rəqəm olmalıdır" })
         .min(0, "Millaj mənfi ola bilməz"),
 
     pricePerDay: z
-        .number({ invalid_type_error: "Qiymət rəqəm olmalıdır" })
+        .number({ error: "Qiymət rəqəm olmalıdır" })
         .min(1, "Qiymət mütləqdir və 0-dan böyük olmalıdır"),
 
     isAvailable: z.boolean(),

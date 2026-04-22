@@ -7,7 +7,7 @@ export const paymentFormSchema = z.object({
         .max(60, 'Ad çox uzundur')
         .regex(/^[A-ZÇŞĞÜÖİa-zçşğüöı\s]+$/, 'Yalnız hərf daxil edin'),
     arrivalTime: z.string().min(1, 'Varış saatını seçin'),
-    terms: z.literal(true, { errorMap: () => ({ message: 'Şərtləri qəbul etməlisiniz' }) }),
+    terms: z.literal(true, { error: 'Şərtləri qəbul etməlisiniz' }),
 })
 
 export type PaymentFormValues = z.infer<typeof paymentFormSchema>

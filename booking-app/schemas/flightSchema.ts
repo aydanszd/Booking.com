@@ -6,7 +6,7 @@ export const flightSchema = z.object({
     flightNumber: z.string().optional(),
     aircraft: z.string().optional(),
     cabin: z.enum(["economy", "premium_economy", "business", "first"], {
-        errorMap: () => ({ message: "Düzgün kabinə seçin" }),
+        error: "Düzgün kabinə seçin",
     }),
     origin: z.object({
         airport: z.string().min(1, "Hava limanı mütləqdir"),
@@ -21,7 +21,7 @@ export const flightSchema = z.object({
     departureTime: z.string().min(1, "Uçuş vaxtı mütləqdir"),
     arrivalTime: z.string().min(1, "Eniş vaxtı mütləqdir"),
     duration: z
-        .number({ invalid_type_error: "Müddət rəqəm olmalıdır" })
+        .number({ error: "Müddət rəqəm olmalıdır" })
         .min(1, "Müddət mütləqdir"),
     stops: z.array(
         z.object({
@@ -30,7 +30,7 @@ export const flightSchema = z.object({
         })
     ),
     price: z
-        .number({ invalid_type_error: "Qiymət rəqəm olmalıdır" })
+        .number({ error: "Qiymət rəqəm olmalıdır" })
         .min(1, "Qiymət mütləqdir"),
     baggagePerPax: z.string().optional(),
     flightQuality: z.number().min(0).max(10).optional(),
@@ -42,11 +42,11 @@ export const flightSchema = z.object({
         })
     ),
     totalSeats: z
-        .number({ invalid_type_error: "Oturacaq sayı rəqəm olmalıdır" })
+        .number({ error: "Oturacaq sayı rəqəm olmalıdır" })
         .int()
         .min(1, "Minimum 1 oturacaq"),
     bookedSeats: z
-        .number({ invalid_type_error: "Rəqəm olmalıdır" })
+        .number({ error: "Rəqəm olmalıdır" })
         .int()
         .min(0),
 });

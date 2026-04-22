@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AdminNotificationsProvider, useAdminNotifications } from "@/context/AdminNotificationsContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,7 +7,7 @@ import {
     LayoutDashboard, Building2, Car, Plane,
     Settings, Users,
     Menu, Bell, Search, ChevronLeft, LogOut, Calendar, CreditCard, Star, Languages, DollarSign,
-    Camera, X,
+    Camera, X, Globe,
 } from "lucide-react";
 
 const AVATAR_KEY = "admin_avatar";
@@ -67,7 +67,7 @@ function AvatarModal({ onClose }: { onClose: () => void }) {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" onClick={onClose}>
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/40" onClick={onClose}>
             <div
                 className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-80 p-6 relative"
                 onClick={e => e.stopPropagation()}
@@ -127,7 +127,10 @@ function AvatarModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-const navGroups = [
+type NavItem = { href: string; label: string; icon: React.ElementType; badge?: string }
+type NavGroup = { label: string; items: NavItem[] }
+
+const navGroups: NavGroup[] = [
     {
         label: "Main",
         items: [
@@ -140,6 +143,7 @@ const navGroups = [
     {
         label: "Management",
         items: [
+            { href: "/admin/destinations", label: "Destinations", icon: Globe },
             { href: "/admin/bookings", label: "Bookings", icon: Calendar },
             { href: "/admin/payments", label: "Payments", icon: CreditCard },
             { href: "/admin/reviews",  label: "Reviews",  icon: Star },
@@ -168,6 +172,7 @@ const pageMeta = {
     "/admin/translations":  { title: "Translations",  subtitle: "Manage EN · TR · RU translations." },
     "/admin/currencies":    { title: "Currencies",    subtitle: "Manage currency rates and symbols." },
     "/admin/settings":      { title: "Settings",      subtitle: "Configure your platform." },
+    "/admin/destinations":  { title: "Destinations",  subtitle: "Manage explore destinations." },
 };
 
 function SidebarInner({ collapsed, onNavClick, onAvatarClick }: { collapsed: boolean; onNavClick: () => void; onAvatarClick: () => void }) {

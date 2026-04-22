@@ -1,4 +1,3 @@
-"use client";
 import { Ticket, Zap, Headphones } from "lucide-react";
 
 export default function InfoSections() {
