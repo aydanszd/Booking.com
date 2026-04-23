@@ -2,7 +2,7 @@
 import { MapPin, ChevronRight, Leaf, Star } from "lucide-react";
 import { Building } from "@/types/buildingFilter";
 import { capitalize, scoreLabel } from "@/lib/buildings/utils";
-import { imgUrl } from "@/lib/buildings/api";
+import { imgSrc } from "@/utils/imageUrl";
 import { useCurrency } from "@/context/CurrencyContext";
 interface Props {
     building: Building;
@@ -11,7 +11,7 @@ interface Props {
 export function GridCard({ building }: Props) {
     const { format } = useCurrency();
     const imageUrl = building.images?.[0]
-        ? imgUrl(building.images[0])
+        ? imgSrc(building.images[0])
         : "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&q=80";
 
     return (

@@ -4,7 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Filters } from "@/types/buildingFilter";
 import { DEFAULT_FILTERS } from "@/lib/buildings/constants";
 import { capitalize } from "@/lib/buildings/utils";
-import { useBuildings } from "@/lib/buildings/api";
+import { useBuildingsList } from "@/hooks/useBuildingsList";
 import { Sidebar } from "@/components/filters/Sidebar";
 import FilterBreadcrumb from "@/components/filter/FilterBreadcrumb";
 import FilterToolbar from "@/components/filter/FilterToolbar";
@@ -16,7 +16,7 @@ export default function SearchResults() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const { allBuildings, loading, error } = useBuildings();
+    const { allBuildings, loading, error } = useBuildingsList();
 
     const [filters, setFilters] = useState<Filters>(() => ({
         ...DEFAULT_FILTERS,
