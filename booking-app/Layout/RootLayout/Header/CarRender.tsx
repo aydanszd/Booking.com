@@ -8,7 +8,7 @@ import {
     X, ChevronDown, ChevronLeft, ChevronRight, Clock, Heart,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/customThing/LanguageSwitcher";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 

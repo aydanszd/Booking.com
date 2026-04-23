@@ -1,6 +1,6 @@
-import { BASE } from '@/utils/imageUrl'
 "use client";
 import { useState, Suspense } from "react";
+import { BASE } from '@/utils/imageUrl'
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, User } from "lucide-react";
 import { toast } from "sonner";

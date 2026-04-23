@@ -1,7 +1,7 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useEffect, useState } from 'react'
+import { BASE } from '@/utils/imageUrl'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'

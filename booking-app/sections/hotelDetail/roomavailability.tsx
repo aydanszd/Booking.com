@@ -6,7 +6,7 @@ import {
     CheckCircle2, AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
-import DateRangePicker from "@/components/DateRangePicker";
+import DateRangePicker from "@/components/customThing/DateRangePicker";
 import { useTranslations } from "next-intl";
 
 export default function RoomAvailability({ building }: { building: any }) {

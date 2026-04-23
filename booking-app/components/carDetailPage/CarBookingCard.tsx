@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import DateRangePicker from '@/components/DateRangePicker'
+import DateRangePicker from '@/components/customThing/DateRangePicker'
 import type { CarWithReviews } from '@/types/car'
 
 interface Props {

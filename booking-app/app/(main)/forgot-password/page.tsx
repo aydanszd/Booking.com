@@ -1,6 +1,5 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
-
+import { BASE } from '@/utils/imageUrl'
 import { useState } from 'react'
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'

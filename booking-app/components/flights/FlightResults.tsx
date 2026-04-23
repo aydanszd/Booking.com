@@ -1,10 +1,10 @@
 'use client'
+import { BASE } from '@/utils/imageUrl'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import type { FlightType, FetchFlightsResponse, Filters } from '@/types/flight'
 import { DEFAULT_FILTERS } from '@/types/flight'
-import { BASE } from '@/utils/imageUrl'
 import SearchHeader from './SearchHeader'
 import FilterSidebar from './FilterSidebar'
 import SortTabs from './SortTabs'

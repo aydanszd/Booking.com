@@ -1,5 +1,5 @@
 import DashboardLayout from "@/layout/AdminLayout/Admin/adminsidebar";
-import ProtectAdmin from "@/components/ProtectAdmin";
+import ProtectAdmin from "@/components/customThing/ProtectAdmin";
 
 export default function AdminLayout({
     children,

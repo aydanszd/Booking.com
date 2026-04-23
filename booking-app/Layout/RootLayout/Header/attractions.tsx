@@ -8,7 +8,7 @@ import {
     X, ChevronLeft, ChevronRight, ChevronDown,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/customThing/LanguageSwitcher";
 
 const SUGGESTIONS = [
     "Baku, Azerbaijan",

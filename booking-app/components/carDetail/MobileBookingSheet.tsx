@@ -2,7 +2,7 @@
 
 import { X, Loader2, MapPin, Shield, ThumbsUp, Info } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import DateRangePicker from '@/components/DateRangePicker'
+import DateRangePicker from '@/components/customThing/DateRangePicker'
 import type { CarDetailType } from './types'
 import { useCurrency } from '@/context/CurrencyContext'
 

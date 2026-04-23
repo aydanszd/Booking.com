@@ -4,7 +4,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bed, BedDouble, Plane, Car, Ticket, Heart, ChevronDown } from "lucide-react";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/customThing/LanguageSwitcher";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 

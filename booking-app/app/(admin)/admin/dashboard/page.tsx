@@ -1,6 +1,6 @@
-import { BASE } from '@/utils/imageUrl'
 "use client";
 import { useEffect, useState } from "react";
+import { BASE } from '@/utils/imageUrl'
 import { Building2, Car, Plane, TrendingUp, Users, ShoppingBag, DollarSign, Loader2 } from "lucide-react";
 import axios from "axios";
 import { buildingApi } from "@/api/building";

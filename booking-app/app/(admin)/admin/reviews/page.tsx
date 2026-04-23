@@ -1,5 +1,5 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
+import { BASE } from '@/utils/imageUrl'
 
 import { useEffect, useState } from 'react'
 import { Loader2, MessageSquare } from 'lucide-react'

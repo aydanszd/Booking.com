@@ -1,5 +1,5 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
+import { BASE } from '@/utils/imageUrl'
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { carApi } from '@/api/carapi'

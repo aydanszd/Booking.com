@@ -4,7 +4,7 @@ import "./globals.css";
 import HeaderSelector from "@/layout/RootLayout/Header/HeaderSelector";
 import FooterSelector from "@/layout/RootLayout/Footer/FooterSelector";
 import { headers } from "next/headers";
-import GoogleLogger from "@/components/GoogleLogger";
+import GoogleLogger from "@/components/customThing/GoogleLogger";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getLocale } from "next-intl/server";

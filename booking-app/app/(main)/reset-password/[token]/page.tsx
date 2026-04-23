@@ -1,5 +1,5 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
+import { BASE } from '@/utils/imageUrl'
 
 import { useState } from 'react'
 import { Lock, Eye, EyeOff, Loader2 } from 'lucide-react'

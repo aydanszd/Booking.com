@@ -1,5 +1,5 @@
-import { BASE } from '@/utils/imageUrl'
 'use client'
+import { BASE } from '@/utils/imageUrl'
 
 import { useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'

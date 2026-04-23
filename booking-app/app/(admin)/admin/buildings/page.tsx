@@ -4,8 +4,8 @@ import { Search, Filter } from 'lucide-react';
 import { Toaster } from 'sonner';
 import { Building } from '@/types/building';
 import { useBuildings } from '@/hooks/useBuildings';
-import BuildingStats from '@/components/BuildingStats';
-import BuildingTable from '@/components/BuildingTable';
+import BuildingStats from '@/components/adminBuildings/BuildingStats';
+import BuildingTable from '@/components/adminBuildings/BuildingTable';
 import BuildingModal from '@/components/modals/BuildingModal';
 
 export default function BuildingsPage() {

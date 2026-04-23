@@ -1,6 +1,6 @@
-import { BASE } from '@/utils/imageUrl'
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { BASE } from '@/utils/imageUrl'
 import axios from "axios";
 
 const SEEN_KEY = "admin_notif_seen";
