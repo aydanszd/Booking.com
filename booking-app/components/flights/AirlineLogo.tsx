@@ -1,9 +1,8 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState } from 'react'
 import { getAirlineColor } from '@/utils/flightUtils'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 interface Props {
     src?: string

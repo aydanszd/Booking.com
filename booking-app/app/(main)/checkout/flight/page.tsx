@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 "use client";
 import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -11,8 +12,6 @@ import PassengerCountSelector from "@/components/flightCheckout/PassengerCountSe
 import PaymentForm from "@/components/flightCheckout/PaymentForm";
 import FlightSummaryCard from "@/components/flightCheckout/FlightSummaryCard";
 import CheckoutBreadcrumb from "@/components/flightCheckout/CheckoutBreadcrumb";
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 function FlightCheckoutInner() {
     const t = useTranslations("checkout");

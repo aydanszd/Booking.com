@@ -1,5 +1,5 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
-
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { carApi } from '@/api/carapi'
@@ -7,8 +7,6 @@ import bookingApi from '@/api/booking'
 import { toast } from 'sonner'
 import axios from 'axios'
 import type { CarWithReviews } from '@/types/car'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export function useCarDetail(id: string) {
     const router = useRouter()

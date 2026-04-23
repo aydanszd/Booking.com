@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { BASE } from "@/utils/imageUrl";
 import { useFormik } from "formik";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { X, Plus, Plane, Pencil, ImagePlus } from "lucide-react";
@@ -128,7 +129,7 @@ function LogoUploadField({
                     {localPreview && (
                         <div className="relative inline-flex">
                             <img
-                                src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
+                                src={localPreview.startsWith("/uploads") ? `${BASE}${localPreview}` : localPreview}
                                 alt="logo preview"
                                 className="h-14 w-auto max-w-40 object-contain rounded-lg border border-gray-100"
                             />
@@ -159,7 +160,7 @@ function LogoUploadField({
                     {localPreview ? (
                         <>
                             <img
-                                src={localPreview.startsWith("/uploads") ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${localPreview}` : localPreview}
+                                src={localPreview.startsWith("/uploads") ? `${BASE}${localPreview}` : localPreview}
                                 alt="logo preview"
                                 className="h-16 w-auto max-w-35 object-contain rounded-lg"
                             />

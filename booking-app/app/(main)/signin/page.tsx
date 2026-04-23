@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -7,8 +8,6 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { useTranslations } from 'next-intl'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 function Field({ label, icon, error, children }: {
     label: string; icon?: React.ReactNode; error?: string; children: React.ReactNode
@@ -78,7 +77,7 @@ export default function SignInForm() {
         if (Object.keys(errs).length > 0) return
         setLoading(true)
         try {
-            const res = await axios.post(`${API_URL}/api/auth/login`, { email, password })
+            const res = await axios.post(`${BASE}/api/auth/login`, { email, password })
             toast.success(t('signinSuccess'))
             localStorage.setItem('token', res.data.token)
             localStorage.setItem('user', JSON.stringify(res.data.user))
@@ -92,7 +91,7 @@ export default function SignInForm() {
 
     function handleGoogleLogin() {
         setGoogleLoading(true)
-        window.location.href = `${API_URL}/auth/google`
+        window.location.href = `${BASE}/auth/google`
     }
 
     return (

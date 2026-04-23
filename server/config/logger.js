@@ -15,7 +15,6 @@ const logger = createLogger({
         logFormat
     ),
     transports: [
-        // Terminal — rəngli
         new transports.Console({
             format: combine(
                 colorize(),

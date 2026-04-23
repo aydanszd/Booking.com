@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,8 +9,6 @@ import ReviewFilterTabs from '@/components/adminReviews/ReviewFilterTabs'
 import ReviewCard from '@/components/adminReviews/ReviewCard'
 import type { ReviewItem, FilterType } from '@/types/review'
 import { useAdminNotifications } from '@/context/AdminNotificationsContext'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function AdminReviewsPage() {
     const { markSeen } = useAdminNotifications();

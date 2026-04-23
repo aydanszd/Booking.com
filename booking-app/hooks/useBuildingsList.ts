@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Building } from "@/types/building";
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+import { BASE } from "@/utils/imageUrl";
 
 function extractItems(payload: unknown): Building[] {
     if (Array.isArray(payload)) return payload as Building[];
@@ -29,7 +28,7 @@ export function useBuildingsList() {
             setError(null);
 
             try {
-                const { data: d } = await axios.get(`${BASE_URL}/api/buildings`, {
+                const { data: d } = await axios.get(`${BASE}/api/buildings`, {
                     params: { page: 1, limit: 100 },
                 });
 
@@ -48,7 +47,7 @@ export function useBuildingsList() {
                 const rest = await Promise.all(
                     Array.from({ length: totalPages - 1 }, (_, i) =>
                         axios
-                            .get(`${BASE_URL}/api/buildings`, { params: { page: i + 2, limit: pageSize } })
+                            .get(`${BASE}/api/buildings`, { params: { page: i + 2, limit: pageSize } })
                             .then(r => extractItems(r.data))
                     )
                 );

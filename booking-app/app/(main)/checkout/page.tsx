@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState, Suspense } from 'react'
@@ -9,8 +10,6 @@ import { useTranslations } from 'next-intl'
 import PersonalInfoSection from '@/components/checkout/PersonalInfoSection'
 import PaymentSection from '@/components/checkout/PaymentSection'
 import OrderSummary from '@/components/checkout/OrderSummary'
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 function CheckoutInner() {
     const t = useTranslations('checkout')

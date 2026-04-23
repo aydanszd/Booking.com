@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState } from 'react'
@@ -6,8 +7,6 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { useTranslations } from 'next-intl'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ForgotPasswordForm() {
     const t = useTranslations('auth')
@@ -21,7 +20,7 @@ export default function ForgotPasswordForm() {
 
         setLoading(true)
         try {
-            await axios.post(`${API_URL}/api/auth/forgot-password`, { email })
+            await axios.post(`${BASE}/api/auth/forgot-password`, { email })
             toast.success(t('resetLinkSent'))
             setSent(true)
         } catch (err: any) {

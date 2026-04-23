@@ -1,8 +1,8 @@
+import { BASE } from '@/utils/imageUrl'
 "use client";
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import axios from "axios";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const SEEN_KEY = "admin_notif_seen";
 
 type Section = "bookings" | "reviews" | "users" | "payments";

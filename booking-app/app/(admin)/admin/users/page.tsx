@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -8,8 +9,6 @@ import UserStatsBar from '@/components/adminUsers/UserStatsBar'
 import UserTable from '@/components/adminUsers/UserTable'
 import type { AdminUser } from '@/types/user'
 import { useAdminNotifications } from '@/context/AdminNotificationsContext'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function UsersPage() {
     const [users, setUsers] = useState<AdminUser[]>([])
@@ -22,7 +21,7 @@ export default function UsersPage() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await axios.get(`${API_URL}/api/admin/users`, {
+            const res = await axios.get(`${BASE}/api/admin/users`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
             setUsers(res.data)
@@ -41,7 +40,7 @@ export default function UsersPage() {
         try {
             const token = localStorage.getItem('token')
             await axios.put(
-                `${API_URL}/api/admin/users/${userId}/role`,
+                `${BASE}/api/admin/users/${userId}/role`,
                 { role: newRole },
                 { headers: { Authorization: `Bearer ${token}` } },
             )

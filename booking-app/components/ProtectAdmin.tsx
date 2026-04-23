@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -5,8 +6,6 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'
 import { toast } from 'sonner'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ProtectAdmin({ children }: { children: React.ReactNode }) {
     const router = useRouter()
@@ -24,7 +23,7 @@ export default function ProtectAdmin({ children }: { children: React.ReactNode }
 
             try {
                 // Backend-dən ən son user məlumatlarını alırıq (role daxil)
-                const res = await axios.get(`${API_URL}/api/auth/me`, {
+                const res = await axios.get(`${BASE}/api/auth/me`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

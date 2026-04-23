@@ -1,6 +1,7 @@
 import type { CarType } from '@/types/car'
+import { BASE } from '@/utils/imageUrl'
 
-const API = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/cars`
+const API = `${BASE}/api/cars`
 
 type Params = { page: number; limit: number; category?: string; city?: string }
 type Response = { cars: CarType[]; total: number }

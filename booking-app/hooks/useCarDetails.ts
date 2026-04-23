@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { toast } from 'sonner'
 import type { CarDetailType } from '@/components/carDetail/types'
+import { BASE } from '@/utils/imageUrl'
 
-const API = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/cars`
+const API = `${BASE}/api/cars`
 
 export function useCarDetails(t: (key: string, opts?: any) => string) {
     const router = useRouter()

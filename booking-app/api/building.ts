@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { BASE } from '@/utils/imageUrl';
 
 const api = axios.create({
-    baseURL: (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000') + '/api',
+    baseURL: `${BASE}/api`,
 });
 
 api.interceptors.request.use((config) => {
@@ -12,9 +13,8 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-const _BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 export const IMG = (path: string) =>
-    path?.startsWith('http') ? path : `${_BASE}${path}`;
+    path?.startsWith('http') ? path : `${BASE}${path}`;
 
 // Define helper methods to keep consistency with my recent edits
 const buildingApiMethods = {

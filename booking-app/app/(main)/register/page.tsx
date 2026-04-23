@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -11,8 +12,6 @@ import StepPersonal from '@/components/register/StepPersonal'
 import StepContact from '@/components/register/StepContact'
 import StepPassword from '@/components/register/StepPassword'
 import StepSummary from '@/components/register/StepSummary'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 const EMPTY_FORM: RegisterFormData = {
     fname: '', lname: '', email: '', phone: '', idcode: '', password: '', confirmPassword: '',
@@ -52,7 +51,7 @@ export default function RegisterForm() {
                 phone: formData.phone,
                 idCode: formData.idcode,
             }
-            await axios.post(`${API_URL}/api/auth/register`, payload)
+            await axios.post(`${BASE}/api/auth/register`, payload)
             toast.success(t('registerSuccess'))
             setTimeout(() => router.push('/signin'), 1500)
         } catch (err: any) {

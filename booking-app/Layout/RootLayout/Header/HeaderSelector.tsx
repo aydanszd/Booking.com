@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import MainHeader from "./page";
+import MainHeader from "./Main";
 import SecondLayoutOption from "./secondLayoutOption";
 import CarRentalHeader from "./CarRender";
 import AttractionsHeader from "./attractions"

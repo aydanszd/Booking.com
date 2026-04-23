@@ -1,3 +1,4 @@
+import { BASE } from '@/utils/imageUrl'
 'use client'
 
 import { useState } from 'react'
@@ -6,8 +7,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { useTranslations } from 'next-intl'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function ResetPasswordForm() {
     const t = useTranslations('auth')
@@ -25,7 +24,7 @@ export default function ResetPasswordForm() {
 
         setLoading(true)
         try {
-            await axios.post(`${API_URL}/api/auth/reset-password/${token}`, { password })
+            await axios.post(`${BASE}/api/auth/reset-password/${token}`, { password })
             toast.success(t('resetSuccess'))
             setTimeout(() => {
                 router.push('/signin')

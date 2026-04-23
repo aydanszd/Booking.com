@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "./Header/page";
+import Header from "./Header/Main";
 import Footer from "./Footer/page";
 
 export default function RootLayout({

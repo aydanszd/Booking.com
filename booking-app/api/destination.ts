@@ -1,6 +1,5 @@
+import { BASE } from '@/utils/imageUrl'
 import axios from 'axios';
-
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export const destinationApi = {
     getAll: () => axios.get(`${BASE}/api/destinations`),

@@ -1,6 +1,6 @@
+import { BASE } from '@/utils/imageUrl'
 import { FlightType } from "@/types/flight";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API = `${BASE}/api/flights`;
 
 export type FetchFlightsParams = {
