@@ -1,5 +1,5 @@
 import { LayoutList, LayoutGrid, SlidersHorizontal } from 'lucide-react'
-import { capitalize } from '@/lib/buildings/utils'
+import { capitalize } from '@/utils/buildingUtils'
 
 interface Props {
     city: string

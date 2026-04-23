@@ -7,7 +7,7 @@ import {
     AMENITY_OPTIONS,
     RATING_FILTERS,
 } from "@/lib/buildings/constants";
-import { capitalize } from "@/lib/buildings/utils";
+import { capitalize } from "@/utils/buildingUtils";
 import { CheckRow } from "./CheckRow";
 import { CounterRow } from "./CounterRow";
 import { PillButton } from "./PillButton";

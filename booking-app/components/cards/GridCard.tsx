@@ -1,7 +1,7 @@
 "use client";
 import { MapPin, ChevronRight, Leaf, Star } from "lucide-react";
 import { Building } from "@/types/buildingFilter";
-import { capitalize, scoreLabel } from "@/lib/buildings/utils";
+import { capitalize, scoreLabel } from "@/utils/buildingUtils";
 import { imgSrc } from "@/utils/imageUrl";
 import { useCurrency } from "@/context/CurrencyContext";
 interface Props {

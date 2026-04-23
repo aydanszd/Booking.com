@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Filters } from "@/types/buildingFilter";
 import { DEFAULT_FILTERS } from "@/lib/buildings/constants";
-import { capitalize } from "@/lib/buildings/utils";
+import { capitalize } from "@/utils/buildingUtils";
 import { useBuildingsList } from "@/hooks/useBuildingsList";
 import { Sidebar } from "@/components/filters/Sidebar";
 import FilterBreadcrumb from "@/components/filter/FilterBreadcrumb";
