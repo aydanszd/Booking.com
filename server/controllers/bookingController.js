@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Building = require('../models/Building');
 const Car = require('../models/Car');
@@ -29,6 +30,12 @@ exports.getBooking = async (req, res, next) => {
 };
 
 exports.createBooking = async (req, res, next) => {
+    // Transaction: bütün əməliyyatlar bir blokda icra olunur.
+    // Əgər hər hansı biri uğursuz olarsa — hamısı geri alınır (rollback).
+    // Bu, eyni anda 2 user rezervasiya etdikdə double booking-in qarşısını alır.
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         const {
             type, building: buildingId, car: carId, flight: flightId,
@@ -36,15 +43,10 @@ exports.createBooking = async (req, res, next) => {
             guests, passengers, totalPrice, contactInfo, notes,
         } = req.body;
 
-        // ── Mövcudluq yoxlaması ──────────────────────────────────────────────
-        // Hər tip üçün ayrı yoxlama lazımdır çünki:
-        // - Building və Car tarix üst-üstə düşməsini yoxlayır (isDateAvailable)
-        // - Flight isə yer sayını yoxlayır (bookedSeats + yeni < totalSeats)
-        // Qeyd: burada race condition riski var — eyni anda 2 sorğu gəlsə
-        // hər ikisi "boşdur" görüb keçə bilər. Həll üçün MongoDB transaction lazımdır.
-
         if (type === 'building') {
-            const building = await Building.findById(buildingId);
+            // session ilə oxuma — transaction içindəki ən son vəziyyəti görür,
+            // başqa paralel əməliyyatın yarımçıq dəyişikliklərini görmür
+            const building = await Building.findById(buildingId).session(session);
             if (!building) return res.status(404).json({ message: 'Otel tapılmadı' });
             if (!building.isAvailable) return res.status(400).json({ message: 'Otel mövcud deyil' });
             if (!building.isDateAvailable(checkIn, checkOut)) {
@@ -53,7 +55,7 @@ exports.createBooking = async (req, res, next) => {
         }
 
         if (type === 'car') {
-            const car = await Car.findById(carId);
+            const car = await Car.findById(carId).session(session);
             if (!car) return res.status(404).json({ message: 'Avtomobil tapılmadı' });
             if (!car.isAvailable) return res.status(400).json({ message: 'Avtomobil mövcud deyil' });
             if (!car.isDateAvailable(pickUp, dropOff)) {
@@ -62,9 +64,21 @@ exports.createBooking = async (req, res, next) => {
         }
 
         if (type === 'flight') {
-            const flight = await Flight.findById(flightId);
-            if (!flight) return res.status(404).json({ message: 'Uçuş tapılmadı' });
-            if (flight.bookedSeats + (passengers || 1) > flight.totalSeats) {
+            // findOneAndUpdate atomik əməliyyatdır — yoxlama və yeniləmə eyni anda baş verir.
+            // $expr ilə şərti birbaşa update sorğusuna yazırıq:
+            // "yalnız (bookedSeats + passengers) < totalSeats olduqda yenilə"
+            // Əgər şərt ödənilmirsə — null qaytarır, booking baş vermir.
+            const count = passengers || 1;
+            const flight = await Flight.findOneAndUpdate(
+                {
+                    _id: flightId,
+                    $expr: { $lt: [{ $add: ['$bookedSeats', count] }, '$totalSeats'] },
+                },
+                { $inc: { bookedSeats: count } },
+                { new: true, session }
+            );
+            if (!flight) {
+                await session.abortTransaction();
                 return res.status(400).json({ message: 'Kifayət qədər yer yoxdur' });
             }
         }
@@ -72,7 +86,8 @@ exports.createBooking = async (req, res, next) => {
         // Ümumi qiymətin 30%-i depozit kimi hesablanır
         const paidAmount = Math.ceil((totalPrice || 0) * 0.3);
 
-        const booking = await Booking.create({
+        // Booking session ilə yaradılır — transaction ləğv olarsa bu da silinir
+        const [booking] = await Booking.create([{
             user: req.user._id,
             type,
             building: buildingId,
@@ -82,33 +97,33 @@ exports.createBooking = async (req, res, next) => {
             pickUp, dropOff,
             guests, passengers,
             totalPrice, paidAmount, contactInfo, notes,
-        });
+        }], { session });
 
-        // ── Resurs vəziyyətini yenilə ────────────────────────────────────────
-        // Booking yaradıldıqdan sonra müvafiq resursun məlumatı yenilənir.
         // $push — massivə yeni element əlavə edir (bookedDates)
-        // $inc  — rəqəmsal sahəni artırır (bookedSeats)
-
         if (type === 'building') {
-            await Building.findByIdAndUpdate(buildingId, {
-                $push: { bookedDates: { checkIn, checkOut, bookingId: booking._id } },
-            });
+            await Building.findByIdAndUpdate(buildingId,
+                { $push: { bookedDates: { checkIn, checkOut, bookingId: booking._id } } },
+                { session }
+            );
         }
 
         if (type === 'car') {
-            await Car.findByIdAndUpdate(carId, {
-                $push: { bookedDates: { pickUp, dropOff, bookingId: booking._id } },
-            });
+            await Car.findByIdAndUpdate(carId,
+                { $push: { bookedDates: { pickUp, dropOff, bookingId: booking._id } } },
+                { session }
+            );
         }
 
-        if (type === 'flight') {
-            await Flight.findByIdAndUpdate(flightId, {
-                $inc: { bookedSeats: passengers || 1 },
-            });
-        }
+        // Flight bookedSeats yuxarıda atomik şəkildə artırıldı — burada əlavə əməliyyat lazım deyil
 
+        await session.commitTransaction();
         res.status(201).json(booking);
-    } catch (err) { next(err); }
+    } catch (err) {
+        await session.abortTransaction();
+        next(err);
+    } finally {
+        session.endSession();
+    }
 };
 
 exports.cancelBooking = async (req, res, next) => {
