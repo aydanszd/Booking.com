@@ -13,7 +13,10 @@ export function useTranslations() {
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        fetch('/api/translations')
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+        fetch('/api/translations', {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
             .then(r => r.json())
             .then(d => { setData(d); setLoading(false) })
     }, [])
@@ -59,9 +62,13 @@ export function useTranslations() {
 
     const saveAll = async () => {
         setSaving(true)
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
         await fetch('/api/translations', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
             body: JSON.stringify(data),
         })
         setSaving(false)

@@ -3,7 +3,6 @@ import { toast } from 'sonner';
 import { BASE } from '@/utils/imageUrl';
 
 // Bütün booking sorğuları üçün vahid axios instance.
-// baseURL bir yerdə saxlanır ki, endpoint dəyişəndə 20+ yerdə deyil, burada dəyişdirilsin.
 const api = axios.create({
     baseURL: `${BASE}/api`,
     timeout: 10000,
