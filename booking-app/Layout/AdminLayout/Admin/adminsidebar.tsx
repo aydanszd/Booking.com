@@ -177,6 +177,17 @@ const pageMeta = {
 
 function SidebarInner({ collapsed, onNavClick, onAvatarClick }: { collapsed: boolean; onNavClick: () => void; onAvatarClick: () => void }) {
     const pathname = usePathname();
+    const [adminName, setAdminName] = useState<string>('Admin');
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem('user');
+            if (raw) {
+                const u = JSON.parse(raw);
+                setAdminName(u.name || u.username || 'Admin');
+            }
+        } catch { /* ignore */ }
+    }, []);
 
     return (
         <div className="flex flex-col h-full">
@@ -250,8 +261,7 @@ function SidebarInner({ collapsed, onNavClick, onAvatarClick }: { collapsed: boo
                     <div className="flex items-center gap-3 px-2 py-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer group">
                         <AvatarButton onClick={onAvatarClick} />
                         <div className="flex-1 min-w-0">
-                            <div className="text-gray-800 dark:text-gray-200 text-[13px] font-semibold truncate">Anar K.</div>
-                            <div className="text-gray-400 text-[11px]">Administrator</div>
+                            <div className="text-gray-800 dark:text-gray-200 text-[13px] font-semibold truncate">{adminName}</div>
                         </div>
                         <LogOut size={14} className="text-gray-400 group-hover:text-red-400 transition-colors shrink-0" />
                     </div>
