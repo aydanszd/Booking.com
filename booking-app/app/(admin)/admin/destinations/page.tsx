@@ -14,7 +14,7 @@ function ImageSlot({ index, value, onChange, onClear }: {
     onClear: () => void
 }) {
     const inputRef = useRef<HTMLInputElement>(null)
-    const [mode, setMode] = useState<'upload' | 'url'>('upload')
+    const [mode, setMode] = useState<'upload' | 'url'>('url')
     const [urlInput, setUrlInput] = useState('')
 
     const handleFile = (file: File) => onChange(URL.createObjectURL(file), file)
@@ -138,7 +138,7 @@ function Modal({ dest, onClose, onSaved }: { dest: Destination | null; onClose: 
                     </div>
                     <div>
                         <label className="text-xs text-gray-500 font-medium mb-2 block">Şəkillər (maks 3)</label>
-                        <div className="flex gap-3">
+                        <div className="flex flex-col gap-3">
                             {[0, 1, 2].map(i => (
                                 <ImageSlot key={i} index={i} value={images[i] ?? ''}
                                     onChange={(val, file) => setSlot(i, val, file)}

@@ -57,11 +57,26 @@ export default function FlightResults() {
             }
 
             result = result.filter(f => f.price >= filters.minPrice && f.price <= filters.maxPrice)
+
+            const getDuration = (f: FlightType) => {
+                if (f.duration && f.duration > 0) return f.duration
+                if (f.departureTime && f.arrivalTime)
+                    return (new Date(f.arrivalTime).getTime() - new Date(f.departureTime).getTime()) / 60000
+                return 0
+            }
+            const getQuality = (f: FlightType) => {
+                if (f.flightQuality != null && f.flightQuality > 0) return f.flightQuality
+                const stopPenalty = (f.stops?.length ?? 0) * 3
+                const dur = getDuration(f)
+                const durScore = dur > 0 ? Math.max(0, 10 - dur / 60) : 5
+                return Math.max(0, durScore - stopPenalty)
+            }
+
             result = [...result].sort((a, b) => {
                 if (filters.sortBy === 'price_asc') return a.price - b.price
                 if (filters.sortBy === 'price_desc') return b.price - a.price
-                if (filters.sortBy === 'duration') return a.duration - b.duration
-                if (filters.sortBy === 'quality') return (b.flightQuality ?? 0) - (a.flightQuality ?? 0)
+                if (filters.sortBy === 'duration') return getDuration(a) - getDuration(b)
+                if (filters.sortBy === 'quality') return getQuality(b) - getQuality(a)
                 return 0
             })
 
@@ -85,7 +100,7 @@ export default function FlightResults() {
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
             <div className="max-w-7xl mx-auto px-4 py-6">
-                <SearchHeader filters={filters} onSearch={fetchFlights} />
+                <SearchHeader filters={filters} setFilters={setFilters} onSearch={fetchFlights} />
                 <div className="flex flex-col lg:flex-row gap-5">
                     <FilterSidebar filters={filters} setFilters={setFilters} airlines={allAirlines} origins={allOrigins} destinations={allDests} />
                     <div className="flex-1 min-w-0">

@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { FlightType } from '@/types/flight'
 import { seatsLeft, formatDateLabel } from '@/utils/flightUtils'
+import { useCurrency } from '@/context/CurrencyContext'
 import LegRow from './LegRow'
 import LegDetail from './LegDetail'
 
 export default function FlightCard({ flight }: { flight: FlightType }) {
     const t = useTranslations('flights')
+    const { selected, convert } = useCurrency()
     const [expanded, setExpanded] = useState(false)
 
     const CABIN_MAP: Record<string, string> = {
@@ -86,7 +88,7 @@ export default function FlightCard({ flight }: { flight: FlightType }) {
                 <div className="sm:w-44 p-4 sm:border-l border-t sm:border-t-0 border-gray-100 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 bg-gray-50 sm:bg-white">
                     <div className="text-right">
                         <div className="text-2xl font-bold text-gray-900 tabular-nums">
-                            ${flight.price}
+                            {selected.symbol}{convert(flight.price)}
                             <span className="text-xs font-normal text-gray-400 ml-1">/ {t('perPerson')}</span>
                         </div>
                         <div className="text-xs text-gray-400 mt-0.5">{CABIN_MAP[flight.cabin] || flight.cabin}</div>
@@ -111,7 +113,7 @@ export default function FlightCard({ flight }: { flight: FlightType }) {
                                     <a key={i} href={site.url} target="_blank" rel="noopener noreferrer"
                                         className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-blue-300 hover:shadow-sm transition-all group">
                                         <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">{site.name}</span>
-                                        <span className="text-sm font-bold text-blue-600">${site.price}</span>
+                                        <span className="text-sm font-bold text-blue-600">{selected.symbol}{convert(site.price)}</span>
                                     </a>
                                 ))}
                             </div>
@@ -124,7 +126,7 @@ export default function FlightCard({ flight }: { flight: FlightType }) {
                         <div className="flex items-center gap-3">
                             <div className="text-right">
                                 <p className="text-lg font-bold text-gray-900 tabular-nums">
-                                    ${flight.price}{' '}
+                                    {selected.symbol}{convert(flight.price)}{' '}
                                     <span className="text-xs font-normal text-gray-400">/ {t('perPerson')}</span>
                                 </p>
                             </div>

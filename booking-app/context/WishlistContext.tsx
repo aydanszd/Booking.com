@@ -24,47 +24,83 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | null>(null);
 
-const STORAGE_KEY = "wishlist";
+function getStorageKey(): string {
+    try {
+        const raw = localStorage.getItem("user");
+        if (raw) {
+            const user = JSON.parse(raw);
+            if (user?._id) return `wishlist_${user._id}`;
+        }
+    } catch {
+        // ignore
+    }
+    return "wishlist_guest";
+}
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<WishlistItem[]>([]);
+    const [storageKey, setStorageKey] = useState("wishlist_guest");
 
+    // Load wishlist whenever the logged-in user changes
     useEffect(() => {
+        const key = getStorageKey();
+        setStorageKey(key);
         try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) setItems(JSON.parse(stored));
+            const stored = localStorage.getItem(key);
+            setItems(stored ? JSON.parse(stored) : []);
         } catch {
-            // ignore
+            setItems([]);
         }
     }, []);
 
-    const persist = (next: WishlistItem[]) => {
+    // Re-sync when user logs in/out (storage event from another tab or manual trigger)
+    useEffect(() => {
+        const onStorage = (e: StorageEvent) => {
+            if (e.key === "user") {
+                const key = getStorageKey();
+                setStorageKey(key);
+                try {
+                    const stored = localStorage.getItem(key);
+                    setItems(stored ? JSON.parse(stored) : []);
+                } catch {
+                    setItems([]);
+                }
+            }
+        };
+        window.addEventListener("storage", onStorage);
+        return () => window.removeEventListener("storage", onStorage);
+    }, []);
+
+    const persist = useCallback((next: WishlistItem[], key: string) => {
         setItems(next);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    };
+        localStorage.setItem(key, JSON.stringify(next));
+    }, []);
 
     const add = useCallback((item: WishlistItem) => {
+        const key = getStorageKey();
         setItems(prev => {
             if (prev.some(i => i.id === item.id)) return prev;
             const next = [...prev, item];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            localStorage.setItem(key, JSON.stringify(next));
             return next;
         });
     }, []);
 
     const remove = useCallback((id: string) => {
+        const key = getStorageKey();
         setItems(prev => {
             const next = prev.filter(i => i.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            localStorage.setItem(key, JSON.stringify(next));
             return next;
         });
     }, []);
 
     const toggle = useCallback((item: WishlistItem) => {
+        const key = getStorageKey();
         setItems(prev => {
             const exists = prev.some(i => i.id === item.id);
             const next = exists ? prev.filter(i => i.id !== item.id) : [...prev, item];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            localStorage.setItem(key, JSON.stringify(next));
             return next;
         });
     }, []);

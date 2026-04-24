@@ -247,11 +247,16 @@ export default function Header() {
     const [rightYear, setRightYear] = useState<number>(initRight.getFullYear());
     const [rightMonth, setRightMonth] = useState<number>(initRight.getMonth());
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const locationRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
     const guestRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         setIsLoggedIn(!!localStorage.getItem("token"));
+        try {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            setIsAdmin(user?.role === "admin");
+        } catch { setIsAdmin(false); }
         const handler = (e: MouseEvent) => {
             if (locationRef.current && !locationRef.current.contains(e.target as Node)) setShowLocation(false);
             if (dateRef.current && !dateRef.current.contains(e.target as Node)) setShowDate(false);
@@ -348,7 +353,7 @@ export default function Header() {
                             <button className="hidden sm:flex hover:bg-white/10 px-3 py-3 rounded transition-colors items-center justify-center">
                                 <span className="w-6 h-6 flex items-center justify-center border border-white rounded-full text-xs">?</span>
                             </button>
-                            <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{t("listProperty")}</Link>
+                            {isAdmin && <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{t("listProperty")}</Link>}
                             {isLoggedIn ? (
                                 <>
                                     <Link href="/my-bookings" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px] font-semibold text-amber-400">{t("myBookings")}</Link>

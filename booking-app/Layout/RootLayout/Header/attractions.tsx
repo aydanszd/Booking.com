@@ -5,10 +5,12 @@ import Link from "next/link";
 import {
     Bed, BedDouble, Plane, Car, Ticket,
     MapPin, Calendar, Search,
-    X, ChevronLeft, ChevronRight, ChevronDown,
+    X, ChevronLeft, ChevronRight, ChevronDown, Heart,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/customThing/LanguageSwitcher";
+import { useWishlist } from "@/context/WishlistContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const SUGGESTIONS = [
     "Baku, Azerbaijan",
@@ -227,11 +229,26 @@ export default function AttractionsHeader() {
     const [rightMonth, setRightMonth] = useState(initRight.getMonth());
     const locationRef = useRef<HTMLDivElement>(null);
     const dateRef = useRef<HTMLDivElement>(null);
+    const currencyRef = useRef<HTMLDivElement>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showCurrency, setShowCurrency] = useState(false);
+    const { count: wishlistCount } = useWishlist();
+    const { currencies, selected, setCurrency } = useCurrency();
+
+    useEffect(() => {
+        setIsLoggedIn(!!localStorage.getItem("token"));
+        try {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+            setIsAdmin(user?.role === "admin");
+        } catch { setIsAdmin(false); }
+    }, []);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (locationRef.current && !locationRef.current.contains(e.target as Node)) setShowLocation(false);
             if (dateRef.current && !dateRef.current.contains(e.target as Node)) setShowDate(false);
+            if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) setShowCurrency(false);
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
@@ -293,11 +310,56 @@ export default function AttractionsHeader() {
                                 className="h-10 sm:h-16 object-contain cursor-pointer"
                             />
                         </Link>
-                        <div className="flex items-center gap-1 sm:gap-3 text-white text-sm font-medium">
+                        <div className="flex items-center gap-1 sm:gap-2 text-white text-sm font-medium">
+                            {/* Currency */}
+                            <div ref={currencyRef} className="relative hidden sm:block">
+                                <button
+                                    onClick={() => setShowCurrency(v => !v)}
+                                    className="flex items-center gap-1 px-3 py-1.5 rounded hover:bg-white/10 transition-colors text-sm"
+                                >
+                                    {selected.symbol} {selected.code}
+                                    <ChevronDown size={12} />
+                                </button>
+                                {showCurrency && (
+                                    <div className="absolute top-full right-0 mt-1 z-50 bg-white rounded-xl shadow-2xl border border-gray-100 py-1 min-w-36 max-h-64 overflow-y-auto">
+                                        {currencies.map(c => (
+                                            <button
+                                                key={c.code}
+                                                onClick={() => { setCurrency(c.code); setShowCurrency(false); }}
+                                                className={`w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors ${c.code === selected.code ? "bg-[#003b94] text-white font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
+                                            >
+                                                <span className="w-5 text-center font-bold">{c.symbol}</span>
+                                                <span>{c.code}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            {/* Language */}
                             <LanguageSwitcher />
-                            <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-3 rounded transition-colors text-[16px]">{tHeader("listProperty")}</Link>
-                            <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer transition-colors block leading-none text-xs sm:text-sm">{tHeader("register")}</Link>
-                            <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none text-xs sm:text-sm">{tHeader("signIn")}</Link>
+                            {/* Wishlist */}
+                            <Link href="/wishlist" className="relative hover:bg-white/10 px-2 py-2 rounded transition-colors flex items-center justify-center">
+                                <Heart size={18} className="text-white" />
+                                {wishlistCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                        {wishlistCount > 9 ? "9+" : wishlistCount}
+                                    </span>
+                                )}
+                            </Link>
+                            {isAdmin && <Link href="/admin/dashboard" className="hidden sm:block hover:bg-white/10 px-3 py-1.5 rounded transition-colors text-sm">{tHeader("listProperty")}</Link>}
+                            {isLoggedIn ? (
+                                <button
+                                    onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); setIsLoggedIn(false); window.location.reload(); }}
+                                    className="bg-white text-red-600 border border-red-200 rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-red-50 transition-colors block leading-none text-xs sm:text-sm"
+                                >
+                                    {tHeader("signOut")}
+                                </button>
+                            ) : (
+                                <>
+                                    <Link href="/register" className="text-[#006ae3] bg-white border border-[#006ae3] rounded px-2 sm:px-3 py-1.5 cursor-pointer transition-colors block leading-none text-xs sm:text-sm">{tHeader("register")}</Link>
+                                    <Link href="/signin" className="bg-white text-[#006ae3] border border-[#006ae3] rounded px-2 sm:px-3 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition-colors block leading-none text-xs sm:text-sm">{tHeader("signIn")}</Link>
+                                </>
+                            )}
                         </div>
                     </div>
 

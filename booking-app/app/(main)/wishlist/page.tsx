@@ -15,7 +15,7 @@ export default function WishlistPage() {
     const { items, remove } = useWishlist();
 
     return (
-        <div className="min-h-screen bg-[#f2f6fa] py-8 px-4">
+        <div className="min-h-screen bg-[#f2f6fa] py-8 px-4 pt-20">
             <div className="max-w-5xl mx-auto">
 
                 {/* Header */}
