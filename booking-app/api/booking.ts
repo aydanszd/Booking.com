@@ -2,12 +2,18 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { BASE } from '@/utils/imageUrl';
 
+// Bütün booking sorğuları üçün vahid axios instance.
+// baseURL bir yerdə saxlanır ki, endpoint dəyişəndə 20+ yerdə deyil, burada dəyişdirilsin.
 const api = axios.create({
     baseURL: `${BASE}/api`,
     timeout: 10000,
 });
 
-// Request interceptor — hər istəyə token əlavə et
+// Request interceptor — hər outgoing sorğuya avtomatik JWT token əlavə edir.
+// Bu olmasaydı, hər api çağırışında manual olaraq
+// headers: { Authorization: `Bearer ${token}` } yazmaq lazım olardı.
+// typeof window yoxlaması SSR zamanı localStorage-a müraciəti bloklayır —
+// Next.js server tərəfdə window mövcud deyil, yoxlanmasa crash verir.
 api.interceptors.request.use(
     (config) => {
         if (typeof window !== 'undefined') {
@@ -21,7 +27,10 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor — bütün API xətalarını mərkəzləşdirilmiş idarə edir.
+// 401: token etibarsızdır və ya vaxtı keçib → localStorage təmizlənir, login-ə yönləndirilir.
+// 403: token var amma icazə yoxdur (admin deyil) → toast göstərilir.
+// Bu olmasaydı, hər axios çağırışında .catch() bloku yazıb eyni məntiqi təkrarlamaq lazım olardı.
 api.interceptors.response.use(
     (response) => response,
     (error) => {
