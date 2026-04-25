@@ -18,10 +18,13 @@ export default function RoomAvailability({ building }: { building: any }) {
     const [qty, setQty] = useState(1);
 
     const bookedRanges = useMemo(() =>
-        (building?.bookedDates || []).map((b: any) => ({
-            start: new Date(b.checkIn),
-            end: new Date(b.checkOut),
-        })),
+        (building?.bookedDates || []).map((b: any) => {
+            const toLocalMidnight = (iso: string) => {
+                const d = new Date(iso);
+                return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            };
+            return { start: toLocalMidnight(b.checkIn), end: toLocalMidnight(b.checkOut) };
+        }),
     [building]);
 
     const handleBooking = () => {
